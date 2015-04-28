@@ -1,0 +1,6 @@
+--
+- name: Installs and configures the analytics layer of Odyssey
+  hosts: analytics
+  remote_user: root
+  roles:
+    - druid

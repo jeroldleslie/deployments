@@ -1,0 +1,6 @@
+---
+- name: Installs and configures Java
+  hosts: all
+  remote_user: centos
+  roles:
+    - java

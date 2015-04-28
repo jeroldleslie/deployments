@@ -1,0 +1,6 @@
+---
+- name: Installs and configures the performance testing layer of Odyssey
+  hosts: performance
+  remote_user: centos
+  roles:
+    - basho_bench

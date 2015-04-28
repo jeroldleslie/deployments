@@ -1,0 +1,47 @@
+---
+- name: make drill user
+  user: name={{ drill_user }} state=present
+  sudo: yes
+
+- name: make drill group
+  group: name={{ drill_group }} state=present
+  sudo: yes
+
+# safety first, fun will follow
+
+## Creating home dir
+
+- name: Check if home dir is created
+  stat: path={{ drill_home_dir }}
+  register: created
+
+- name: Create Zookeeper home directory if it has not been created yet
+  file: path={{ drill_home_dir }} state=directory mode=755 group={{ drill_group }} owner={{ drill_user }}
+  when: created.stat.exists == false
+  sudo: yes
+
+## Downloading Drill
+
+- name: Check if Drill is already downloaded
+  stat: path={{ drill_home_dir }}/{{ drill_tgz  }}
+  register: downloaded
+
+- name: Downloading Drill tgz
+  get_url: url={{ drill_tgz_url  }} dest={{ drill_home_dir }}
+  when: downloaded.stat.exists == false
+
+## Untar + unzip
+
+- name: Check if the tgz is already unarchived
+  stat: path={{ drill_home_dir }}/bin
+  register: unarchived
+
+- name: Unarchive tgz
+  unarchive: src={{ drill_home_dir }}/{{ drill_tgz  }} dest={{ drill_home_dir }} copy=no
+  sudo: yes
+  when: unarchived.stat.exists == false
+
+- name: Rename Drill dir to use short path
+  shell: mv {{ drill_home_dir }}/{{ drill_dir }}/* {{ drill_home_dir }}/.
+  sudo: yes
+  when: unarchived.stat.exists == false
