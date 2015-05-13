@@ -1,6 +1,6 @@
 # neverwinter deployments
 
-This project automates the installation and configuration of the following software components:
+This project automates the installation and configuration of the following software components::
 
 * ambari_agent
 * ambari_server
