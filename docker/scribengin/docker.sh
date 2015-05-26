@@ -434,7 +434,6 @@ function printUsage() {
 # get command
 COMMAND=$1
 shift
-echo $COMMAND
  
 if [ "$COMMAND" = "image" ] ; then
   # get subcommand
