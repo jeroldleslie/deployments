@@ -1,0 +1,5 @@
+drill_home_dir: /opt/drill/
+drill_user: centos
+drill_group: centos
+drill_tgz_url: 'https://s3-us-west-2.amazonaws.com/nvent-repo/tgz/drill/0.8.0/apache-drill-0.8.0.tgz'
+drill_tgz: apache-drill-0.8.0.tgz

@@ -1,0 +1,10 @@
+storm.zookeeper.servers: 
+{% for host in groups['tier3-storm-zookeeper'] %}
+ - '{{ host }}'
+{% endfor %}
+
+nimbus.host: 
+{% for host in groups['tier3-storm-nimbus'] %}
+'{{ host }}'
+{% endfor %}
+

@@ -1,0 +1,9 @@
+---
+#- name: Check if jmxtrans is installed
+#  stat: path=/opt/grafana/versions/{{ grafana_version }}
+#  register: installed
+
+- name: Yum install jmxtrans
+  yum: name=https://s3-us-west-2.amazonaws.com/nvent-repo/rpm/jmxtrans/249/jmxtrans-249.rpm state=present
+  sudo: yes
+#  when: installed.stat.exists == false

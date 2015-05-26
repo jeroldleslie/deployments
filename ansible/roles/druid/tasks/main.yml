@@ -1,0 +1,4 @@
+--
+- name: downloads druid tgz
+  get_url: url=http://static.druid.io/artifacts/releases/druid-0.7.1.1-bin.tar.gz dest=/opt/druid/ruid-0.7.1.1-bin.tar.gz mode=0440
+
