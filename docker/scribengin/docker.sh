@@ -1,6 +1,5 @@
 #!/bin/bash
 
-
 BIN_DIR=`dirname "$0"`
 BIN_DIR=`cd "$BIN_DIR"; pwd`
 
@@ -46,6 +45,32 @@ function get_opt() {
   echo $DEFAULT_VALUE
 }
 
+function check_dir_exit() {
+  if [ ! -d "$1" ]; then
+   echo "Please set NEVERWINTERDP_HOME environment variable or set --neverwinterdp-home option. And make sure neverwinterdp related projects are checkedout into NEVERWINTERDP_HOME" 
+   exit 1
+  fi
+}
+
+function get_neverwinterdp_home() {
+  neverwinterdp_home=$(get_opt --neverwinterdp-home '' $@)
+  if [ "$neverwinterdp_home" = "" ]; then
+    if [ -z "$NEVERWINTERDP_HOME" ]; then
+      echo "doesnt exists"
+    fi 
+  	neverwinterdp_home=$NEVERWINTERDP_HOME
+  fi
+  echo $neverwinterdp_home
+}
+
+function get_scribengin_home() {
+  dir_path=`dirname $1`
+  base_path=`basename $1`
+  
+  scribengin_home=$dir_path"/"$base_path"/Scribengin/V2"
+  echo $scribengin_home
+}
+
 function h1() {
   echo ""
   echo "###########################################################################################################"
@@ -55,6 +80,12 @@ function h1() {
 
 function build_image() {
   h1 "Build the os image with the preinstalled requirements"
+  neverwinterdp_home=$(get_neverwinterdp_home $@) 
+  scribengin_home=$(get_scribengin_home $neverwinterdp_home)
+  
+  check_dir_exit $neverwinterdp_home  
+  check_dir_exit $scribengin_home
+  
   echo "Prepare the temporary configuration files"
   DOCKERSCRIBEDIR=$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )
   mkdir $DOCKERSCRIBEDIR/tmp
@@ -70,12 +101,12 @@ function build_image() {
   fi
 
   if [ ! -d $DOCKERSCRIBEDIR/../../release/build/release ] ; then
-    $DOCKERSCRIBEDIR/../../tools/cluster/clusterCommander.py scribengin --build
+    $DOCKERSCRIBEDIR/../../tools/cluster/clusterCommander.py --neverwinterdp-home $neverwinterdp_home scribengin --build
   fi
   
   #Move release/build/release to $DOCKERSCRIBEDIR/tmp
-  cp -R -f $DOCKERSCRIBEDIR/../../release/build/release $DOCKERSCRIBEDIR/tmp/release
-  cp -R -f $DOCKERSCRIBEDIR/../../tools/cluster $DOCKERSCRIBEDIR/tmp/cluster
+  cp -R -f $scribengin_home/release/build/release $DOCKERSCRIBEDIR/tmp/release
+  cp -R -f $scribengin_home/tools/cluster $DOCKERSCRIBEDIR/tmp/cluster
   
   #Use existing key if it already exists
   if [ -e ~/.ssh/id_rsa ] && [ -e ~/.ssh/id_rsa.pub ]; then
@@ -269,9 +300,6 @@ function host_machine_update_hosts() {
   #write new hosts file
   echo -e "$out\n$hostString" > /etc/hosts
   echo -e "$hostString"
-  
-  
-  
 }
 
 function container_clean() {
@@ -283,13 +311,19 @@ function container_clean() {
 }
 
 function host_sync() {
+  neverwinterdp_home=$(get_neverwinterdp_home $@) 
+  scribengin_home=$(get_scribengin_home $neverwinterdp_home)
+  
+  check_dir_exit $neverwinterdp_home  
+  check_dir_exit $scribengin_home
+  
   DOCKERSCRIBEDIR=$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )
-  $DOCKERSCRIBEDIR/../../tools/cluster/clusterCommander.py scribengin --build  
+  $DOCKERSCRIBEDIR/../../tools/cluster/clusterCommander.py --neverwinterdp-home $neverwinterdp_home scribengin --build  
   
   ssh -o "StrictHostKeyChecking no" neverwinterdp@hadoop-master "mkdir /opt/scribengin"
   
-  scp -r ../../release/build/release/*       neverwinterdp@hadoop-master:/opt/scribengin/
-  scp -r ../../tools/cluster/*         	     neverwinterdp@hadoop-master:/opt/cluster
+  scp -r $scribengin_home/release/build/release/*       neverwinterdp@hadoop-master:/opt/scribengin/
+  scp -r $DOCKERSCRIBEDIR/../../tools/cluster/*         	     neverwinterdp@hadoop-master:/opt/cluster
   scp -r ./bootstrap/post-install/hadoop     neverwinterdp@hadoop-master:/opt/
   scp -r ./bootstrap/post-install/kafka      neverwinterdp@hadoop-master:/opt/
   scp -r ./bootstrap/post-install/zookeeper  neverwinterdp@hadoop-master:/opt/
@@ -309,6 +343,12 @@ function cluster(){
   STOP_CLUSTER=$(has_opt "--stop-cluster" $@ )
   FORCE_STOP_CLUSTER=$(has_opt "--force-stop-cluster" $@ )
   LAUNCH=$(has_opt "--launch" $@ )
+  
+  neverwinterdp_home=$(get_neverwinterdp_home $@) 
+  scribengin_home=$(get_scribengin_home $neverwinterdp_home)
+  
+  check_dir_exit $neverwinterdp_home  
+  check_dir_exit $scribengin_home
   
   if [ $CLEAN_CONTAINERS == "true" ] || [ $LAUNCH == "true" ] ; then
     container_clean
@@ -333,7 +373,7 @@ function cluster(){
   fi
   
   if [ $DEPLOY_SCRIBENGIN == "true" ] || [ $LAUNCH == "true" ] ; then
-    $DOCKERSCRIBEDIR/../../tools/cluster/clusterCommander.py scribengin --build --deploy
+    $DOCKERSCRIBEDIR/../../tools/cluster/clusterCommander.py --neverwinterdp-home $neverwinterdp_home scribengin --build --deploy
   fi
   
   if [ $START_CLUSTER == "true" ] || [ $LAUNCH == "true" ] ; then
@@ -357,6 +397,7 @@ function printUsage() {
   echo "  Command image consists of the sub commands: "
   echo "    build                      : To build the ubuntu os image with the required components"
   echo "    build --aws-credential-path: To build with aws credential directory. (--aws-credential-path='/root/.aws')"
+  echo "    build --neverwinterdp-home : Neverwinterdp home path, if env variable NEVERWINTERDP_HOME was not set. (--neverwinterdp-home=/root/neverwinterdp)"
   echo "    clean                      : To remove the image"
   echo "  Command container consists of the sub commands: "
   echo "    run                        : To run the containers(hadoop, zookeeper, kafka...)"
@@ -379,11 +420,13 @@ function printUsage() {
   echo "         --stop-cluster        : Stops kafka, hadoop, zookeeper, and scribengin"
   echo "         --force-stop-cluster  : Force stop kafka, hadoop, zookeeper, and scribengin"
   echo "         --launch              : Cleans docker image and containers, Builds image and container, then launches Scribengin"
+  echo "         --neverwinterdp-home  : To set neverwinterdp home path if NEVERWINTERDP_HOME is not set in env variable"
   echo "  Other commands:"
   echo "    ssh                        : The ssh command use to resolve the container ssh port and login a container with ssh command"
   echo "    scp                        : The scp command use to resolve the container ssh port and copy the file/directory from or to a container"
   echo "    ip-route                   : If you are running macos, use this command to route the 127.17.0.0 ip range to the boot2docker host. It allows to access the docker container directly from the MAC"
   echo "    host-sync                  : Run this to run \"./scribengin.sh build\" and then sync the release folder and post-install with your cluster."
+  echo "      --neverwinterdp-home     : To set neverwinterdp home path if NEVERWINTERDP_HOME is not set in env variable"
 }
 
 
@@ -391,7 +434,8 @@ function printUsage() {
 # get command
 COMMAND=$1
 shift
-
+echo $COMMAND
+ 
 if [ "$COMMAND" = "image" ] ; then
   # get subcommand
   SUB_COMMAND=$1

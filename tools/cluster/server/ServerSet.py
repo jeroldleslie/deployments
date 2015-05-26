@@ -376,39 +376,39 @@ class ServerSet(object):
     self.cleanHadoopWorker()
     self.cleanHadoopMaster()
   
-  def scribenginBuild(self,with_test):
+  def scribenginBuild(self,with_test,neverwinterdp_home):
     self.printTitle("Build Scribengin")
     command = ""
     if(with_test):
       command="../gradlew clean build install release"
     else:
       command="../gradlew clean build install release -x test"
-    currentWorkingDir = self.module_path()
-    
-    os.chdir(join(currentWorkingDir,"../../../"))
+    scribengin_home=join(neverwinterdp_home,"Scribengin/V2")
+    os.chdir(scribengin_home)
     os.system(join(os.getcwd(),command))
     
     os.chdir(join(os.getcwd(),"release"))
     os.system(join(os.getcwd(), "../../gradlew clean release"))
-    os.chdir(currentWorkingDir)
+    os.chdir(self.module_path())
     
-  def scribenginDeploy(self, hostname, aws_credential_path, clean):
+  def scribenginDeploy(self, hostname, aws_credential_path, clean, neverwinterdp_home):
     self.printTitle("Deploy Scribengin")
+    scribengin_home=join(neverwinterdp_home,"Scribengin/V2")
     self.killCluster()
     if(clean):
       self.cleanCluster()
-    currentWorkingDir = self.module_path()
     self.sshExecute("rm -rf /opt/scribengin")
     self.sshExecute("rm -rf /opt/cluster")
-    os.chdir(join(currentWorkingDir, "../../../"))
+    os.chdir(scribengin_home)
     os.system("scp -q -o StrictHostKeyChecking=no -r "+join(os.getcwd(),"release/build/release")+" neverwinterdp@"+hostname+":/opt/scribengin")
-    os.system("scp -q -o StrictHostKeyChecking=no -r "+join(os.getcwd(),"tools/cluster")+" neverwinterdp@"+hostname+":/opt/cluster")
+    os.chdir(self.module_path())
+    os.system("scp -q -o StrictHostKeyChecking=no -r "+join(os.getcwd(),"../../cluster")+" neverwinterdp@"+hostname+":/opt/cluster")
     if aws_credential_path == "":
       aws_credential_path = join(expanduser("~"),".aws")
     #print aws_credential_path
     os.system("scp -q -o StrictHostKeyChecking=no -r "+aws_credential_path+" neverwinterdp@"+hostname+":/home/neverwinterdp")
     self.sync(hostname, src="/home/neverwinterdp/.aws", dst="/home/neverwinterdp")
-    os.chdir(currentWorkingDir)
+    os.chdir(self.module_path())
     self.sync(hostname)
     
   def getReport(self):

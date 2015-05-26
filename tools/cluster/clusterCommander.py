@@ -13,14 +13,17 @@ from Cluster import Cluster
 _debug = False
 _logfile = ''
 _jobs = []
+_neverwinterdp_home = ''
 
 @click.group(chain=True)
 @click.option('--debug/--no-debug', default=False, help="Turn debugging on")
 @click.option('--logfile', default='failure.log', help="Log file to write to")
-def mastercommand(debug, logfile):
-  global _debug, _logfile
+@click.option('--neverwinterdp-home', default='', help="NEVERWINTERDP_HOME path for neverwinterdp projects")
+def mastercommand(debug, logfile, neverwinterdp_home):
+  global _debug, _logfile, _neverwinterdp_home
   _debug = debug
   _logfile = logfile
+  _neverwinterdp_home = neverwinterdp_home
   
   #Setting paramiko's logger to be quiet, otherwise too much noise
   logging.getLogger("paramiko").setLevel(logging.WARNING)
@@ -84,12 +87,17 @@ def vmmaster(restart, start, stop,force_stop, wait_before_start, wait_before_rep
 @click.option('--clean',   is_flag=True, help="Clean cluster")
 def scribengin(restart, start, stop, force_stop, wait_before_start, wait_before_report, build, with_test, deploy, aws_credential_path, clean):
   cluster = Cluster()
-  
+  neverwinterdp_home = _neverwinterdp_home
+  if neverwinterdp_home == '':
+    neverwinterdp_home = os.getenv('NEVERWINTERDP_HOME', 0)
+    if neverwinterdp_home == 0:
+      raise click.BadParameter("or set environment variable NEVERWINTERDP_HOME", param_hint = "--neverwinterdp-home")
+
   if(build):
-    cluster.scribenginBuild(with_test)
+    cluster.scribenginBuild(with_test, neverwinterdp_home)
     
   if(deploy):
-    cluster.scribenginDeploy("hadoop-master", aws_credential_path, clean)
+    cluster.scribenginDeploy("hadoop-master", aws_credential_path, clean, neverwinterdp_home)
       
   if(restart or stop):
     logging.debug("Shutting down Scribengin")
