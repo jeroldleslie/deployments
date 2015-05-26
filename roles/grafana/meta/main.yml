@@ -1,4 +1,0 @@
----
-dependencies:
-  - { role: influxdb }
-  - { role: jmxtrans }
