@@ -4,15 +4,15 @@ This project automates the installation, configuration and integration tests of 
 
 
 ##Three important components in neverwinter deployments
-###1. ansible
+###ansible
 Not yet done, is in progress
-###2. docker.sh
+###docker.sh
 docker.sh is used for several functionalities.
 
 1. Build docker image with hadoop, zookeeper, kafka, scribengin installed.
 2. Launch docker containers for hadoop-master, hadoop-workers, zookeeper, kafka.
 
-###3. clusterCommander.py
+###clusterCommander.py
 
 Is used to start/stop/restart cluster or specific processes with the given hostmachine. Also used to monitor running and none running processes in the cluster.
 
@@ -36,51 +36,32 @@ Checkout neverwinterdp-deployments project into any of your directory.
 
 ####Build docker image with scribengin
 
-1. ``docker/scribengin/docker.sh image clean`` (optional)
+1. Clean docker image 
+``docker/scribengin/docker.sh image clean`` (optional)
 
-2. if env variable NEVERWINTERDP_HOME is available
-
-   ``docker/scribengin/docker.sh image build``
-
-   if env variable NEVERWINTERDP_HOME is not available
-   
-   ``docker/scribengin/docker.sh image build --neverwinterdp-home /neverwinterdp/home/path``
+2. Build docker image
+if env variable NEVERWINTERDP_HOME is available run ``docker/scribengin/docker.sh image build``
+if env variable NEVERWINTERDP_HOME is not available run ``docker/scribengin/docker.sh image build --neverwinterdp-home /neverwinterdp/home/path``
 
 ####Sync scribengin with all containers
-1. if env variable NEVERWINTERDP_HOME is available 
-
-   ``docker/scribengin/docker.sh host-sync``
-
-   if env variable NEVERWINTERDP_HOME is not available
-   
-   ``docker/scribengin/docker.sh host-sync --neverwinterdp-home /neverwinterdp/home/path``
+if env variable NEVERWINTERDP_HOME is available run ``docker/scribengin/docker.sh host-sync``
+if env variable NEVERWINTERDP_HOME is not available run ``docker/scribengin/docker.sh host-sync --neverwinterdp-home /neverwinterdp/home/path``
 
 ####Clean-run-deploy 
 1. To clean containers, run containers ,build scribengin and deploy scribengin into running containers
-
-   ``docker/scribengin/docker.sh cluster --clean-containers --run-containers --deploy-scribengin --start-cluster``
+``docker/scribengin/docker.sh cluster --clean-containers --run-containers --deploy-scribengin --start-cluster``
 
 ####Build Scribengin from cluster commander
 1. ``cd /path/to/neverwinterdp-deployments``
 
-2. if env variable NEVERWINTERDP_HOME is available run 
-
-   ``./tools/cluster/clusterCommander.py scribengin --build``
-
-   if env variable NEVERWINTERDP_HOME is not available run 
-   
-   ``./tools/cluster/clusterCommander.py --neverwinterdp-home /path/to/neverwinterdp_home scribengin --build``
+2. if env variable NEVERWINTERDP_HOME is available run ``./tools/cluster/clusterCommander.py scribengin --build``
+if env variable NEVERWINTERDP_HOME is not available run ``./tools/cluster/clusterCommander.py --neverwinterdp-home /path/to/neverwinterdp_home scribengin --build``
    
 ####Deploy Scribengin from cluster commander
 1. ``cd /path/to/neverwinterdp-deployments``
 
-2. if env variable NEVERWINTERDP_HOME is available
-
-   ``./tools/cluster/clusterCommander.py scribengin --deploy``
-
-   if env variable NEVERWINTERDP_HOME is not available
-   
-   ``./tools/cluster/clusterCommander.py --neverwinterdp-home /path/to/neverwinterdp_home scribengin --deploy``
+2. if env variable NEVERWINTERDP_HOME is available ``./tools/cluster/clusterCommander.py scribengin --deploy``
+if env variable NEVERWINTERDP_HOME is not available ``./tools/cluster/clusterCommander.py --neverwinterdp-home /path/to/neverwinterdp_home scribengin --deploy``
     
  
  [repository](https://bitbucket.org/nventdata/neverwinterdp-deployments)
