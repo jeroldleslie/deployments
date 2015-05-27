@@ -18,14 +18,11 @@ Is used to start/stop/restart cluster or specific processes with the given hostm
 
 ##Usage
 ###Setup neverwinterdp_home
-1. Create a directory for NeverwinterDP home 
-
-   ``mkdir neverwinterdp``
+1. Create a directory for NeverwinterDP home
+``mkdir neverwinterdp``
 2. Checkout Scribengin into neverwinterdp_home
-
-   ``cd neverwinterdp``
-   
-   ``git clone https://github.com/DemandCube/Scribengin``
+``cd neverwinterdp``
+``git clone https://github.com/DemandCube/Scribengin``
 3. Set NEVERWINTERDP_HOME environment variable (optional) or you can give --neverwinterdp-home option value in the commandline arguments.
    
 
