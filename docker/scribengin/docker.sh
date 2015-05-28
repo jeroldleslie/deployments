@@ -107,6 +107,7 @@ function build_image() {
   
   #Move release/build/release to $DOCKERSCRIBEDIR/tmp
   cp -R -f $scribengin_home/scribengin/release/build/release $DOCKERSCRIBEDIR/tmp/release
+  cp -R -f $scribengin_home/module/elasticsearch/build/release/elasticsearch $DOCKERSCRIBEDIR/tmp/elasticsearch
   cp -R -f $scribengin_home/tools/cluster $DOCKERSCRIBEDIR/tmp/cluster
   
   #Use existing key if it already exists
