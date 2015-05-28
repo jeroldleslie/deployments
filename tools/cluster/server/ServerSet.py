@@ -387,8 +387,8 @@ class ServerSet(object):
     os.chdir(scribengin_home)
     os.system(join(os.getcwd(),command))
     
-    os.chdir(join(os.getcwd(),"release"))
-    os.system(join(os.getcwd(), "../../gradlew clean release"))
+    os.chdir(join(os.getcwd(),"scribengin/release"))
+    os.system(join(os.getcwd(), "../../../gradlew clean release"))
     os.chdir(self.module_path())
     
   def scribenginDeploy(self, hostname, aws_credential_path, clean, neverwinterdp_home):
@@ -401,7 +401,7 @@ class ServerSet(object):
     self.sshExecute("rm -rf /opt/scribengin")
     self.sshExecute("rm -rf /opt/cluster")
     os.chdir(scribengin_home)
-    os.system("scp -q -o StrictHostKeyChecking=no -r "+join(os.getcwd(),"release/build/release")+" neverwinterdp@"+hostname+":/opt/scribengin")
+    os.system("scp -q -o StrictHostKeyChecking=no -r "+join(os.getcwd(),"scribengin/release/build/release")+" neverwinterdp@"+hostname+":/opt/scribengin")
     os.chdir(self.module_path())
     os.system("scp -q -o StrictHostKeyChecking=no -r "+join(os.getcwd(),"../../cluster")+" neverwinterdp@"+hostname+":/opt/cluster")
     if aws_credential_path == "":

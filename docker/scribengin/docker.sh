@@ -88,6 +88,7 @@ function build_image() {
   
   echo "Prepare the temporary configuration files"
   DOCKERSCRIBEDIR=$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )
+  
   mkdir $DOCKERSCRIBEDIR/tmp
   
   #Check .aws path exists
@@ -100,12 +101,12 @@ function build_image() {
     echo "AWS credentials $aws_path  does not exists. Skipping to copy .aws directory"  
   fi
 
-  if [ ! -d $DOCKERSCRIBEDIR/../../release/build/release ] ; then
+  if [ ! -d $scribengin_home/scribengin/release/build/release ] ; then
     $DOCKERSCRIBEDIR/../../tools/cluster/clusterCommander.py --neverwinterdp-home $neverwinterdp_home scribengin --build
   fi
   
   #Move release/build/release to $DOCKERSCRIBEDIR/tmp
-  cp -R -f $scribengin_home/release/build/release $DOCKERSCRIBEDIR/tmp/release
+  cp -R -f $scribengin_home/scribengin/release/build/release $DOCKERSCRIBEDIR/tmp/release
   cp -R -f $scribengin_home/tools/cluster $DOCKERSCRIBEDIR/tmp/cluster
   
   #Use existing key if it already exists
@@ -150,6 +151,8 @@ function launch_containers() {
   NUM_SPARE_KAFKA_BROKER=$(get_opt --spare-kafka '0' $@)
   NUM_SPARE_ZOOKEEPER_SERVER=$(get_opt --spare-zookeeper 0 $@)
   NUM_SPARE_HADOOP_WORKER=$(get_opt --spare-hadoop 0 $@)
+  
+  NUM_ELASTICSEARCH_SERVER=$(get_opt --elasticsearch-server 1 $@)
   
   h1 "Launch hadoop-worker containers"
   for (( i=1; i<="$NUM_HADOOP_WORKER"; i++ ))
@@ -198,7 +201,13 @@ function launch_containers() {
     docker run -d -p 22 -p 9092 --privileged -h "$NAME" --name "$NAME"  ubuntu:scribengin
   done
   
-
+  h1 "Launch elasticsearch containers"
+  for (( i=1; i<="$NUM_ELASTICSEARCH_SERVER"; i++ ))
+  do
+    NAME="elasticsearch-"$i
+    docker run -d -p 22 -p 9300 --privileged -h "$NAME" --name "$NAME"  ubuntu:scribengin
+  done
+  
   docker ps
 }
 
@@ -322,7 +331,7 @@ function host_sync() {
   
   ssh -o "StrictHostKeyChecking no" neverwinterdp@hadoop-master "mkdir /opt/scribengin"
   
-  scp -r $scribengin_home/release/build/release/*       neverwinterdp@hadoop-master:/opt/scribengin/
+  scp -r $scribengin_home/scribengin/release/build/release/*       neverwinterdp@hadoop-master:/opt/scribengin/
   scp -r $DOCKERSCRIBEDIR/../../tools/cluster/*         	     neverwinterdp@hadoop-master:/opt/cluster
   scp -r ./bootstrap/post-install/hadoop     neverwinterdp@hadoop-master:/opt/
   scp -r ./bootstrap/post-install/kafka      neverwinterdp@hadoop-master:/opt/
