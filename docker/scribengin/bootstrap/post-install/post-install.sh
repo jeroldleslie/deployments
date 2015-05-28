@@ -29,6 +29,8 @@ cp -r /tmp/post-install/release/*  /opt/scribengin/
 
 cp -r /tmp/post-install/cluster/*  /opt/cluster/
 
+cp -r /tmp/post-install/elasticsearch/*  /opt/elasticsearch/
+
 if [ -d /tmp/post-install/aws/.aws ]; then
   h1 "Set aws credential"
   cp -r /tmp/post-install/aws/.aws /home/neverwinterdp

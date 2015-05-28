@@ -83,6 +83,10 @@ ADD tmp/release /tmp/post-install/release/
 RUN mkdir -p  /opt/cluster/
 ADD tmp/cluster /tmp/post-install/cluster/
 
+#Elastic Search
+RUN mkdir -p  /opt/elasticsearch/
+ADD tmp/elasticsearch /tmp/post-install/elasticsearch/
+
 #Add aws credentials
 ADD tmp/aws /tmp/post-install/aws
 

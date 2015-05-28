@@ -203,6 +203,9 @@ class ServerSet(object):
     if hadoopMasterServers.servers:
       return self.startProcessOnHost("scribengin", hadoopMasterServers.servers[0].getHostname())
   
+  def startElasticSearch(self):
+    return self.startProcess("elasticsearch")
+  
   def startZookeeper(self):
     return self.startProcess("zookeeper")
   
@@ -250,6 +253,7 @@ class ServerSet(object):
     self.startHadoopWorker()
     self.startVmMaster()
     self.startScribengin()
+    self.startElasticSearch()
     
   def shutdownVmMaster(self):
     hadoopMasterServers = self.getServersByRole("hadoop-worker")
@@ -387,6 +391,10 @@ class ServerSet(object):
     os.chdir(scribengin_home)
     os.system(join(os.getcwd(),command))
     
+    os.chdir(join(os.getcwd(), "module/elasticsearch"))
+    os.system(join(os.getcwd(), "../../../gradlew clean build install release -x test"))
+    os.chdir(join(os.getcwd(),"../../"))
+    
     os.chdir(join(os.getcwd(),"scribengin/release"))
     os.system(join(os.getcwd(), "../../../gradlew clean release"))
     os.chdir(self.module_path())
@@ -401,6 +409,7 @@ class ServerSet(object):
     self.sshExecute("rm -rf /opt/scribengin")
     self.sshExecute("rm -rf /opt/cluster")
     os.chdir(scribengin_home)
+    os.system("scp -q -o StrictHostKeyChecking=no -r "+join(os.getcwd(),"module/elasticsearch/build/release/elasticsearch")+" neverwinterdp@"+hostname+":/opt/elasticsearch")
     os.system("scp -q -o StrictHostKeyChecking=no -r "+join(os.getcwd(),"scribengin/release/build/release")+" neverwinterdp@"+hostname+":/opt/scribengin")
     os.chdir(self.module_path())
     os.system("scp -q -o StrictHostKeyChecking=no -r "+join(os.getcwd(),"../../cluster")+" neverwinterdp@"+hostname+":/opt/cluster")
