@@ -39,7 +39,7 @@ git clone https://github.com/DemandCube/Scribengin
 Checkout neverwinterdp-deployments project into any of your directory.
 	
 ```
-git clone git clone https://<bitbucket_user>@bitbucket.org/nventdata/neverwinterdp- deployments.git
+git clone git clone https://<bitbucket_user>@bitbucket.org/nventdata/neverwinterdp-deployments.git
 cd /path/to/neverwinterdp-deployments
 ```
 	
@@ -55,7 +55,7 @@ docker/scribengin/docker.sh image clean
 docker/scribengin/docker.sh image build
 
 #if env variable NEVERWINTERDP_HOME is not available run 
-docker/scribengin/docker.sh image build --neverwinterdp-home /neverwinterdp/home/path
+docker/scribengin/docker.sh image build --neverwinterdp-home=/neverwinterdp/home/path
 ```
 
 ####Sync scribengin with all containers
@@ -65,14 +65,18 @@ docker/scribengin/docker.sh image build --neverwinterdp-home /neverwinterdp/home
 docker/scribengin/docker.sh host-sync
 
 #if env variable NEVERWINTERDP_HOME is not available run 
-docker/scribengin/docker.sh host-sync --neverwinterdp-home /neverwinterdp/home/path
+docker/scribengin/docker.sh host-sync --neverwinterdp-home=/neverwinterdp/home/path
 ```
 
 ####Clean-run-deploy 
 ```
 #To clean containers, run containers ,build scribengin and deploy scribengin 
 #into running containers
+#if env variable NEVERWINTERDP_HOME is available
 docker/scribengin/docker.sh cluster --clean-containers --run-containers --deploy-scribengin --start-cluster
+
+#if env variable NEVERWINTERDP_HOME is not available
+docker/scribengin/docker.sh cluster --clean-containers --run-containers --deploy-scribengin --start-cluster --neverwinterdp-home=/path/to/neverwinterdp_home
 ```
 
 ####Build Scribengin from cluster commander
