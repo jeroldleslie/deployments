@@ -67,7 +67,7 @@ function get_scribengin_home() {
   dir_path=`dirname $1`
   base_path=`basename $1`
   
-  scribengin_home=$dir_path"/"$base_path"/Scribengin/V2"
+  scribengin_home=$dir_path"/"$base_path"/Scribengin/"
   echo $scribengin_home
 }
 
@@ -87,8 +87,10 @@ function build_image() {
   check_dir_exit $scribengin_home
   
   echo "Prepare the temporary configuration files"
+  #Direcotry this script is in
   DOCKERSCRIBEDIR=$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )
-  
+  #Root of neverwinterdp-deployments
+  ROOTDIR=$(dirname $(dirname $DOCKERSCRIBEDIR))
   mkdir $DOCKERSCRIBEDIR/tmp
   
   #Check .aws path exists
@@ -106,9 +108,9 @@ function build_image() {
   fi
   
   #Move release/build/release to $DOCKERSCRIBEDIR/tmp
-  cp -R -f $scribengin_home/scribengin/release/build/release $DOCKERSCRIBEDIR/tmp/release
-  cp -R -f $scribengin_home/module/elasticsearch/build/release/elasticsearch $DOCKERSCRIBEDIR/tmp/elasticsearch
-  cp -R -f $scribengin_home/tools/cluster $DOCKERSCRIBEDIR/tmp/cluster
+  cp -R -f $scribengin_home/release/build/release $DOCKERSCRIBEDIR/tmp/release
+  cp -R -f $neverwinterdp_home/module/elasticsearch/build/release/elasticsearch $DOCKERSCRIBEDIR/tmp/elasticsearch
+  cp -R -f $ROOTDIR/tools/cluster $DOCKERSCRIBEDIR/tmp/cluster
   
   #Use existing key if it already exists
   if [ -e ~/.ssh/id_rsa ] && [ -e ~/.ssh/id_rsa.pub ]; then

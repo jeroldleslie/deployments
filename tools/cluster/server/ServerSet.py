@@ -384,24 +384,23 @@ class ServerSet(object):
     self.printTitle("Build Scribengin")
     command = ""
     if(with_test):
-      command="../gradlew clean build install release"
+      command=" clean build install release"
     else:
-      command="../gradlew clean build install release -x test"
-    scribengin_home=join(neverwinterdp_home,"Scribengin/V2")
-    os.chdir(scribengin_home)
-    os.system(join(os.getcwd(),command))
+      command=" clean build install release -x test"
+    #scribengin_home=join(neverwinterdp_home,"scribengin/")
+    os.chdir(neverwinterdp_home)
+    os.system(join(neverwinterdp_home, "gradlew",) +command)
     
-    os.chdir(join(os.getcwd(), "module/elasticsearch"))
-    os.system(join(os.getcwd(), "../../../gradlew clean build install release -x test"))
-    os.chdir(join(os.getcwd(),"../../"))
+    os.chdir(join(neverwinterdp_home, "module/elasticsearch"))
+    os.system(join(neverwinterdp_home, "gradlew")+" clean build install release -x test")
     
-    os.chdir(join(os.getcwd(),"scribengin/release"))
-    os.system(join(os.getcwd(), "../../../gradlew clean release"))
+    os.chdir(join(neverwinterdp_home,"scribengin/release"))
+    os.system(join(neverwinterdp_home, "gradlew")+" clean release")
     os.chdir(self.module_path())
     
   def scribenginDeploy(self, hostname, aws_credential_path, clean, neverwinterdp_home):
     self.printTitle("Deploy Scribengin")
-    scribengin_home=join(neverwinterdp_home,"Scribengin/V2")
+    scribengin_home=join(neverwinterdp_home,"Scribengin/")
     print "Building scribengin from " + scribengin_home
     self.killCluster()
     if(clean):
@@ -409,8 +408,8 @@ class ServerSet(object):
     self.sshExecute("rm -rf /opt/scribengin")
     self.sshExecute("rm -rf /opt/cluster")
     os.chdir(scribengin_home)
-    os.system("scp -q -o StrictHostKeyChecking=no -r "+join(os.getcwd(),"module/elasticsearch/build/release/elasticsearch")+" neverwinterdp@"+hostname+":/opt/elasticsearch")
-    os.system("scp -q -o StrictHostKeyChecking=no -r "+join(os.getcwd(),"scribengin/release/build/release")+" neverwinterdp@"+hostname+":/opt/scribengin")
+    os.system("scp -q -o StrictHostKeyChecking=no -r "+join(neverwinterdp_home,"module/elasticsearch/build/release/elasticsearch")+" neverwinterdp@"+hostname+":/opt/elasticsearch")
+    os.system("scp -q -o StrictHostKeyChecking=no -r "+join(neverwinterdp_home,"scribengin/release/build/release")+" neverwinterdp@"+hostname+":/opt/scribengin")
     os.chdir(self.module_path())
     os.system("scp -q -o StrictHostKeyChecking=no -r "+join(os.getcwd(),"../../cluster")+" neverwinterdp@"+hostname+":/opt/cluster")
     if aws_credential_path == "":
