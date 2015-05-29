@@ -400,7 +400,7 @@ class ServerSet(object):
     
   def scribenginDeploy(self, hostname, aws_credential_path, clean, neverwinterdp_home):
     self.printTitle("Deploy Scribengin")
-    scribengin_home=join(neverwinterdp_home,"Scribengin/")
+    scribengin_home=join(neverwinterdp_home,"scribengin/")
     print "Building scribengin from " + scribengin_home
     self.killCluster()
     if(clean):
