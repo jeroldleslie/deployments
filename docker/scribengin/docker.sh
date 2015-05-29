@@ -208,7 +208,8 @@ function launch_containers() {
   for (( i=1; i<="$NUM_ELASTICSEARCH_SERVER"; i++ ))
   do
     NAME="elasticsearch-"$i
-    docker run -d -p 22 -p 9300 --privileged -h "$NAME" --name "$NAME"  ubuntu:scribengin
+    PORT_NUM=`expr 2181 - 1 + $i + $NUM_ZOOKEEPER_SERVER`
+    docker run -d -p 22 -p $PORT_NUM:9300 --privileged -h "$NAME" --name "$NAME"  ubuntu:scribengin
   done
   
   docker ps
