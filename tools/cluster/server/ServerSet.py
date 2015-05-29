@@ -8,19 +8,18 @@ from os.path import join, expanduser
 #http://stackoverflow.com/questions/1816958/cant-pickle-type-instancemethod-when-using-pythons-multiprocessing-pool-ma
 
 def frameDictionary(process, processID, processIdentifier, running):
-  dictionary = {
-            "Role" : process.role,
-            "Hostname": process.hostname,
-            "HomeDir" : process.homeDir,
-            "Status" : running,
-            "ProcessIdentifier" : processIdentifier,
-            "processID" : processID
-            }
-  return dictionary
+  return {
+          "Role" : process.role,
+          "Hostname": process.hostname,
+          "HomeDir" : process.homeDir,
+          "Status" : running,
+          "ProcessIdentifier" : processIdentifier,
+          "processID" : processID
+        }
 
 def getReportOnServer(server):
-  omitStoppedProcesses = ["scribengin-master-*", "vm-master-*", "dataflow-master-*", "dataflow-worker-*"]
-  scribenginRoles = ["vmmaster", "scribengin", "dataflow-master", "dataflow-worker"]
+  omitStoppedProcesses = ["scribengin-master-*", "vm-master-*", "dataflow-master-*", "dataflow-worker-*", ]
+  scribenginRoles = ["vmmaster", "scribengin", "dataflow-master", "dataflow-worker", "elasticsearch"]
   
   result = [] #list for individual process report
   report = [] #list for server report
@@ -42,6 +41,8 @@ def getReportOnServer(server):
     for line in stdout.splitlines():
       pid_and_name = line.split(" ")
       runningProcesses[pid_and_name[0]] = pid_and_name[1]
+    
+    
     
     #adding none running process status
     for proc in procs:
