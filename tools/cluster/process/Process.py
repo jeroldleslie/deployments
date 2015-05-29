@@ -429,19 +429,20 @@ class DataflowWorkerProcess(ScribenginProcess):
  
 class ElasticSearchProcess(Process): 
   def __init__(self, role, hostname):
-    Process.__init__(self, role, hostname, "/opt/elasticsearch/", "Elasticsearch")
+    Process.__init__(self, role, hostname, "/opt/elasticsearch/", "Main")
   
   def setupClusterEnv(self, paramDict = {}):
     pass
   
-  def getReportDict(self):
-    pass
+  #def getReportDict(self):
+  #  pass
 
-  def getRunningPid(self):
-    pass
+  #def getRunningPid(self):
+  #  pass
   
   def start(self):
-    stdout,stderr = self.sshExecute(join(self.homeDir, join("bin", "shell.sh")))
+    stdout,stderr = self.sshExecute(join(self.homeDir, join("bin", "elasticsearch.sh")))
+    return stdout,stderr
     
   def shutdown(self):
     pass
@@ -449,5 +450,5 @@ class ElasticSearchProcess(Process):
   def clean(self):
     pass 
   
-  def kill(self):
-    pass
+  #def kill(self):
+  #  pass
