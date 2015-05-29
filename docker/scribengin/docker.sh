@@ -67,7 +67,7 @@ function get_scribengin_home() {
   dir_path=`dirname $1`
   base_path=`basename $1`
   
-  scribengin_home=$dir_path"/"$base_path"/Scribengin/"
+  scribengin_home=$dir_path"/"$base_path"/scribengin/"
   echo $scribengin_home
 }
 
