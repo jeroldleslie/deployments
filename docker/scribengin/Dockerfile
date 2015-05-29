@@ -44,7 +44,7 @@ RUN echo "Create neverwinterdp user account and setup home directory"
 #A bug with file creation permission, need to create a template ssh configuration and copy to the account in the post installation
 
 #EXPOSE Ports
-EXPOSE 22 2181 9092 50070 8088 9000
+EXPOSE 22 2181 9092 50070 8088 9000 9300
 
 CMD ["/usr/sbin/sshd", "-D"]
 
