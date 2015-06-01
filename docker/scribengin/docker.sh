@@ -157,6 +157,8 @@ function launch_containers() {
   
   NUM_ELASTICSEARCH_SERVER=$(get_opt --elasticsearch-server 1 $@)
   
+  NUM_GRAFANA=$(get_opt --grafana-server 1 $@)
+  
   h1 "Launch hadoop-worker containers"
   for (( i=1; i<="$NUM_HADOOP_WORKER"; i++ ))
   do
@@ -210,6 +212,16 @@ function launch_containers() {
     NAME="elasticsearch-"$i
     PORT_NUM=`expr 9300 - 1 + $i`
     docker run -d -p 22 -p $PORT_NUM:9300 --privileged -h "$NAME" --name "$NAME"  ubuntu:scribengin
+  done
+  
+  h1 "Launch grafana containers"
+  for (( i=1; i<="$NUM_GRAFANA"; i++ ))
+  do
+    NAME="grafana-"$i
+    PORT_NUM=`expr 3000 - 1 + $i`
+    docker run -d -p 22 -p $PORT_NUM:3000 --privileged -h "$NAME" --name "$NAME"  ubuntu:scribengin
+    #Install influxdb and grafana
+    docker exec -it $NAME /bin/bash -c "wget https://grafanarel.s3.amazonaws.com/builds/grafana_2.0.2_amd64.deb && sudo apt-get install -y adduser libfontconfig && sudo dpkg -i grafana_2.0.2_amd64.deb && wget https://s3.amazonaws.com/influxdb/influxdb_latest_amd64.deb && sudo dpkg -i influxdb_latest_amd64.deb && sudo service grafana-server start && sudo /etc/init.d/influxdb start"
   done
   
   docker ps
