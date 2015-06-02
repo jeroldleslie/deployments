@@ -1,7 +1,11 @@
-#V2/docker/scribengin/integration-tests/Kafka_Stability_Integration__KafkaFailureSimulator.sh
-./V2/docker/scribengin/docker.sh cluster --clean-containers --run-containers --kafka-server=5 --deploy-scribengin
-ssh -o StrictHostKeyChecking=no neverwinterdp@hadoop-master "cd /opt/cluster && 				\
-									./clusterCommander.py zookeeper --clean --start kafka --clean --start"
+#SCRIPT_DIR is the directory this script is in.  Allows us to execute without relative paths
+SCRIPT_DIR=$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )
+
+#This Script will set root directory and Neverwinter_home
+source $SCRIPT_DIR/setupEnvironment.sh $@
+
+#Set up docker images
+$ROOT/docker/scribengin/docker.sh cluster --clean-containers --run-containers --deploy-scribengin --start-cluster --kafka-server=5 --neverwinterdp-home=$NEVERWINTER_HOME
 
 #make folder for test results
 mkdir testresults
@@ -12,12 +16,15 @@ sleep 5
 
 #Run failure simulator in the background
 ssh -o StrictHostKeyChecking=no neverwinterdp@hadoop-master "cd /opt/cluster && mkdir -p /opt/scribengin/scribengin/tools/kafka/junit-reports"
+#in cluster command stop kafka on idle-servers
 ssh -o StrictHostKeyChecking=no neverwinterdp@hadoop-master "cd /opt/cluster &&                                     \
                                   python clusterCommander.py --debug kafkafailure                                    \
-                                  --wait-before-start 30 --failure-interval 30 --kill-method restart                 \
-                                  --servers-to-fail-simultaneously 2                                                 \
-                                  --use-spare 2                           						\
-                                  --restart-method flipflop                                                      	 \
+                                  --wait-before-start 30                                                              \
+                                  --failure-interval 30                                                                \
+                                  --kill-method shutdown                                                                \
+                                  --servers-to-fail-simultaneously 1                                                   \
+                                  --idle-servers 2                     						       \
+                                  --restart-method random                                                      	\
                                   --junit-report /opt/scribengin/scribengin/tools/kafka/junit-reports/kafkaFailureReport.xml" &
 FAIL_SIM_PID=$!
 
@@ -46,4 +53,4 @@ scp -o stricthostkeychecking=no neverwinterdp@hadoop-master:/opt/scribengin/scri
 kill -9 $FAIL_SIM_PID $MONITOR_PID
 
 #Clean up
-./V2/docker/scribengin/docker.sh cluster --clean-containers
+$ROOT/docker/scribengin/docker.sh cluster --clean-containers --neverwinterdp-home=$NEVERWINTER_HOME

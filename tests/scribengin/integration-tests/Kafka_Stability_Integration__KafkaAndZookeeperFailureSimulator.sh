@@ -20,11 +20,11 @@ ssh -o StrictHostKeyChecking=no neverwinterdp@hadoop-master "cd /opt/cluster && 
 ssh -o StrictHostKeyChecking=no neverwinterdp@hadoop-master "cd /opt/cluster &&                                   \
                                       python clusterCommander.py --debug                                                 \
                                        kafkafailure 		  				                         \
-                                      --wait-before-start 30 --failure-interval 30 --kill-method restart                 \
+                                      --wait-before-start 30 --failure-interval 30 --kill-method shutdown                 \
                                       --servers-to-fail-simultaneously 1                                                 \
                                       --junit-report /opt/scribengin/scribengin/tools/kafka/junit-reports/kafkaFailureReport.xml \
                                       zookeeperfailure --servers zookeeper-1,zookeeper-2                                 \
-                                      --wait-before-start 30 --failure-interval 30 --kill-method restart                 \
+                                      --wait-before-start 30 --failure-interval 30 --kill-method shutdown                 \
                                       --servers-to-fail-simultaneously 1                                                 \
                                       --junit-report /opt/scribengin/scribengin/tools/kafka/junit-reports/zkFailureReport.xml " &
 

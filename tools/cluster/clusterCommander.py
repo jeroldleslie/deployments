@@ -152,7 +152,7 @@ def cluster(restart, start, stop, force_stop, clean, sync, wait_before_start, wa
     sleep(wait_before_kill)
     logging.debug("Force Killing Cluster")
     cluster.killCluster()
-  
+
   if(clean):
     logging.debug("Cleaning Kafka")
     cluster.cleanCluster()
@@ -179,13 +179,15 @@ def cluster(restart, start, stop, force_stop, clean, sync, wait_before_start, wa
 @click.option('--stop',              is_flag=True, help="stop kafka brokers")
 @click.option('--force-stop',        is_flag=True, help="kill -9 kafka on brokers")
 @click.option('--clean',             is_flag=True, help="Clean old kafka data")
-#@click.option('--start-with-spare',  default=2, help="Start zookeeper cluster with spare zookeeper nodes")
+@click.option('--idle-servers',      default=0, help="Kafka servers on which kafka is not initially running.")
 @click.option('--brokers',           default="",   help="Which kafka brokers to effect (command separated list)")
 @click.option('--wait-before-start', default=0,    help="Time to wait before restarting kafka server (seconds)")
 @click.option('--wait-before-kill',  default=0,    help="Time to wait before force killing Kafka process (seconds)")
 @click.option('--server-config',     default='/opt/kafka/config/default.properties', help='Kafka server configuration template path, default is /opt/kafka/config/default.properties', type=click.Path(exists=True))
-def kafka(restart, start, stop, force_stop, clean, brokers, wait_before_start, wait_before_kill, server_config):
+#idle-servers comes after clean
+def kafka(restart, start, stop, force_stop, clean,idle_servers, brokers, wait_before_start, wait_before_kill, server_config):
   cluster = Cluster()
+  logging.debug("Just a test message.")
   
   if len(brokers) > 0 :
     brokerList = brokers.split(",")
@@ -211,7 +213,8 @@ def kafka(restart, start, stop, force_stop, clean, brokers, wait_before_start, w
     logging.debug("Starting Kafka")
     cluster.paramDict["server_config"] = server_config
     cluster.startKafka()
-  #click.echo(cluster.getReport())  
+  #click.echo(cluster.getReport())
+  '''TODO stop number of idle servers '''  
   
 
 @mastercommand.command("zookeeper",help="Zookeeper commands")
@@ -239,7 +242,6 @@ def zookeeper(restart, start, stop, force_stop, clean, zk_servers, wait_before_s
   if(clean):
     logging.debug("Cleaning Zookeeper")
     cluster.cleanZookeeper()
-    cluster.cleanSpareZookeeper()
   
   if(restart or start):
     logging.debug("Waiting for "+str(wait_before_start)+" seconds")
@@ -293,13 +295,14 @@ def hadoop(restart, start, stop, force_stop, clean, hadoop_nodes, wait_before_st
 @click.option('--servers',                        default="",   help="Servers to effect.  Command separated list (i.e. --servers zk1,zk2,zk3)")
 @click.option('--min-servers',                    default=1,    help="Minimum number of servers that must stay up")
 @click.option('--servers-to-fail-simultaneously', default=1,    help="Number of servers to kill simultaneously")
-@click.option('--kill-method',                    default='kill', type=click.Choice(['restart', 'kill', "random"]), help="Server kill method.  Restart is clean, kill uses kill -9, random switches randomly")
+@click.option('--kill-method',                    default='kill', type=click.Choice(['shutdown', 'kill', "random"]), help="Server kill method. Shutdown is clean, kill uses kill -9, random switches randomly")
 @click.option('--initial-clean',                  is_flag=True, help="If enabled, will run a clean operation before starting the failure simulation")
-@click.option('--server-config',     default='/opt/kafka/config/default.properties', help='Kafka server configuration template path, default is /opt/kafka/config/default.properties', type=click.Path(exists=True))
-#@click.option('--use-spare',                      is_flag=True, help="If enabled, will select spare-kafka server to run in the cluster")
+@click.option('--server-config',                  default='/opt/kafka/config/default.properties', help='Kafka server configuration template path, default is /opt/kafka/config/default.properties', type=click.Path(exists=True))
+@click.option('--idle-servers',                   default=2, help="If enabled, will select spare-kafka server to run in the cluster")
 @click.option('--junit-report',                   default="",   help="If set, will write the junit-report to the specified file")
 @click.option('--restart-method',                 default='random', type=click.Choice(["flipflop", "random"]), help="Server restart method. 'flipflop' - it starts spare node if normal node killed and vise versa, 'random' - it starts any random node when failure occurs")
-def kafkafailure(failure_interval, wait_before_start, servers, min_servers, servers_to_fail_simultaneously, kill_method, initial_clean, server_config, use_spare, junit_report, restart_method):
+#use-spare before junit report
+def kafkafailure(failure_interval, wait_before_start, servers, min_servers, servers_to_fail_simultaneously, kill_method, initial_clean, server_config,idle_servers, junit_report, restart_method):
   global _jobs
   
   kf = KafkaFailure()
@@ -307,7 +310,7 @@ def kafkafailure(failure_interval, wait_before_start, servers, min_servers, serv
   p = multiprocessing.Process(name="KafkaFailure",
                               target=kf.failureSimulation, 
                               args=(failure_interval, wait_before_start, servers, min_servers, 
-                                    servers_to_fail_simultaneously, kill_method, initial_clean, server_config, junit_report, restart_method))
+                                    servers_to_fail_simultaneously, kill_method, initial_clean, server_config, idle_servers, junit_report, restart_method))
   _jobs.append(p)
   p.start()
   
@@ -318,7 +321,7 @@ def kafkafailure(failure_interval, wait_before_start, servers, min_servers, serv
 @click.option('--servers',                        default="",   help="Servers to effect.  Command separated list (i.e. --servers zk1,zk2,zk3)")
 @click.option('--min-servers',                    default=1,    help="Minimum number of servers that must stay up")
 @click.option('--servers-to-fail-simultaneously', default=1,    help="Number of servers to kill simultaneously")
-@click.option('--kill-method',                    default='kill', type=click.Choice(['restart', 'kill', "random"]), help="Server kill method.  Restart is clean, kill uses kill -9, random switches randomly")
+@click.option('--kill-method',                    default='kill', type=click.Choice(['shutdown', 'kill', "random"]), help="Server kill method. Shutdown is clean, kill uses kill -9, random switches randomly")
 @click.option('--initial-clean',                  is_flag=True, help="If enabled, will run a clean operation before starting the failure simulation")
 @click.option('--zoo-cfg',                        default='/opt/zookeeper/conf/zoo_sample.cfg', help='Zookeeper configuration template path, default is /opt/zookeeper/conf/zoo_sample.cfg', type=click.Path(exists=True))
 @click.option('--junit-report',                   default="",    help="If set, will write the junit-report to the specified file")
