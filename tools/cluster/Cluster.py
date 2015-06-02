@@ -1,6 +1,5 @@
-from server.Server import KafkaServer,ZookeeperServer,HadoopMasterServer,HadoopWorkerServer,ElasticSearchServer
+from server.Server import *
 from server.ServerSet import ServerSet
-
 import re
 
 
@@ -19,6 +18,7 @@ class Cluster(ServerSet):
     re.compile('.*spare-zookeeper-\d+.*'),
     re.compile('.*spare-hadoop-worker-\d+.*'),
     re.compile('.*elasticsearch-\d+.*'),
+    re.compile('.*generic-\d+.*'),
   ]
   
   def __init__(self, etcHostsPath="/etc/hosts"):
@@ -43,6 +43,7 @@ class Cluster(ServerSet):
     spareHadoopWorkers = []
     hadoopMasters = []
     elasticsearchServers = []
+    genericServers = []
     
     f = open(path, 'r')
     for line in f:
@@ -72,6 +73,9 @@ class Cluster(ServerSet):
         if re.match("elasticsearch.*", hostname, re.IGNORECASE) is not None:
           self.addServer(ElasticSearchServer(hostname, "elasticsearch"))
           elasticsearchServers.append(hostname)
+        if re.match("generic.*", hostname, re.IGNORECASE) is not None:
+          self.addServer(GenericServer(hostname, "generic"))
+          genericServers.append(hostname)
           
     self.paramDict["kafkaServers"] = kafkaServers
     self.paramDict["spareKafkaServers"] = spareKafkaServers
@@ -81,5 +85,6 @@ class Cluster(ServerSet):
     self.paramDict["spareHadoopWorkers"] = spareHadoopWorkers
     self.paramDict["hadoopMasters"] = hadoopMasters
     self.paramDict["elasticsearchServers"] = elasticsearchServers
+    self.paramDict["genericServers"] = genericServers
     self.paramDict["all"] = kafkaServers + spareKafkaServers + zkList + spareZkList + hadoopWorkers + spareHadoopWorkers + hadoopMasters + elasticsearchServers
     
