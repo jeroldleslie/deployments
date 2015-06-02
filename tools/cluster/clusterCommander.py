@@ -17,7 +17,7 @@ _neverwinterdp_home = ''
 
 @click.group(chain=True)
 @click.option('--debug/--no-debug', default=False, help="Turn debugging on")
-@click.option('--logfile', default='failure.log', help="Log file to write to")
+@click.option('--logfile', default='/tmp/clustercommander.log', help="Log file to write to")
 @click.option('--neverwinterdp-home', default='', help="NEVERWINTERDP_HOME path for neverwinterdp projects")
 def mastercommand(debug, logfile, neverwinterdp_home):
   global _debug, _logfile, _neverwinterdp_home

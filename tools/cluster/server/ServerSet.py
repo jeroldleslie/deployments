@@ -1,6 +1,6 @@
 from tabulate import tabulate
 from multiprocessing import Pool
-import os, sys
+import os, sys, re
 from os.path import join, expanduser
 
 #This function is outside the ServerSet class
@@ -18,12 +18,14 @@ def frameDictionary(process, processID, processIdentifier, running):
         }
 
 def getReportOnServer(server):
-  omitStoppedProcesses = ["scribengin-master-*", "vm-master-*", "dataflow-master-*", "dataflow-worker-*", ]
-  scribenginRoles = ["vmmaster", "scribengin", "dataflow-master", "dataflow-worker", "elasticsearch"]
+  omitStoppedProcesses = ["scribengin-master-*", "vm-master-*", "dataflow-master-*", 
+                          "dataflow-worker-*", "grafana-server", "kibana", "influxdb" ]
+  scribenginRoles = ["vmmaster", "scribengin", "dataflow-master", "dataflow-worker", "elasticsearch", "generic"]
   
   result = [] #list for individual process report
   report = [] #list for server report
   serverReportDict = server.getReportDict()
+  
   if serverReportDict is not None and serverReportDict["Hostname"] :
     result.append([serverReportDict["Role"], serverReportDict["Hostname"], "", "", "",""])
     procs = server.getProcesses()
@@ -100,13 +102,15 @@ class ServerSet(object):
     return output 
   
   def sync(self, hostname, src="/opt/", dst="/opt"):
+    omitSync = [ re.compile("generic.*") ]
     for hostmachine in self.servers :
       if hostmachine.getHostname() == hostname:
         for server in self.servers :
           if server.getHostname() != hostname:
-            self.printTitle("Sync data with " + server.getHostname() + " from " + hostname)
-            command = "rsync -a -r -c -P --delete " +src+ " " + server.user +"@"+ server.getHostname() + ":"+dst
-            hostmachine.sshExecute(command, False)
+            if not any(regex.match(server.getHostname()) for regex in omitSync):
+              self.printTitle("Sync data with " + server.getHostname() + " from " + hostname)
+              command = "rsync -a -r -c -P --delete " +src+ " " + server.user +"@"+ server.getHostname() + ":"+dst
+              hostmachine.sshExecute(command, False)
         break
     
   def startProcessOnHost(self, processName, hostname, setupClusterEnv = False):
@@ -192,13 +196,11 @@ class ServerSet(object):
       hostnames.append(server.hostname)
     return hostnames
   
-  #TODO: I do not think you can start vm master this way
   def startVmMaster(self):
     hadoopMasterServers = self.getServersByRole("hadoop-worker")
     if hadoopMasterServers.servers:
       return self.startProcessOnHost("vmmaster", hadoopMasterServers.servers[0].getHostname())
   
-  #TODO: I do not think you can start vm master this way
   def startScribengin(self):
     hadoopMasterServers = self.getServersByRole("hadoop-worker")
     if hadoopMasterServers.servers:
@@ -206,6 +208,14 @@ class ServerSet(object):
   
   def startElasticSearch(self):
     return self.startProcess("elasticsearch")
+  
+  def startGrafana(self):
+    return self.startProcess("grafana")
+  
+  def startGeneric(self):
+    self.startProcess("grafana")
+    self.startProcess("kibana")
+    self.startProcess("influxdb")
   
   def startZookeeper(self):
     return self.startProcess("zookeeper")
@@ -247,6 +257,7 @@ class ServerSet(object):
     return self.startProcess("datanode,nodemanager")
   
   def startCluster(self):
+    self.startElasticSearch()
     self.startZookeeper()
     self.startKafka()
     self.cleanHadoopDataAtFirst()
@@ -254,7 +265,7 @@ class ServerSet(object):
     self.startHadoopWorker()
     self.startVmMaster()
     self.startScribengin()
-    self.startElasticSearch()
+    self.startGeneric()
     
   def shutdownVmMaster(self):
     hadoopMasterServers = self.getServersByRole("hadoop-worker")

@@ -1,9 +1,8 @@
-from tabulate import tabulate
 from sys import path
-from os.path import join, dirname, abspath, expanduser
+from os.path import  dirname, abspath
 #Make sure the cluster package is on the path correctly
 path.insert(0, dirname(dirname(abspath(__file__))))
-from process.Process import KafkaProcess,ZookeeperProcess,HadoopDaemonProcess, VmMasterProcess, ScribenginMasterProcess, DataflowMasterProcess, DataflowWorkerProcess, ElasticSearchProcess  #@UnresolvedImport
+from process.Process import *  #@UnresolvedImport
 #from yarnRestApi.YarnRestApi import YarnRestApi #@UnresolvedImport
 
 class Server(object):
@@ -122,7 +121,14 @@ class HadoopMasterServer(Server):
     Server.addProcess(self, HadoopDaemonProcess('resourcemanager',hostname, 'ResourceManager', "sbin/yarn-daemon.sh"))
 
 class ElasticSearchServer(Server):
-  def __init__(self, hostname, role):
+  def __init__(self, hostname, role="elasticsearch"):
     Server.__init__(self, hostname, role)
     Server.addProcess(self, ElasticSearchProcess(role, hostname))
+
+class GenericServer(Server):
+  def __init__(self, hostname, role="generic"):
+    Server.__init__(self, hostname, role)
+    Server.addProcess(self, GrafanaProcess("grafana", hostname))
+    Server.addProcess(self, KibanaProcess("kibana", hostname))
+    Server.addProcess(self, InfluxdbProcess("influxdb", hostname))
     

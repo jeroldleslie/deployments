@@ -157,7 +157,7 @@ function launch_containers() {
   
   NUM_ELASTICSEARCH_SERVER=$(get_opt --elasticsearch-server 1 $@)
   
-  NUM_GRAFANA=$(get_opt --grafana-server 1 $@)
+  NUM_GENERIC=$(get_opt --generic-server 1 $@)
   
   h1 "Launch hadoop-worker containers"
   for (( i=1; i<="$NUM_HADOOP_WORKER"; i++ ))
@@ -214,14 +214,19 @@ function launch_containers() {
     docker run -d -p 22 -p $PORT_NUM:9300 --privileged -h "$NAME" --name "$NAME"  ubuntu:scribengin
   done
   
-  h1 "Launch grafana containers"
-  for (( i=1; i<="$NUM_GRAFANA"; i++ ))
+  h1 "Launch generic containers"
+  for (( i=1; i<="$NUM_GENERIC"; i++ ))
   do
-    NAME="grafana-"$i
-    PORT_NUM=`expr 3000 - 1 + $i`
-    docker run -d -p 22 -p $PORT_NUM:3000 --privileged -h "$NAME" --name "$NAME"  ubuntu:scribengin
-    #Install influxdb and grafana
-    docker exec -it $NAME /bin/bash -c "wget https://grafanarel.s3.amazonaws.com/builds/grafana_2.0.2_amd64.deb && sudo apt-get install -y adduser libfontconfig && sudo dpkg -i grafana_2.0.2_amd64.deb && wget https://s3.amazonaws.com/influxdb/influxdb_latest_amd64.deb && sudo dpkg -i influxdb_latest_amd64.deb && sudo service grafana-server start && sudo /etc/init.d/influxdb start"
+    NAME="generic-"$i
+    docker run -d -p 22 -p 3000 -p 5601 --privileged -h "$NAME" --name "$NAME"  ubuntu:scribengin
+    #Install and start grafana
+    docker exec -it $NAME /bin/bash -c "wget https://grafanarel.s3.amazonaws.com/builds/grafana_2.0.2_amd64.deb && sudo apt-get install -y adduser libfontconfig && sudo dpkg -i grafana_2.0.2_amd64.deb && sudo service grafana-server start "
+    #Install and start influxdb
+    docker exec -it $NAME /bin/bash -c "wget https://s3.amazonaws.com/influxdb/influxdb_latest_amd64.deb && sudo dpkg -i influxdb_latest_amd64.deb && sudo /etc/init.d/influxdb start"
+    #Install and configure kibana
+    docker exec -it $NAME /bin/bash -c "wget https://download.elastic.co/kibana/kibana/kibana-4.0.2-linux-x64.tar.gz -O kibana.tar.gz && mkdir -p /opt/kibana && tar xf kibana.tar.gz -C /opt/kibana --strip 1 && sed -i 's@^elasticsearch_url:.*@elasticsearch_url: \"http://elasticsearch-1:9200\"@' /opt/kibana/config/kibana.yml"
+    #Set kibana up as a service - Can't be started until elasticsearch is up
+    docker exec -it $NAME /bin/bash -c "cd /etc/init.d && sudo wget https://gist.githubusercontent.com/thisismitch/8b15ac909aed214ad04a/raw/bce61d85643c2dcdfbc2728c55a41dab444dca20/kibana4 && sudo chmod +x /etc/init.d/kibana4 && sudo update-rc.d kibana4 defaults 96 9 "
   done
   
   docker ps

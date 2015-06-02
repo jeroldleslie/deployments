@@ -452,3 +452,66 @@ class ElasticSearchProcess(Process):
   
   #def kill(self):
   #  pass
+
+class GrafanaProcess(Process):
+  def __init__(self, role, hostname):
+    Process.__init__(self, role, hostname, "/usr/sbin", "grafana-server")
+  
+  def getProcessCommand(self):
+    return "ps ax | grep -w 'grafana-server' | grep /usr | awk '{print $1 \" \" $5}' | grep grafana"
+  
+  def setupClusterEnv(self, paramDict = {}):
+    pass
+  
+  def shutdown(self):
+    stdout,stderr = self.sshExecute("sudo service grafana-server stop")
+    return stdout,stderr
+  
+  def clean(self):
+    pass 
+  
+  def start(self):
+    stdout,stderr = self.sshExecute("sudo service grafana-server start")
+    return stdout,stderr
+  
+class KibanaProcess(Process):
+  def __init__(self, role, hostname):
+    Process.__init__(self, role, hostname, "/opt/kibana", "kibana")
+  
+  def getProcessCommand(self):
+    return "ps ax | grep -w 'kibana' | awk '{print $1 \" \" $5}' | grep kibana | sed -e 's@/opt/kibana/bin/../node/bin/node@/opt/kibana/bin/kibana@'"
+  
+  def setupClusterEnv(self, paramDict = {}):
+    pass
+  
+  def shutdown(self):
+    stdout,stderr = self.sshExecute("sudo service kibana4 stop")
+    return stdout,stderr
+  
+  def clean(self):
+    pass 
+  
+  def start(self):
+    stdout,stderr = self.sshExecute("sudo service kibana4 start")
+    return stdout,stderr
+  
+class InfluxdbProcess(Process):
+  def __init__(self, role, hostname):
+    Process.__init__(self, role, hostname, "/usr/bin", "influxdb")
+  
+  def getProcessCommand(self):
+    return "ps ax | grep -w 'influxdb' | grep /usr | awk '{print $1 \" \" $5}' | grep influxdb"
+  
+  def setupClusterEnv(self, paramDict = {}):
+    pass
+  
+  def shutdown(self):
+    stdout,stderr = self.sshExecute("sudo /etc/init.d/influxdb start")
+    return stdout,stderr
+  
+  def clean(self):
+    pass 
+  
+  def start(self):
+    stdout,stderr = self.sshExecute("sudo /etc/init.d/influxdb start")
+    return stdout,stderr
