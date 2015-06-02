@@ -32,7 +32,7 @@ class FailureSimulator():
     else:
       return self.cluster
     
-  def failureSimulation(self,failure_interval, wait_before_start, servers, min_servers, servers_to_fail_simultaneously, kill_method, initial_clean, config_path, use_spare, junit_report, restart_method):
+  def failureSimulation(self,failure_interval, wait_before_start, servers, min_servers, servers_to_fail_simultaneously, kill_method, initial_clean, config_path, junit_report, restart_method):
     """
     Run the failure loop for a given role
     """
@@ -78,16 +78,18 @@ class FailureSimulator():
       exit(-1)   
     
     spareServersArray = []
+    '''
     if use_spare:
       self.spareCluster = self.mainCluster.getServersByRole(spareRoleName)
       for server in self.spareCluster.servers:
         spareServersArray.append(server.getHostname())
-    
+    '''
     if initial_clean:
       self.cluster.cleanProcess(self.roleName)
+    '''
       if use_spare:
         self.spareCluster.cleanProcess(spareRoleName)
-    
+    '''
     
     #Find running and Idle servers initially    
     runningServers = []
@@ -169,7 +171,7 @@ class FailureSimulator():
       sleep(wait_before_start)
       newServers = []
       
-      if use_spare:
+      if True:
         serversToStart = []
         tempList = idleServers[:]
         for hostname in serversToKill:
