@@ -31,8 +31,9 @@ else
   echo "credentials file does not exists on remote"
 fi
 
-  echo "testing existence of sunjce file on remote host. JAVA_HOME="$JAVA_HOME
-  if [ -e $JAVA_HOME/jre/lib/ext ] ; then 
+  echo "testing existence of sunjce file on remote host."
+is_exists2=`ssh -o "StrictHostKeyChecking no" neverwinterdp@hadoop-master "if [ -e /usr/lib/jvm/java-7-openjdk-amd64/jre/lib/ext/sunjce_provider.jar ] ; then echo '0';else echo '1'; fi"`
+  if [ $is_exists2 == '0' ] ; then 
     echo "sunjce exists !!!!"
   else
     echo "sunjce exists not."
@@ -70,4 +71,4 @@ ssh -o "StrictHostKeyChecking no" neverwinterdp@hadoop-master "cd /opt/scribengi
 scp -o stricthostkeychecking=no neverwinterdp@hadoop-master:/opt/scribengin/scribengin/S3_IntegrationTest.xml ./testresults/
 
 #Clean up
-$ROOT/docker/scribengin/docker.sh cluster --clean-containers --neverwinterdp-home=$NEVERWINTER_HOME
+#$ROOT/docker/scribengin/docker.sh cluster --clean-containers --neverwinterdp-home=$NEVERWINTER_HOME
