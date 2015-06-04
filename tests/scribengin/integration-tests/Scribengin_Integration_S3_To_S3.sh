@@ -58,8 +58,10 @@ ssh -o "StrictHostKeyChecking no" neverwinterdp@hadoop-master "cd /opt/scribengi
                  --source-name dataflow-test \
                  --source-num-of-stream 1    \
                  --source-max-records-per-stream 100 \
+                 --source-auto-create-bucket \
                  --sink-location jenkins-dataflow-test-$UUID  \
                  --sink-name dataflow-test  \
+                 --sink-auto-delete-bucket  \
                  --print-dataflow-info -1 \
                  --debug-dataflow-task  \
                  --debug-dataflow-vm  \
