@@ -33,7 +33,6 @@ ssh -o StrictHostKeyChecking=no neverwinterdp@hadoop-master "cd /opt/cluster && 
 
 MONITOR_PID=$!
 
-
 #Run kafkaStabilityCheckTool
 ssh -o "StrictHostKeyChecking no" neverwinterdp@hadoop-master "cd /opt/scribengin/scribengin/tools/kafka/ &&     \
                               ./kafka.sh test stability --zk-connect zookeeper-1:2181 --topic stabilitytest      \
