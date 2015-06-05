@@ -19,8 +19,8 @@ ssh -o StrictHostKeyChecking=no neverwinterdp@hadoop-master "cd /opt/cluster && 
 #in cluster command stop kafka on idle-servers
 ssh -o StrictHostKeyChecking=no neverwinterdp@hadoop-master "cd /opt/cluster &&                                     \
                                   python clusterCommander.py --debug kafkafailure                                    \
-                                  --wait-before-start 30                                                              \
-                                  --failure-interval 30                                                                \
+                                  --wait-before-start 20                                                              \
+                                  --failure-interval 20                                                                \
                                   --kill-method shutdown                                                                \
                                   --servers-to-fail-simultaneously 1                                                   \
                                   --idle-servers 2                     						       \
@@ -36,13 +36,13 @@ MONITOR_PID=$!
 #Run kafkaStabilityCheckTool
 ssh -o "StrictHostKeyChecking no" neverwinterdp@hadoop-master "cd /opt/scribengin/scribengin/tools/kafka/ &&     \
                               ./kafka.sh test stability --zk-connect zookeeper-1:2181 --topic stabilitytest      \
-                              --replication 3 --send-period 0 --send-writer-type ack --send-max-duration 18000 \
-                              --send-max-per-partition 20000 --producer:message.send.max.retries=5            \
+                              --replication 3 --send-period 0 --send-writer-type ack --send-max-duration 1800 \
+                              --send-max-per-partition 2000 --producer:message.send.max.retries=5            \
                               --producer:retry.backoff.ms=100 --producer:queue.buffering.max.ms=1000             \
                               --producer:queue.buffering.max.messages=15000                                      \
                               --producer:topic.metadata.refresh.interval.ms=-1 --producer:batch.num.messages=100 \
-                              --producer:acks=all --producer:compression.type=gzip --consume-max 100000       \
-                              --consume-max-duration 600000                                                     \
+                              --producer:acks=all --producer:compression.type=gzip --consume-max 10000       \
+                              --consume-max-duration 6000                                                     \
                               --junit-report junit-reports/KafkaMessageCheckTool.xml"
 
 
