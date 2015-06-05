@@ -19,7 +19,7 @@ class FailureSimulator():
   def getExecutionCluster(self, hostname):
     return self.cluster
     #restart-method is not used?
-  def failureSimulation(self,failure_interval, wait_before_start, servers, min_servers, servers_to_fail_simultaneously, kill_method, initial_clean, config_path, idle_servers, junit_report, restart_method):
+  def failureSimulation(self,failure_interval, wait_before_start, servers, min_servers, servers_to_fail_simultaneously, kill_method, initial_clean, config_path, junit_report, restart_method):
     """
     Run the failure loop for a given role
     """
@@ -30,12 +30,8 @@ class FailureSimulator():
     logging.debug("Kill method: " + kill_method)
     logging.debug("Initial clean: " + str(initial_clean)) 
     logging.debug("Role name: "+ self.roleName)
-    logging.debug("idle_servers: "+ str(idle_servers))
     logging.debug("Junit Report: "+ junit_report)
     
-    #kill idle servers in role.name
-    #shutdown process on num idle_server 
- 
     testCases = []
     testNum = 0
     ''' 
@@ -69,11 +65,6 @@ class FailureSimulator():
     if initial_clean:
       self.cluster.cleanProcess(self.roleName)
     
-    #kill process on num idle_server 
-    for number in range(idle_servers):
-       serverToKill = choice(self.mainCluster.getServersByRole(self.roleName).servers)
-       self.cluster.killProcessOnHost(self.roleName, serverToKill.getHostname())
-
     #Find running and Idle servers initially    
     runningServers = []
     idleServers = []
