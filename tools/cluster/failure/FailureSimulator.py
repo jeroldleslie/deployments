@@ -168,6 +168,7 @@ class FailureSimulator():
         currentExecutingCluster.startProcessOnHost(roleName, hostname, setupClusterEnv)
       
       #Reassign replicas processes
+      logging.debug("checking if we have new servers "+ len(newServers))
       if len(newServers) > 0:
         #Getting new broker list
         if self.roleName == "kafka":
