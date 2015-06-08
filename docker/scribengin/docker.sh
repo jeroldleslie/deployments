@@ -218,7 +218,8 @@ function launch_containers() {
   for (( i=1; i<="$NUM_GENERIC"; i++ ))
   do
     NAME="generic-"$i
-    docker run -d -p 22 -p 3000 -p 5601 --privileged -h "$NAME" --name "$NAME"  ubuntu:scribengin
+    PORT_NUM=`expr 5601 - 1 + $i`
+    docker run -d -p 22 -p 3000 -p $PORT_NUM:5601 --privileged -h "$NAME" --name "$NAME"  ubuntu:scribengin
     #Install and start grafana
     docker exec -it $NAME /bin/bash -c "wget https://grafanarel.s3.amazonaws.com/builds/grafana_2.0.2_amd64.deb && sudo apt-get install -y adduser libfontconfig && sudo dpkg -i grafana_2.0.2_amd64.deb && sudo service grafana-server start "
     #Install and start influxdb
