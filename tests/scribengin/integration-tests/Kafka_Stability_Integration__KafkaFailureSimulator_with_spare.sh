@@ -6,7 +6,7 @@ source $SCRIPT_DIR/setupEnvironment.sh $@
 
 #Set up docker images
 $ROOT/docker/scribengin/docker.sh cluster --clean-containers --run-containers --kafka-server=5 --generic-server=0 --deploy-scribengin --neverwinterdp-home=$NEVERWINTER_HOME
-ssh -o StrictHostKeyChecking=no neverwinterdp@hadoop-master "cd /opt/cluster && python clusterCommander.py zookeeper --start kafka --start --brokers kafka-1,kafka-2,kafka-3 hadoop --start scribengin --start"
+ssh -o StrictHostKeyChecking=no neverwinterdp@hadoop-master "export NEVERWINTERDP_HOME=$NEVERWINTER_HOME && cd /opt/cluster && python clusterCommander.py zookeeper --start kafka --start --brokers kafka-1,kafka-2,kafka-3 hadoop --start scribengin --start"
 
 #make folder for test results
  if [ ! -d testresults ] ; then
