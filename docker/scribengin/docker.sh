@@ -151,10 +151,6 @@ function launch_containers() {
   NUM_ZOOKEEPER_SERVER=$(get_opt --zk-server 1 $@)
   NUM_HADOOP_WORKER=$(get_opt --hadoop-worker 3 $@)
   
-  NUM_SPARE_KAFKA_BROKER=$(get_opt --spare-kafka '0' $@)
-  NUM_SPARE_ZOOKEEPER_SERVER=$(get_opt --spare-zookeeper 0 $@)
-  NUM_SPARE_HADOOP_WORKER=$(get_opt --spare-hadoop 0 $@)
-  
   NUM_ELASTICSEARCH_SERVER=$(get_opt --elasticsearch-server 1 $@)
   
   NUM_GENERIC=$(get_opt --generic-server 1 $@)
@@ -166,12 +162,6 @@ function launch_containers() {
     docker run -d -p 22 --privileged -h "$NAME" --name "$NAME" ubuntu:scribengin
   done
 
-  h1 "Launch spare hadoop-worker containers"
-  for (( i=1; i<="$NUM_SPARE_HADOOP_WORKER"; i++ ))
-  do
-    NAME="spare-hadoop-worker-"$i
-    docker run -d -p 22 --privileged -h "$NAME" --name "$NAME" ubuntu:scribengin
-  done
   
   h1 "Launch zookeeper containers"
   for (( i=1; i<="$NUM_ZOOKEEPER_SERVER"; i++ ))
@@ -181,13 +171,6 @@ function launch_containers() {
     docker run -d -p 22 -p $PORT_NUM:2181 --privileged -h "$NAME" --name "$NAME"  ubuntu:scribengin
   done  
 
-  h1 "Launch spare zookeeper containers"
-  for (( i=1; i<="$NUM_SPARE_ZOOKEEPER_SERVER"; i++ ))
-  do
-    NAME="spare-zookeeper-"$i
-    PORT_NUM=`expr 2181 - 1 + $i + $NUM_ZOOKEEPER_SERVER`
-    docker run -d -p 22 -p $PORT_NUM:2181 --privileged -h "$NAME" --name "$NAME"  ubuntu:scribengin
-  done  
 
   h1 "Remove hadoop-master entry in the $HOME/.ssh/known_hosts"
   ssh-keygen -f "$HOME/.ssh/known_hosts" -R hadoop-master
@@ -199,13 +182,7 @@ function launch_containers() {
     docker run -d -p 22 -p 9092 --privileged -h "$NAME" --name "$NAME"  ubuntu:scribengin
   done
   
-  h1 "Launch spare kafka containers"
-  for (( i=1; i<="$NUM_SPARE_KAFKA_BROKER"; i++ ))
-  do
-    NAME="spare-kafka-"$i
-    docker run -d -p 22 -p 9092 --privileged -h "$NAME" --name "$NAME"  ubuntu:scribengin
-  done
-  
+ 
   h1 "Launch elasticsearch containers"
   for (( i=1; i<="$NUM_ELASTICSEARCH_SERVER"; i++ ))
   do
@@ -432,9 +409,6 @@ function printUsage() {
   echo "    clean                      : To remove the image"
   echo "  Command container consists of the sub commands: "
   echo "    run                        : To run the containers(hadoop, zookeeper, kafka...)"
-  echo "    run --spare-zookeeper      : Number of spare zookeeper servers to launch"
-  echo "    run --spare-kafka          : Number of spare kafka servers to launch"
-  echo "    run --spare-hadoop         : Number of spare hadoop-worker servers to launch"
   echo "    clean                      : To remove and destroy all the running containers"
   echo "    login                      : To login the given containeri name or id  with the root user"
   echo "    update-hosts               : To update the /etc/hosts in all the running containers"

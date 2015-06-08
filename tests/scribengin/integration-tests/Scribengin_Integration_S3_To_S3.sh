@@ -5,7 +5,7 @@ SCRIPT_DIR=$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )
 source $SCRIPT_DIR/setupEnvironment.sh $@
 
 #Set up docker images
-$ROOT/docker/scribengin/docker.sh cluster --clean-containers --run-containers --deploy-scribengin --start-cluster --neverwinterdp-home=$NEVERWINTER_HOME
+$ROOT/docker/scribengin/docker.sh cluster --clean-containers --run-containers --deploy-scribengin --generic-server=0 --start-cluster --neverwinterdp-home=$NEVERWINTER_HOME
 
 scp -o "StrictHostKeyChecking no" -r /root/.aws neverwinterdp@hadoop-master:/home/neverwinterdp/
 
@@ -16,23 +16,24 @@ mkdir testresults
 sleep 5
 
   echo "testing existence of .aws folder on local host"
-  if [ -d /root/.aws ] ; then 
-    echo "pasword exists on host !!!!"
+  if [ "$(ls -A /root/.aws)" ] ; then 
+    echo "Credentials exist on host !!!!"
   else
-    echo "we have the wrong host location."
+    echo "Credentials dont exist on host."
   fi
 
 
  echo "testing existence of .aws folder on remote host"
 is_exists=`ssh -o "StrictHostKeyChecking no" neverwinterdp@hadoop-master "if [ -e /home/neverwinterdp/.aws/credentials ] ; then echo '0';else echo '1'; fi"`
 if [ $is_exists == '0' ]; then
-  echo "Credentials file exists"
+  echo "Credentials file exists on remote"
 else
-  echo "credentials file does not exists"
+  echo "credentials file does not exists on remote"
 fi
 
-  echo "testing existence of sunjce file on remote host"
-  if [ -e $JAVA_HOME/jre/lib/ext ] ; then 
+  echo "testing existence of sunjce file on remote host."
+is_exists2=`ssh -o "StrictHostKeyChecking no" neverwinterdp@hadoop-master "if [ -e /usr/lib/jvm/java-7-openjdk-amd64/jre/lib/ext/sunjce_provider.jar ] ; then echo '0';else echo '1'; fi"`
+  if [ $is_exists2 == '0' ] ; then 
     echo "sunjce exists !!!!"
   else
     echo "sunjce exists not."
@@ -56,9 +57,11 @@ ssh -o "StrictHostKeyChecking no" neverwinterdp@hadoop-master "cd /opt/scribengi
                  --source-location jenkins-dataflow-test-$UUID \
                  --source-name dataflow-test \
                  --source-num-of-stream 1    \
-                 --source-max-records-per-stream 100 \
+                 --source-max-records-per-stream 1000 \
+                 --source-auto-create-bucket \
                  --sink-location jenkins-dataflow-test-$UUID  \
                  --sink-name dataflow-test  \
+                 --sink-auto-delete-bucket  \
                  --print-dataflow-info -1 \
                  --debug-dataflow-task  \
                  --debug-dataflow-vm  \
@@ -70,4 +73,4 @@ ssh -o "StrictHostKeyChecking no" neverwinterdp@hadoop-master "cd /opt/scribengi
 scp -o stricthostkeychecking=no neverwinterdp@hadoop-master:/opt/scribengin/scribengin/S3_IntegrationTest.xml ./testresults/
 
 #Clean up
-$ROOT/docker/scribengin/docker.sh cluster --clean-containers --neverwinterdp-home=$NEVERWINTER_HOME
+#$ROOT/docker/scribengin/docker.sh cluster --clean-containers --neverwinterdp-home=$NEVERWINTER_HOME

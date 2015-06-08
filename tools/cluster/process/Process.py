@@ -128,11 +128,9 @@ class KafkaProcess(Process):
     Process.__init__(self, role, hostname, "/opt/kafka", "Kafka")
    
   def setupClusterEnv(self, paramDict = {}):
-    zkServer = paramDict["zkList"] + paramDict["spareZkList"]
+    zkServer = paramDict["zkList"]
     zkConnect = ":2181,".join(zkServer) + ":2181"
     brokerID = int(re.search(r'\d+', self.hostname).group())
-    if self.role == "spare-kafka":
-      brokerID = brokerID + len(paramDict["kafkaServers"])
     
     fileStr = ""
     for line in open(paramDict["server_config"]).readlines():
@@ -249,7 +247,7 @@ class ZookeeperProcess(Process):
       fileStr = fileStr + line
     self.sshExecute("mkdir -p "+ myid_path +" && echo '" + `hostID` + "' > " + join(myid_path, "myid"))
     
-    allZkServers = paramDict["zkList"] + paramDict["spareZkList"]
+    allZkServers = paramDict["zkList"]
     
     for zk in allZkServers:
       zkID = int(re.search(r'\d+', zk).group())

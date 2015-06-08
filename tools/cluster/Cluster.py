@@ -14,9 +14,6 @@ class Cluster(ServerSet):
     re.compile('.*zookeeper-\d+.*'),
     re.compile('.*hadoop-worker-\d+.*'),
     re.compile('.*hadoop-master.*'),
-    re.compile('.*spare-kafka-\d+.*'),
-    re.compile('.*spare-zookeeper-\d+.*'),
-    re.compile('.*spare-hadoop-worker-\d+.*'),
     re.compile('.*elasticsearch-\d+.*'),
     re.compile('.*generic-\d+.*'),
   ]
@@ -36,11 +33,8 @@ class Cluster(ServerSet):
     Uses serverRegexes for server name regexes
     """
     kafkaServers = []
-    spareKafkaServers = []
     zkList = []
-    spareZkList = []
     hadoopWorkers = []
-    spareHadoopWorkers = []
     hadoopMasters = []
     elasticsearchServers = []
     genericServers = []
@@ -52,24 +46,15 @@ class Cluster(ServerSet):
         if re.match("kafka.*", hostname, re.IGNORECASE) is not None:
           self.addServer(KafkaServer(hostname, "kafka"))
           kafkaServers.append(hostname)
-        if re.match("spare-kafka.*", hostname, re.IGNORECASE) is not None:
-          self.addServer(KafkaServer(hostname, "spare-kafka"))
-          spareKafkaServers.append(hostname)
         if re.match("zookeeper.*", hostname, re.IGNORECASE) is not None:
           zkList.append(hostname)
           self.addServer(ZookeeperServer(hostname, "zookeeper"))
-        if re.match("spare-zookeeper.*", hostname, re.IGNORECASE) is not None:
-          spareZkList.append(hostname)
-          self.addServer(ZookeeperServer(hostname, "spare-zookeeper")) 
         if re.match("hadoop-master.*", hostname, re.IGNORECASE) is not None:
           hadoopMasters.append(hostname)
           self.addServer(HadoopMasterServer(hostname))
         if re.match("hadoop-worker.*", hostname, re.IGNORECASE) is not None :
           hadoopWorkers.append(hostname)
           self.addServer(HadoopWorkerServer(hostname, "hadoop-worker"))
-        if re.match("spare-hadoop-worker.*", hostname, re.IGNORECASE) is not None :
-          spareHadoopWorkers.append(hostname)
-          self.addServer(HadoopWorkerServer(hostname, "spare-hadoop-worker"))
         if re.match("elasticsearch.*", hostname, re.IGNORECASE) is not None:
           self.addServer(ElasticSearchServer(hostname, "elasticsearch"))
           elasticsearchServers.append(hostname)
@@ -78,13 +63,11 @@ class Cluster(ServerSet):
           genericServers.append(hostname)
           
     self.paramDict["kafkaServers"] = kafkaServers
-    self.paramDict["spareKafkaServers"] = spareKafkaServers
     self.paramDict["zkList"] = zkList
-    self.paramDict["spareZkList"] = spareZkList
     self.paramDict["hadoopWorkers"] = hadoopWorkers
-    self.paramDict["spareHadoopWorkers"] = spareHadoopWorkers
     self.paramDict["hadoopMasters"] = hadoopMasters
     self.paramDict["elasticsearchServers"] = elasticsearchServers
     self.paramDict["genericServers"] = genericServers
-    self.paramDict["all"] = kafkaServers + spareKafkaServers + zkList + spareZkList + hadoopWorkers + spareHadoopWorkers + hadoopMasters + elasticsearchServers
+    self.paramDict["all"] = kafkaServers + zkList + hadoopWorkers + hadoopMasters + elasticsearchServers
+
     
