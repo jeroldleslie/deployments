@@ -6,7 +6,7 @@ source $SCRIPT_DIR/setupEnvironment.sh $@
 
 #Set up docker images
 $ROOT/docker/scribengin/docker.sh cluster --clean-containers --run-containers --kafka-server=5 --generic-server=0 --deploy-scribengin --neverwinterdp-home=$NEVERWINTER_HOME
-ssh -o StrictHostKeyChecking=no neverwinterdp@hadoop-master "cd /opt/cluster && python clusterCommander.py zookeeper --start kafka --start --brokers kafka-1,kafka-2,kafka-3 hadoop --start scribengin --start "
+ssh -o StrictHostKeyChecking=no neverwinterdp@hadoop-master "cd /opt/cluster && python clusterCommander.py zookeeper --start kafka --start --brokers kafka-1,kafka-2,kafka-3 hadoop --start scribengin --start"
 
 #make folder for test results
  if [ ! -d testresults ] ; then
@@ -38,12 +38,12 @@ MONITOR_PID=$!
 #Run kafkaStabilityCheckTool
 ssh -o "StrictHostKeyChecking no" neverwinterdp@hadoop-master "cd /opt/scribengin/scribengin/tools/kafka/ &&     \
                               ./kafka.sh test stability --zk-connect zookeeper-1:2181 --topic stabilitytest      \
-                              --replication 3 --send-period 0 --send-writer-type ack --send-max-duration 18000 \
-                              --send-max-per-partition 20000 --producer:message.send.max.retries=5            \
+                              --replication 3 --send-period 0 --send-writer-type ack --send-max-duration 1800000 \
+                              --send-max-per-partition 2000000 --producer:message.send.max.retries=5            \
                               --producer:retry.backoff.ms=100 --producer:queue.buffering.max.ms=1000             \
                               --producer:queue.buffering.max.messages=15000                                      \
                               --producer:topic.metadata.refresh.interval.ms=-1 --producer:batch.num.messages=100 \
-                              --producer:acks=all --producer:compression.type=gzip --consume-max 100000       \
+                              --producer:acks=all --producer:compression.type=gzip --consume-max 10000000       \
                               --consume-max-duration 600000                                                     \
                               --junit-report junit-reports/KafkaMessageCheckTool.xml"
 

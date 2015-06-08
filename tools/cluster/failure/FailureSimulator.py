@@ -82,13 +82,12 @@ class FailureSimulator():
       logging.debug("Sleeping for "+str(failure_interval)+" seconds")
       sleep(failure_interval)
       
-      serversToStart = []
+      serversToStart = sample(idleServers, servers_to_fail_simultaneously)
       #pick random servers to kill
       serversToKill = sample(runningServers, servers_to_fail_simultaneously)
       logging.debug("Servers selected to kill: "+ ','.join(serversToKill))
       
-      #assigning servers to start with servers to kill
-      serversToStart = serversToKill[:]
+      logging.debug("Servers to start: "+str(serversToStart))
       
       #Stop the running process based on kill_method
       currentExecutingCluster = None
@@ -159,7 +158,7 @@ class FailureSimulator():
         currentExecutingCluster.startProcessOnHost(roleName, hostname, setupClusterEnv)
       
       #Reassign replicas processes
-      logging.debug("checking if we have new servers "+ len(newServers))
+      logging.debug("checking if we have new servers "+ str(newServers))
       if len(newServers) > 0:
         #Getting new broker list
         if self.roleName == "kafka":
