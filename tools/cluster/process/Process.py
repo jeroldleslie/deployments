@@ -1,5 +1,5 @@
 from os.path import expanduser, join, abspath, dirname
-from sys import path
+from sys import path, stdout
 from time import sleep
 from random import sample
 from tabulate import tabulate
@@ -145,7 +145,7 @@ class KafkaProcess(Process):
     logging.debug("Reassigning replicas started")
     zk_connect = ":2181,".join(zkServer) + ":2181"
     expand_json_path = ""
-    topics_json_list = []
+ 
     retry = True
     while retry:
       describePath = join(self.homeDir, "bin/kafka-topics.sh --describe --zookeeper "+zk_connect)
@@ -155,30 +155,9 @@ class KafkaProcess(Process):
       if not stderr:
         retry = False
         new_brokers = new_brokers.split(",")
-        #generating json
-        topics_to_move_json = "{\\\"version\\\":1,\\\"partitions\\\":["
-        for line in stdout.splitlines():
-          if not re.match('.*ReplicationFactor.*', line):
-            if re.match('.*Topic:.*', line):
-              line = string.replace(line, "\t", " ")
-              line = line + " end"
-              topic= re.search("(?<=\Topic:\s)(\w+)", line).group()
-              partition=re.search("(?<=\Partition:\s)(\w+)", line).group()
-              replicas_list = re.compile(r'Replicas:\s*(.*?)\s*Isr:', re.DOTALL).findall(line)[0].split(",")
-              isr_list = re.compile(r'Isr:\s*(.*?)\s*end', re.DOTALL).findall(line)[0].split(",")
-            
-              add_to_json = False
-              while len(isr_list) <  len(replicas_list):
-                add_to_json = True
-                broker_to_add = sample(new_brokers, 1)
-                if broker_to_add[0] not in isr_list:
-                  isr_list.append(broker_to_add[0])
-              if add_to_json:
-                topics_json_list.append("{\\\"topic\\\":\\\""+str(topic)+"\\\",\\\"partition\\\":"+str(partition)+",\\\"replicas\\\":["+",".join(map(str, isr_list))+"]}")
-            
-        topics_to_move_json = topics_to_move_json + ",".join(topics_json_list) + "]}"
         
-        print topics_to_move_json
+        topics_to_move_json,topics_json_list = self.generateReassignmentJson(stdout, new_brokers)
+        
         #Create Json file
         if len(topics_json_list) > 0:
           expand_json_path = join(self.homeDir, "expand-cluster-reassignment.json")
@@ -214,6 +193,35 @@ class KafkaProcess(Process):
     
             sleep(2)
           logging.debug("Reassignment Successfull....");
+          
+  def generateReassignmentJson(self, stdout, new_brokers):
+        #generating json
+        topics_json_list = []
+        topics_to_move_json = "{\\\"version\\\":1,\\\"partitions\\\":["
+        for line in stdout.splitlines():
+          if not re.match('.*ReplicationFactor.*', line):
+            if re.match('.*Topic:.*', line):
+              line = string.replace(line, "\t", " ")
+              line = line + " end"
+              topic= re.search("(?<=\Topic:\s)(\w+)", line).group()
+              partition=re.search("(?<=\Partition:\s)(\w+)", line).group()
+              replicas_list = re.compile(r'Replicas:\s*(.*?)\s*Isr:', re.DOTALL).findall(line)[0].split(",")
+              isr_list = re.compile(r'Isr:\s*(.*?)\s*end', re.DOTALL).findall(line)[0].split(",")
+            
+              add_to_json = False
+              while len(isr_list) <  len(replicas_list):
+                add_to_json = True
+                broker_to_add = sample(new_brokers, 1)
+                if broker_to_add[0] not in isr_list:
+                  isr_list.append(broker_to_add[0])
+              if add_to_json:
+                topics_json_list.append("{\\\"topic\\\":\\\""+str(topic)+"\\\",\\\"partition\\\":"+str(partition)+",\\\"replicas\\\":["+",".join(map(str, isr_list))+"]}")
+            
+        topics_to_move_json = topics_to_move_json + ",".join(topics_json_list) + "]}"
+        
+        print topics_to_move_json
+        
+        return topics_to_move_json, topics_json_list
     
   def start(self):
     self.printProgress("Starting ")
