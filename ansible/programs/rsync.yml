@@ -1,8 +1,10 @@
 
 - name: install rsync (CentOS)
+  sudo: yes
   when: ansible_distribution == 'CentOS' or ansible_distribution == 'Red Hat Enterprise Linux'
   yum: pkg=rsync state=installed
 
-- name: install openssh (Ubuntu)
+- name: install rsync (Ubuntu)
+  sudo: yes
   when: ansible_distribution == 'Debian' or ansible_distribution == 'Ubuntu'
   apt: pkg=rsync state=installed
