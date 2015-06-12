@@ -5,6 +5,7 @@
   remote_user: neverwinterdp
   roles:
     - common
+    - clustercommander
 
 - name: Monitoring
   hosts: monitoring
@@ -31,7 +32,6 @@
   hosts: hadoop_master
   remote_user: neverwinterdp
   roles:
-    - clustercommander
     #TODO remove kafka_configs and zk_configs and do kafka/zk right
     #We'll have to update clustercommander as well
     - kafka_configs
