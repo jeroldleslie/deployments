@@ -1,0 +1,9 @@
+- name: Setting role as sparkngin
+  set_fact:
+     currentrole: sparkngin
+  
+- include: ../../common-tasks/main.yml
+
+
+
+

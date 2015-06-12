@@ -1,0 +1,36 @@
+#!/bin/bash
+
+#chkconfig: 2345 95 20
+# description: neverwinterdp_{{currentrole}}
+# processname: neverwinterdp_{{currentrole}}
+usage() {
+        echo "service neverwinterdp_{{currentrole}} {start|stop|ping}"
+        exit 0
+}
+
+APP_DIR=/opt/NeverwinterDP
+JAVA_OPTS="-Xshare:auto -Xms128m -Xmx192m -XX:-UseSplitVerifier"
+APP_OPT="-Dapp.dir=$APP_DIR -Duser.dir=$APP_DIR"
+LOG_OPT="-Dlog4j.configuration=file:$APP_DIR/config/log4j.properties"
+
+START_MAIN_CLASS="com.neverwinterdp.server.Server"
+STOP_MAIN_CLASS="com.neverwinterdp.server.shell.Shell"
+function startServer {
+  nohup java -Djava.ext.dirs=$APP_DIR/libs $APP_OPT $LOG_OPT $START_MAIN_CLASS "$@" <&- &>/dev/null &
+  #printf '%d' $! > $SERVER_NAME.pid
+}
+
+function stopServer {
+  java -Djava.ext.dirs=$APP_DIR/libs $APP_OPT $STOP_MAIN_CLASS "$@"
+}
+#echo "LOG_OPTS = $LOG_OPT"
+case $1 in
+    start) startServer -Pserver.name={{ ansible_hostname }} -Pserver.roles={{currentrole}}
+        ;;
+    stop) stopServer -c server exit
+        ;;
+    ping) stopServer -c server ping
+        ;;
+    *) usage
+        ;;
+esac

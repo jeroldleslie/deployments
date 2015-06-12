@@ -1,0 +1,9 @@
+- name: Setting role as zookeeper
+  set_fact:
+     currentrole: zookeeper
+  
+- include: ../../common-tasks/main.yml
+
+
+
+

@@ -1,0 +1,9 @@
+- name: Setting role as generic
+  set_fact:
+     currentrole: generic
+  
+- include: ../../common-tasks/main.yml
+
+
+
+

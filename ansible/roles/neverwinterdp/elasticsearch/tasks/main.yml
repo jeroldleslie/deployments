@@ -1,0 +1,9 @@
+- name: Setting role as elasticsearch
+  set_fact:
+     currentrole: elasticsearch
+  
+- include: ../../common-tasks/main.yml
+
+
+
+

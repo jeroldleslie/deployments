@@ -35,8 +35,11 @@ def getReportOnServer(server):
     for proc in procs:
       processCommand.append(procs[proc].getProcessCommand())
     
+    
     #ssh to run process command and get pid and process name
     stdout,stderr = procs.values()[0].sshExecute(";".join(processCommand))
+    
+    #print serverReportDict["Hostname"] +" /// "+";".join(processCommand)+" /// "+stdout+ " /// "+stderr
     
     #extract pid and process name from stdout
     runningProcesses = {}

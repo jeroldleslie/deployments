@@ -1,9 +1,12 @@
 import unittest, os
-
-from cluster.Cluster import Cluster
+#from os import path, dirname, abspath
+#path.insert(0, dirname(dirname(abspath(__file__))))
+from Cluster import Cluster
+from process.Process import KafkaProcess
 
 class Test_Cluster(unittest.TestCase):
   def test_parseEtcHost(self):
+    x = KafkaProcess("1","1")
     cluster = Cluster(etcHostsPath=os.path.join( os.path.dirname(os.path.realpath(__file__)),"testHostsFile"))
     print cluster.getNumServers()
     self.assertEqual(cluster.getNumServers(), 8, "Should parse 8 applicable host names out of the testHostsFile")

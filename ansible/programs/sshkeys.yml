@@ -1,0 +1,6 @@
+- name: Move public key to containers
+  copy: src=~/.ssh/id_rsa dest=~/.ssh/id_rsa mode=0600
+
+- name: Move private key to containers
+  copy: src=~/.ssh/id_rsa.pub dest=~/.ssh/id_rsa.pub mode=0600
+

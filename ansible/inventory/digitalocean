@@ -1,0 +1,16 @@
+[jenkins]
+jenkins.do.demandcube.com
+
+[hangout]
+hangout.do.demandcube.com
+
+[test]
+162.243.151.220
+
+# Example: setting host variables
+# Variables: http://docs.ansible.com/intro_inventory.html#list-of-behavioral-inventory-parameters
+#hangout.do.demandcube.com ansible_ssh_host=127.0.0.1 ansible_ssh_port=2222 ansible_ssh_user=smorin
+
+[digitalocean:children]
+jenkins
+hangout

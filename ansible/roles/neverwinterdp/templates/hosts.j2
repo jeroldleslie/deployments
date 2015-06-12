@@ -1,0 +1,7 @@
+{% for group in groups %}
+{% for host in groups[group] %}
+{% if group  == 'generic' or group  == 'elasticsearch' or group  == 'kafka' or group  == 'ringbearer' or group  == 'sparkngin' or group  == 'zookeeper' %}
+{{ hostvars[host]['ansible_eth1']['ipv4']['address'] }} {{ host }}
+{% endif %}
+{% endfor %}
+{% endfor %}

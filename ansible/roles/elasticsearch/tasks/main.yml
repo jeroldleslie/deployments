@@ -1,0 +1,20 @@
+- name: download elasticsearch deb
+  get_url: url={{ elasticsearch_url }} dest=/tmp/elasticsearch.deb
+  
+  
+- name: install elasticsearch (Unbuntu)
+  when: ansible_distribution == 'Debian' or ansible_distribution == 'Ubuntu'
+  sudo: yes
+  apt: deb=/tmp/elasticsearch.deb
+  
+- name: setup elastisearch as service
+  sudo: yes
+  command: update-rc.d elasticsearch defaults 95 10
+
+- name: stop elasticsearch service in case its running
+  sudo: yes
+  service: name=elasticsearch state=stopped
+
+- name: start elasticsearch service
+  sudo: yes
+  service: name=elasticsearch state=started enabled=yes

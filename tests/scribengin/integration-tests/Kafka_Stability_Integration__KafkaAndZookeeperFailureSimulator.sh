@@ -5,8 +5,7 @@ SCRIPT_DIR=$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )
 source $SCRIPT_DIR/setupEnvironment.sh $@
 
 #Set up docker images
-$ROOT/docker/scribengin/docker.sh cluster --clean-containers --run-containers --deploy-scribengin --start-cluster --neverwinterdp-home=$NEVERWINTER_HOME
-
+$ROOT/docker/scribengin/docker.sh cluster --clean-containers --run-containers --ansible-inventory --deploy --start --neverwinterdp-home=$NEVERWINTER_HOME
 
 #make folder for test results
 mkdir testresults

@@ -1,0 +1,15 @@
+
+- name: Install service
+  template: src=service_template.j2 dest=/etc/init.d/neverwinterdp_{{currentrole}} mode=0755
+  sudo: yes
+
+- name: Start service
+  command: service neverwinterdp_{{currentrole}} start
+  sudo: yes
+
+- name: Starts service at boot
+  shell: "chkconfig neverwinterdp_{{currentrole}} on"
+  sudo: yes
+
+
+

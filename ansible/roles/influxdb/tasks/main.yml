@@ -1,9 +1,26 @@
-- name: Check if InfluxDB is already installed
-  stat: path=/opt/influxdb/versions/{{ influxdb_version }}
-  register: installed
 
-- name: Yum install InfluxDB
-  yum: name=https://s3-us-west-2.amazonaws.com/nvent-repo/rpm/influxdb/0.9.0/influxdb-0.9.0_rc24-1.x86_64.rpm state=present
+- name: download influxdb (DEB file - Ubuntu)
+  when: ansible_distribution == 'Debian' or ansible_distribution == 'Ubuntu'
+  get_url: url=https://s3.amazonaws.com/influxdb/influxdb_latest_amd64.deb dest=/tmp/influxdb.deb
+
+
+- name: install influxdb (Unbuntu)
+  when: ansible_distribution == 'Debian' or ansible_distribution == 'Ubuntu'
   sudo: yes
-  when: installed.stat.exists == false
+  apt: deb=/tmp/influxdb.deb
 
+
+
+- name: install influxdb from remote repo (CentOS)
+  when: ansible_distribution == 'CentOS' or ansible_distribution == 'Red Hat Enterprise Linux'
+  sudo: yes
+  yum: name=https://s3.amazonaws.com/influxdb/influxdb-latest-1.x86_64.rpm state=present
+  
+  
+- name: stop influxdb in case its already running
+  sudo: yes
+  command: /etc/init.d/influxdb stop
+  
+- name: start influxdb
+  sudo: yes
+  command: /etc/init.d/influxdb start

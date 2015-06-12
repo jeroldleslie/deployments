@@ -1,0 +1,69 @@
+- name: Test version_check, simple case
+  version_check: command="python --version"
+  register: version
+
+- name: debug version variable from the test
+  debug: var=version
+
+- name: Test version_check, check if version is less
+  version_check: command="python --version" installif="lessthan" version=2.7
+  register: version
+
+- name: debug version variable from the test
+  debug: var=version
+  
+- name: Test version_check, check if version is less than or equal to
+  version_check: command="python --version" installif="lessthanequal" version=2.7
+  register: version
+
+- name: debug version variable from the test
+  debug: var=version
+
+- name: Test version_check, check if version is greater than
+  version_check: command="python --version" installif="greaterthan" version=2.7
+  register: version
+
+- name: debug version variable from the test
+  debug: var=version
+  
+- name: Test version_check, check if version is greater than or equal to
+  version_check: command="python --version" installif="greaterthanequal" version=2.7
+  register: version
+
+- name: debug version variable from the test
+  debug: var=version
+
+- name: Test version_check, check if version is equal to 2.7
+  version_check: command="python --version" installif="equal" version=2.7
+  register: version
+
+- name: debug version variable from the test
+  debug: var=version
+  
+- name: Test version_check, check if version is not equal to 2.7
+  version_check: command="python --version" installif="notequal" version=2.7
+  register: version
+
+- name: debug version variable from the test
+  debug: var=version
+
+- name: Test version_check, check if version is less than, uses a custom regex
+  version_check: command="python --version" installif="lessthan" version=2.7 regex="\d\.+"
+  register: version
+
+- name: debug version variable from the test
+  debug: var=version
+  
+- name: Test version_check, check if version is less, use custom regex and custom line
+  version_check: command="python --version" installif="lessthan" version=2.7 regex="\d\.+" line=1
+  register: version
+
+- name: debug version variable from the test
+  debug: var=version
+
+- name: Test version_check, check if non-existant command needs to be installed (it does)
+  version_check: command="notarealcommand --version" 
+  register: version
+
+- name: debug version variable from the test
+  debug: var=version

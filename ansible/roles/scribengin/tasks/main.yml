@@ -1,0 +1,68 @@
+#############################################################################################################################################################
+#To run:
+#  Set your NEVERWINTERDP_HOME variable
+#    #> export NEVERWINTERDP_HOME=/path/to/NeverwinterDP
+#    #> ansible-playbook playbooks/scribenginCluster.yml -i scribengininventory
+#
+#  Or pass in path to neverwinterdp on the command line:
+#    #> ansible-playbook playbooks/scribenginCluster.yml -i scribengininventory --extra-vars "neverwinterdp_home_override=/path/to/NeverwinterDP"
+#############################################################################################################################################################
+
+
+- name: Set neverwinterdp_home to neverwinterdp_home_override if its been passed in on command line
+  when: neverwinterdp_home_override is defined
+  run_once: true
+  set_fact:
+    neverwinterdp_home: "{{neverwinterdp_home_override}}"
+
+
+- name: Check to make sure environment variables are sane
+  fail: msg="Variable '{{ item }}' is not defined" 
+  when: ({{item}} is undefined) or ({{item}} is none) or ({{item}}|trim == '') 
+  run_once: true
+  with_items: 
+    - neverwinterdp_home
+
+- name: Get neverwinterdp_home path info locally
+  local_action: stat path={{neverwinterdp_home}}
+  register: check_path
+  run_once: true
+
+- name: Check if neverwinterdp_home path exists locally
+  local_action: fail msg='{{neverwinterdp_home}} does not exist'
+  when: not(check_path.stat.exists)
+  run_once: true
+
+- name: Echo local NEVERWINTERDP_HOME
+  debug: msg="This is NeverwinterDP Home on the local machine {{neverwinterdp_home}}"
+  run_once: true
+
+- name: Echo local_scribengin_release_folder
+  debug: msg="This is Scribengin Release Directory on the local machine {{local_scribengin_release_folder}}"
+  run_once: true
+
+- name: Building Scribengin locally
+  local_action: shell cd {{neverwinterdp_home}} && gradle clean build install -x test
+  register: stdout
+  run_once: true
+
+- name: Output from gradle build
+  debug: var=stdout.stdout_lines
+  run_once: true
+
+- name: Release Scribengin locally
+  local_action: shell cd {{local_scribengin_release_root_folder}} && gradle release -x test
+  register: stdout
+  run_once: true
+  
+- name: Output from gradle release
+  debug: var=stdout.stdout_lines
+  run_once: true
+
+#TODO: Move dest = /opt/neverwinterdp
+- name: Copy local files from {{local_scribengin_release_folder}} to remote hosts {{remote_scribengin_home}}
+  copy: src={{local_scribengin_release_folder}} dest={{remote_scribengin_home}}
+  
+- name: Make shell.sh executable
+  file: mode=u+rxw path={{remote_scribengin_home}}/scribengin/bin/shell.sh
+  

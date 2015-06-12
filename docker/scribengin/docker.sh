@@ -1,19 +1,11 @@
 #!/bin/bash
 
-BIN_DIR=`dirname "$0"`
-BIN_DIR=`cd "$BIN_DIR"; pwd`
-
-HOST_IP="127.0.0.1"
-
-OS=`uname`
-if [[ "$OS" == 'Linux' ]]; then
-   OS='linux'
-elif [[ "$OS" == 'FreeBSD' ]]; then
-   platform='freebsd'
-elif [[ "$OS" == 'Darwin' ]]; then
-   platform='macos'
-   HOST_IP=$(boot2docker ip)
-fi
+function h1() {
+  echo ""
+  echo "###########################################################################################################"
+  echo "$@"
+  echo "###########################################################################################################"
+}
 
 function has_opt() {
   OPT_NAME=$1
@@ -45,208 +37,27 @@ function get_opt() {
   echo $DEFAULT_VALUE
 }
 
-function check_dir_exit() {
-  if [ ! -d "$1" ]; then
-   echo "Please set NEVERWINTERDP_HOME environment variable or set --neverwinterdp-home option. And make sure neverwinterdp related projects are checkedout into NEVERWINTERDP_HOME" 
-   exit 1
-  fi
-}
-
-function get_neverwinterdp_home() {
-  neverwinterdp_home=$(get_opt --neverwinterdp-home '' $@)
-  if [ "$neverwinterdp_home" = "" ]; then
-    if [ -z "$NEVERWINTERDP_HOME" ]; then
-      echo "doesnt exists"
-    fi 
-  	neverwinterdp_home=$NEVERWINTERDP_HOME
-  fi
-  echo $neverwinterdp_home
-}
-
-function get_scribengin_home() {
-  dir_path=`dirname $1`
-  base_path=`basename $1`
-  
-  scribengin_home=$dir_path"/"$base_path"/scribengin/"
-  echo $scribengin_home
-}
-
-function h1() {
-  echo ""
-  echo "###########################################################################################################"
-  echo "$@"
-  echo "###########################################################################################################"
-}
-
-function build_image() {
-  h1 "Build the os image with the preinstalled requirements"
-  neverwinterdp_home=$(get_neverwinterdp_home $@) 
-  scribengin_home=$(get_scribengin_home $neverwinterdp_home)
-  
-  check_dir_exit $neverwinterdp_home  
-  check_dir_exit $scribengin_home
-  
-  echo "Prepare the temporary configuration files"
-  #Direcotry this script is in
-  DOCKERSCRIBEDIR=$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )
-  #Root of neverwinterdp-deployments
-  ROOTDIR=$(dirname $(dirname $DOCKERSCRIBEDIR))
-  mkdir $DOCKERSCRIBEDIR/tmp
-  
-  #Check .aws path exists
-  aws_path=$(get_opt --aws-credential-path $HOME/'.aws' $@)
-  mkdir $DOCKERSCRIBEDIR/tmp/aws
-  if [ -d "$aws_path" ];then
-    echo "copying $aws_path to $DOCKERSCRIBEDIR/tmp/aws"
-    cp -R -f $aws_path $DOCKERSCRIBEDIR/tmp/aws
-  else
-    echo "AWS credentials $aws_path  does not exists. Skipping to copy .aws directory"  
-  fi
-
-  if [ ! -d $scribengin_home/scribengin/release/build/release ] ; then
-    $DOCKERSCRIBEDIR/../../tools/cluster/clusterCommander.py --neverwinterdp-home $neverwinterdp_home scribengin --build
-  fi
-  
-  #Move release/build/release to $DOCKERSCRIBEDIR/tmp
-  cp -R -f $scribengin_home/release/build/release $DOCKERSCRIBEDIR/tmp/release
-  cp -R -f $neverwinterdp_home/module/elasticsearch/build/release/elasticsearch $DOCKERSCRIBEDIR/tmp/elasticsearch
-  cp -R -f $ROOTDIR/tools/cluster $DOCKERSCRIBEDIR/tmp/cluster
-  
-  #Use existing key if it already exists
-  if [ -e ~/.ssh/id_rsa ] && [ -e ~/.ssh/id_rsa.pub ]; then
-    cat ~/.ssh/id_rsa > $DOCKERSCRIBEDIR/tmp/id_rsa
-    cat ~/.ssh/id_rsa.pub > $DOCKERSCRIBEDIR/tmp/id_rsa.pub
-  #Otherwise generate a new one
-  else
-    ssh-keygen -t rsa  -P "" -f $DOCKERSCRIBEDIR/tmp/id_rsa
-  fi
-  cat ~/.ssh/id_rsa.pub > $DOCKERSCRIBEDIR/tmp/authorized_keys
-
-  docker build -t ubuntu:scribengin $BIN_DIR
-  echo "Clean the temporary configuration files"
-  rm -rf $DOCKERSCRIBEDIR/tmp
-  
-}
-
-function clean_image() {
-  h1 "Clean the images"
-  docker rmi -f ubuntu:scribengin
-}
-
-function launch_containers() {
-  
-  #Checks to make sure images exist
-  #If they don't exist, then create them
-  scribeImageLine=$(docker images | grep scribengin)
-  if [ "$scribeImageLine" == "" ] ; then
-    clean_image
-    build_image $@
-  fi
-  
-  h1 "Launch hadoop containers"
-  docker run -d -p 22 -p 50070:50070 -p 9000:9000 -p 8030:8030 -p 8032:8032 -p 8088:8088 --privileged -h hadoop-master --name hadoop-master  ubuntu:scribengin
-  
-  
-  NUM_KAFKA_BROKER=$(get_opt --kafka-server '3' $@)
-  NUM_ZOOKEEPER_SERVER=$(get_opt --zk-server 1 $@)
-  NUM_HADOOP_WORKER=$(get_opt --hadoop-worker 3 $@)
-  
-  NUM_ELASTICSEARCH_SERVER=$(get_opt --elasticsearch-server 1 $@)
-  
-  NUM_GENERIC=$(get_opt --generic-server 1 $@)
-  
-  h1 "Launch hadoop-worker containers"
-  for (( i=1; i<="$NUM_HADOOP_WORKER"; i++ ))
-  do
-    NAME="hadoop-worker-"$i
-    docker run -d -p 22 --privileged -h "$NAME" --name "$NAME" ubuntu:scribengin
-  done
-
-  
-  h1 "Launch zookeeper containers"
-  for (( i=1; i<="$NUM_ZOOKEEPER_SERVER"; i++ ))
-  do
-    NAME="zookeeper-"$i
-    PORT_NUM=`expr 2181 - 1 + $i`
-    docker run -d -p 22 -p $PORT_NUM:2181 --privileged -h "$NAME" --name "$NAME"  ubuntu:scribengin
-  done  
-
-
-  h1 "Remove hadoop-master entry in the $HOME/.ssh/known_hosts"
-  ssh-keygen -f "$HOME/.ssh/known_hosts" -R hadoop-master
-
-  h1 "Launch kafka containers"
-  for (( i=1; i<="$NUM_KAFKA_BROKER"; i++ ))
-  do
-    NAME="kafka-"$i
-    docker run -d -p 22 -p 9092 --privileged -h "$NAME" --name "$NAME"  ubuntu:scribengin
-  done
-  
- 
-  h1 "Launch elasticsearch containers"
-  for (( i=1; i<="$NUM_ELASTICSEARCH_SERVER"; i++ ))
-  do
-    NAME="elasticsearch-"$i
-    PORT_NUM=`expr 9300 - 1 + $i`
-    docker run -d -p 22 -p $PORT_NUM:9300 --privileged -h "$NAME" --name "$NAME"  ubuntu:scribengin
-  done
-  
-  h1 "Launch generic containers"
-  for (( i=1; i<="$NUM_GENERIC"; i++ ))
-  do
-    NAME="generic-"$i
-    docker run -d -p 22 -p 3000 -p 5601 --privileged -h "$NAME" --name "$NAME"  ubuntu:scribengin
-    #Install and start grafana
-    docker exec -it $NAME /bin/bash -c "wget https://grafanarel.s3.amazonaws.com/builds/grafana_2.0.2_amd64.deb && sudo apt-get install -y adduser libfontconfig && sudo dpkg -i grafana_2.0.2_amd64.deb && sudo service grafana-server start "
-    #Install and start influxdb
-    docker exec -it $NAME /bin/bash -c "wget https://s3.amazonaws.com/influxdb/influxdb_latest_amd64.deb && sudo dpkg -i influxdb_latest_amd64.deb && sudo /etc/init.d/influxdb start"
-    #Install and configure kibana
-    docker exec -it $NAME /bin/bash -c "wget https://download.elastic.co/kibana/kibana/kibana-4.0.2-linux-x64.tar.gz -O kibana.tar.gz && mkdir -p /opt/kibana && tar xf kibana.tar.gz -C /opt/kibana --strip 1 && sed -i 's@^elasticsearch_url:.*@elasticsearch_url: \"http://elasticsearch-1:9200\"@' /opt/kibana/config/kibana.yml"
-    #Set kibana up as a service - Can't be started until elasticsearch is up
-    docker exec -it $NAME /bin/bash -c "cd /etc/init.d && sudo wget https://gist.githubusercontent.com/thisismitch/8b15ac909aed214ad04a/raw/bce61d85643c2dcdfbc2728c55a41dab444dca20/kibana4 && sudo chmod +x /etc/init.d/kibana4 && sudo update-rc.d kibana4 defaults 96 9 "
-  done
-  
-  docker ps
-}
-
-function container_login() {
-  h1 "Login to the instance $@"
-  docker exec -i -t $1 bash 
-}
-
 function login_ssh_port() {
   docker port $1 22 | sed 's/.*://'
 }
 
-function do_ssh() {
-  h1 "Login to the instance $@"
-  arr=(${1//@/ })
-
-  port=$(login_ssh_port ${arr[1]})
-  ssh -p $port ${arr[0]}@$HOST_IP
-}
-
-function do_scp() {
-  h1 "scp $@"
-
-  HOST=$(echo "$@" | sed "s/.*@\(.*\):.*$/\1/")
-  PORT=$(login_ssh_port $HOST)
-  NEW_ARGS=$(echo "$@" | sed "s/@\(.*\):/@$HOST_IP:/")
-  echo "NEW ARGS = $NEW_ARGS" 
-  echo "scp -P $PORT $NEW_ARGS"
-  scp -P $PORT $NEW_ARGS
-}
-
 function container_ids() {
-  echo $(docker ps -q | tr '\n' ' ')
+  echo $(docker ps -q  | tr '\n' ' ')
 }
 
 function all_container_ids() {
   echo $(docker ps -a -q | tr '\n' ' ')
 }
 
+function ip_route() {
+  if [[ $OSTYPE == *"darwin"* ]] ; then
+    h1 "Updating route for OSX"
+    sudo route -n add 172.17.0.0/16 `boot2docker ip`
+  fi
+}
+
 function container_update_hosts() {
-  h1 "Update /etc/hosts file"
+  h1 "Update /etc/hosts file on containers"
   HOSTS=$'## scribengin server ##\n'
   HOSTS+=$'127.0.0.1 localhost\n\n'
   for container_id in $(container_ids); do
@@ -282,6 +93,7 @@ function container_update_hosts() {
 }
 
 function host_machine_update_hosts() {
+  h1 "Updating host machine's /etc/hosts file"
   #Updating /etc/hosts file on host machine
   h1 "Updating /etc/hosts file of host machine"
   
@@ -307,9 +119,34 @@ function host_machine_update_hosts() {
   #write new hosts file
   echo -e "$out\n$hostString" > /etc/hosts
   echo -e "$hostString"
+  
+  ip_route
 }
 
-function container_clean() {
+
+function clean_image() {
+  h1 "Clean the images"
+  docker rmi -f ubuntu:scribengin
+}
+
+function build_image() {
+  h1 "Building Image"
+  
+  #Direcotry this script is in
+  DOCKERSCRIBEDIR=$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )
+  mkdir $DOCKERSCRIBEDIR/tmp
+  
+  cp ~/.ssh/id_rsa      $DOCKERSCRIBEDIR/tmp/id_rsa
+  cp ~/.ssh/id_rsa.pub  $DOCKERSCRIBEDIR/tmp/id_rsa.pub
+  cp ~/.ssh/id_rsa.pub $DOCKERSCRIBEDIR/tmp/authorized_keys
+  
+  docker build -t ubuntu:scribengin $BIN_DIR
+  
+  rm -rf $DOCKERSCRIBEDIR/tmp
+}
+
+function clean_containers() {
+  h1 "Cleaning Containers"
   for container_id in $(all_container_ids); do
     container_name=$(docker inspect -f {{.Config.Hostname}} $container_id)
     docker rm -f $container_id
@@ -317,48 +154,145 @@ function container_clean() {
   done
 }
 
-function host_sync() {
-  neverwinterdp_home=$(get_neverwinterdp_home $@) 
-  scribengin_home=$(get_scribengin_home $neverwinterdp_home)
+function launch_containers() {
+  h1 "Launching Containers"
+  #Checks to make sure images exist
+  #If they don't exist, then create them
+  scribeImageLine=$(docker images | grep scribengin)
+  if [ "$scribeImageLine" == "" ] ; then
+    clean_image
+    build_image $@
+  fi
   
-  check_dir_exit $neverwinterdp_home  
-  check_dir_exit $scribengin_home
+  NUM_KAFKA_BROKER=$(get_opt --kafka-server '3' $@)
+  NUM_ZOOKEEPER_SERVER=$(get_opt --zk-server 1 $@)
+  NUM_HADOOP_WORKER=$(get_opt --hadoop-worker 3 $@)
   
-  DOCKERSCRIBEDIR=$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )
-  $DOCKERSCRIBEDIR/../../tools/cluster/clusterCommander.py --neverwinterdp-home $neverwinterdp_home scribengin --build  
+  NUM_ELASTICSEARCH_SERVER=$(get_opt --elasticsearch-server 1 $@)
   
-  ssh -o "StrictHostKeyChecking no" neverwinterdp@hadoop-master "mkdir /opt/scribengin"
+  NUM_MONITORING=$(get_opt --monitoring-server 1 $@)
   
-  scp -r $scribengin_home/scribengin/release/build/release/*       neverwinterdp@hadoop-master:/opt/scribengin/
-  scp -r $DOCKERSCRIBEDIR/../../tools/cluster/*         	     neverwinterdp@hadoop-master:/opt/cluster
-  scp -r ./bootstrap/post-install/hadoop     neverwinterdp@hadoop-master:/opt/
-  scp -r ./bootstrap/post-install/kafka      neverwinterdp@hadoop-master:/opt/
-  scp -r ./bootstrap/post-install/zookeeper  neverwinterdp@hadoop-master:/opt/
-  scp -r ./bootstrap/post-install/cluster.sh neverwinterdp@hadoop-master:/opt/
+  h1 "Launch hadoop-master containers"
+  docker run -d -p 22 -p 50070:50070 -p 9000:9000 -p 8030:8030 -p 8032:8032 -p 8088:8088 --privileged -h hadoop-master --name hadoop-master  ubuntu:scribengin
   
-  ssh -o "StrictHostKeyChecking no" neverwinterdp@hadoop-master "cd /opt/cluster && yes | ./clusterCommander.py cluster --sync hadoop-master"
+  h1 "Launch hadoop-worker containers"
+  for (( i=1; i<="$NUM_HADOOP_WORKER"; i++ ))
+  do
+    NAME="hadoop-worker-"$i
+    docker run -d -p 22 --privileged -h "$NAME" --name "$NAME" ubuntu:scribengin
+  done
+
+  h1 "Launch zookeeper containers"
+  for (( i=1; i<="$NUM_ZOOKEEPER_SERVER"; i++ ))
+  do
+    NAME="zookeeper-"$i
+    PORT_NUM=`expr 2181 - 1 + $i`
+    docker run -d -p 22 -p $PORT_NUM:2181 --privileged -h "$NAME" --name "$NAME"  ubuntu:scribengin
+  done  
+
+  h1 "Launch kafka containers"
+  for (( i=1; i<="$NUM_KAFKA_BROKER"; i++ ))
+  do
+    NAME="kafka-"$i
+    docker run -d -p 22 -p 9092 --privileged -h "$NAME" --name "$NAME"  ubuntu:scribengin
+  done
+
+  h1 "Launch elasticsearch containers"
+  for (( i=1; i<="$NUM_ELASTICSEARCH_SERVER"; i++ ))
+  do
+    NAME="elasticsearch-"$i
+    PORT_NUM=`expr 9300 - 1 + $i`
+    docker run -d -p 22 -p $PORT_NUM:9300 --privileged -h "$NAME" --name "$NAME"  ubuntu:scribengin
+  done
+  
+  h1 "Launch monitoring containers"
+  for (( i=1; i<="$NUM_MONITORING"; i++ ))
+  do
+    NAME="monitoring-"$i
+    docker run -d -p 22 -p 3000 -p 5601 --privileged -h "$NAME" --name "$NAME"  ubuntu:scribengin
+  done
+  
+  docker ps
+}
+
+function ansible_inventory(){
+  h1 "Creating ansible inventory file"
+  ANSIBLE_USER=$(get_opt    --ansible-user    'neverwinterdp' $@)
+  ANSIBLE_SSH_KEY=$(get_opt --ansible-ssh-key '~/.ssh/id_rsa' $@)
+  INVENTORY_FILE_LOCATION=$(get_opt --inventory-file-location 'scribengininventory' $@)
+  
+  #list of container regex's - these must match the ansible group names
+  regexList=("monitoring"
+             "kafka"
+             "hadoop-master"
+             "hadoop-worker"
+             "zookeeper"
+             "elasticsearch")
+  #File contents we'll write to $INVENTORY_FILE_LOCATION
+  filecontents=""
+  
+  #Do all the work to get container names
+  #Doing it here so we only have to do it once
+  container_ids=$(container_ids)
+  container_names=()
+  for container_id in ${container_ids[@]}; do
+    container_names+=($(docker inspect -f {{.Config.Hostname}} $container_id))
+  done
+  
+  #Go through all docker images, see if it matches the regex, and add it to the inventory
+  for regex in ${regexList[@]}; do
+    #our ansible groups use _ instead of - character to help differentiate the groups from containers
+    ansiblegroup=$(echo $regex | sed -e 's/-/_/g')
+    #Write the ansible group header
+    filecontents="$filecontents\n[$ansiblegroup]\n"
+    for container_name in ${container_names[@]}; do
+      #If the hostname matches the header, then add it to the ansible group
+      if [[ $container_name =~ $regex.* ]] ; then
+        filecontents="$filecontents$container_name ansible_ssh_user=$ANSIBLE_USER ansible_ssh_private_key_file=$ANSIBLE_SSH_KEY\n"
+      fi
+    done
+  done
+  echo "Writing ansible inventory file to $INVENTORY_FILE_LOCATION"
+  echo -e $filecontents > $INVENTORY_FILE_LOCATION
+  echo -e $filecontents
+}
+
+function deploy(){
+  h1 "Provisioning with Ansible"
+  #SCRIPT_DIR is the directory this script is in.  Allows us to execute without relative paths
+  SCRIPT_DIR=$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )
+  INVENTORY_FILE_LOCATION=$(get_opt --inventory-file-location 'scribengininventory' $@)
+  PLAYBOOK_FILE_LOCATION="$(get_opt --playbook-file-location "$SCRIPT_DIR/../../ansible/scribenginCluster.yml" $@)"
+  ANSIBLE_FORKS=$(get_opt --ansible-forks 10 $@)
+  NEVERWINTERDP_HOME=$(get_opt --neverwinterdp-home '' $@)
+  
+  if [[ $NEVERWINTEDP_HOME == "" ]] ; then
+    ansible-playbook $PLAYBOOK_FILE_LOCATION -i $INVENTORY_FILE_LOCATION -f $ANSIBLE_FORKS
+  else
+    ansible-playbook $PLAYBOOK_FILE_LOCATION -i $INVENTORY_FILE_LOCATION -f $ANSIBLE_FORKS --extra-vars "neverwinterdp_home_override=$NEVERWINTERDP_HOME"
+  fi
+}
+
+function startCluster(){
+  h1 "Starting cluster"
+  ssh -o StrictHostKeyChecking=no neverwinterdp@hadoop-master "cd /opt/cluster && python clusterCommander.py cluster --start --clean status"
 }
 
 function cluster(){
-  DOCKERSCRIBEDIR=$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )
   CLEAN_IMAGE=$(has_opt "--clean-image" $@ )
   BUILD_IMAGE=$(has_opt "--build-image" $@ )
   CLEAN_CONTAINERS=$(has_opt "--clean-containers" $@ )
   RUN_CONTAINERS=$(has_opt "--run-containers" $@ )
-  DEPLOY_SCRIBENGIN=$(has_opt "--deploy-scribengin" $@ )
-  START_CLUSTER=$(has_opt "--start-cluster" $@ )
+  ANSIBLE_INVENTORY=$(has_opt "--ansible-inventory" $@ )
+  DEPLOY=$(has_opt "--deploy" $@)
   STOP_CLUSTER=$(has_opt "--stop-cluster" $@ )
   FORCE_STOP_CLUSTER=$(has_opt "--force-stop-cluster" $@ )
+  START=$(has_opt "--start" $@)
   LAUNCH=$(has_opt "--launch" $@ )
   
-  neverwinterdp_home=$(get_neverwinterdp_home $@) 
-  scribengin_home=$(get_scribengin_home $neverwinterdp_home)
-  
-  check_dir_exit $neverwinterdp_home  
-  check_dir_exit $scribengin_home
   
   if [ $CLEAN_CONTAINERS == "true" ] || [ $LAUNCH == "true" ] ; then
-    container_clean
+    clean_containers
   fi
   
   if [ $CLEAN_IMAGE == "true" ] || [ $LAUNCH == "true" ]  ; then
@@ -373,20 +307,20 @@ function cluster(){
   if [ $RUN_CONTAINERS == "true" ] || [ $LAUNCH == "true" ] ; then
     launch_containers $@
     container_update_hosts $@
-    if [[ $OSTYPE == *"darwin"* ]] ; then
-      sudo route -n add 172.17.0.0/16 `boot2docker ip`
-    fi
     host_machine_update_hosts
   fi
   
-  if [ $DEPLOY_SCRIBENGIN == "true" ] || [ $LAUNCH == "true" ] ; then
-    $DOCKERSCRIBEDIR/../../tools/cluster/clusterCommander.py --neverwinterdp-home $neverwinterdp_home scribengin --build --deploy
+  if [ $ANSIBLE_INVENTORY == "true" ] || [ $LAUNCH == "true" ] ; then
+    ansible_inventory $@
   fi
   
-  if [ $START_CLUSTER == "true" ] || [ $LAUNCH == "true" ] ; then
-    ssh -o StrictHostKeyChecking=no neverwinterdp@hadoop-master "cd /opt/cluster && python clusterCommander.py cluster --start --clean status"
+  if [ $DEPLOY == "true" ] || [ $LAUNCH == "true" ] ; then
+    deploy $@
   fi
   
+  if [ $START == "true" ] || [ $LAUNCH == "true" ] ; then
+    startCluster $@
+  fi
   
   if [ $STOP_CLUSTER == "true" ] ; then
     ssh -o StrictHostKeyChecking=no neverwinterdp@hadoop-master "cd /opt/cluster && python clusterCommander.py cluster --stop status"
@@ -401,38 +335,59 @@ function cluster(){
 
 function printUsage() {
   echo "Cluster command options: "
-  echo "  Command image consists of the sub commands: "
-  echo "    build                      : To build the ubuntu os image with the required components"
-  echo "    build --aws-credential-path: To build with aws credential directory. (--aws-credential-path='/root/.aws')"
-  echo "    build --neverwinterdp-home : Neverwinterdp home path, if env variable NEVERWINTERDP_HOME was not set. (--neverwinterdp-home=/root/neverwinterdp)"
-  echo "    clean                      : To remove the image"
-  echo "  Command container consists of the sub commands: "
-  echo "    run                        : To run the containers(hadoop, zookeeper, kafka...)"
-  echo "    clean                      : To remove and destroy all the running containers"
-  echo "    login                      : To login the given containeri name or id  with the root user"
-  echo "    update-hosts               : To update the /etc/hosts in all the running containers"
-  echo "  Cluster Commands: "
-  echo "     ./docker.sh cluster [options]"
+  echo "  Command \"image\" consists of the sub commands: "
+  echo "      build                      : To build the ubuntu os image with the required components"
+  echo "      clean                      : To remove the image"
+  echo "    Examples:"
+  echo "       ./docker.sh image build"
+  echo "  Command \"container\" consists of the sub commands: "
+  echo "      run                        : To run the containers(hadoop, zookeeper, kafka...)"
+  echo "      clean                      : To remove and destroy all the running containers"
+  echo "      update-hosts               : To update the /etc/hosts in all the running containers"
+  echo "    Examples:"
+  echo "       ./docker.sh container run"
+  echo "  Command \"cluster\" consists of the following options: "
   echo "       Options: "
-  echo "         --clean               : Cleans docker containers AND images"
   echo "         --clean-image         : Cleans docker images"
   echo "         --build-image         : Builds the docker image for Scribengin"
   echo "         --clean-containers    : Cleans docker containers"
   echo "         --run-containers      : Runs docker containers"
-  echo "         --deploy-scribengin   : Deploys local Scribengin files onto the cluster"
-  echo "         --start-cluster       : Starts kafka, hadoop, zookeeper, and scribengin"
-  echo "         --stop-cluster        : Stops kafka, hadoop, zookeeper, and scribengin"
-  echo "         --force-stop-cluster  : Force stop kafka, hadoop, zookeeper, and scribengin"
-  echo "         --launch              : Cleans docker image and containers, Builds image and container, then launches Scribengin"
-  echo "         --neverwinterdp-home  : To set neverwinterdp home path if NEVERWINTERDP_HOME is not set in env variable"
+  echo "         --ansible-inventory   : Creates ansible inventory file"
+  echo "         --deploy              : Run ansible playbook"
+  echo "         --start               : Starts services"
+  echo "         --stop-cluster        : Stops cluster services"
+  echo "         --force-stop-cluster  : Force stops cluster services"
+  echo "         --launch              : Cleans docker image and containers, Builds image and container, and starts"
+  echo "    Examples:"
+  echo "        ./docker.sh cluster [options]"
+  echo "       ./docker.sh cluster --launch"
+  echo "  Extra options for cluster --deploy: "
+  echo "         --inventory-file-location : Path to ansible inventory file.                 Default='scribengininventory'"
+  echo "         --playbook-file-location  : Path to playbook to run.                        Default='SCRIPT_DIR/./../ansible/playbooks/scribenginCluster.yml'"
+  echo "         --ansible-forks           : Number of number of parallel processes to use.  Default=10 "
+  echo "         --neverwinterdp-home      : Path to NeverwinterDP home"
   echo "  Other commands:"
-  echo "    ssh                        : The ssh command use to resolve the container ssh port and login a container with ssh command"
-  echo "    scp                        : The scp command use to resolve the container ssh port and copy the file/directory from or to a container"
   echo "    ip-route                   : If you are running macos, use this command to route the 127.17.0.0 ip range to the boot2docker host. It allows to access the docker container directly from the MAC"
-  echo "    host-sync                  : Run this to run \"./scribengin.sh build\" and then sync the release folder and post-install with your cluster."
-  echo "      --neverwinterdp-home     : To set neverwinterdp home path if NEVERWINTERDP_HOME is not set in env variable"
+  echo "    ansible-inventory          : Creates ansible inventory file"
+  
 }
 
+
+##########################################################
+# Start script                                           #
+##########################################################
+OS=`uname`
+if [[ "$OS" == 'Linux' ]]; then
+   OS='linux'
+elif [[ "$OS" == 'FreeBSD' ]]; then
+   platform='freebsd'
+elif [[ "$OS" == 'Darwin' ]]; then
+   platform='macos'
+   HOST_IP=$(boot2docker ip)
+fi
+
+BIN_DIR=`dirname "$0"`
+BIN_DIR=`cd "$BIN_DIR"; pwd`
 
 
 # get command
@@ -455,29 +410,25 @@ elif [ "$COMMAND" = "container" ] ; then
   SUB_COMMAND=$1
   shift
   if [ "$SUB_COMMAND" = "clean" ] ; then
-    container_clean $@
+    clean_containers $@
   elif [ "$SUB_COMMAND" = "run" ] ; then
     launch_containers $@
     container_update_hosts $@
+    host_machine_update_hosts $@
   elif [ "$SUB_COMMAND" = "update-hosts" ] ; then
     container_update_hosts $@
-  elif [ "$SUB_COMMAND" = "login" ] ; then
-    container_login $@
+    host_machine_update_hosts $@
   else
     printUsage
   fi
+elif [ "$COMMAND" = "ansible-inventory" ] ; then
+  ansible_inventory $@
 elif [ "$COMMAND" = "cluster" ] ; then
   cluster $@
-elif [ "$COMMAND" = "ssh" ] ; then
-  do_ssh $@
-elif [ "$COMMAND" = "scp" ] ; then
-  do_scp $@
 elif [ "$COMMAND" = "ip-route" ] ; then
-  sudo route -n add 172.17.0.0/16 `boot2docker ip`
+  ip_route
 elif [ "$COMMAND" = "update-hosts" ] ; then
   host_machine_update_hosts
-elif [ "$COMMAND" = "host-sync" ] ; then
-  host_sync
 else
   h1 "Docker Images"
   docker images
@@ -486,4 +437,5 @@ else
   h1 "docker.sh usage"
   printUsage
 fi
+
 

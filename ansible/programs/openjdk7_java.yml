@@ -1,0 +1,14 @@
+- name: download openjdk7 (CentOS)
+  yum: name='openjdk-7-jdk' state=installed
+  sudo: yes
+  when: ansible_distribution == 'CentOS' or ansible_distribution == 'Red Hat Enterprise Linux'
+
+- name: install openjdk7 (Ubuntu)
+  apt: pkg='openjdk-7-jdk' state=installed
+  sudo: yes
+  when: ansible_distribution == 'Debian' or ansible_distribution == 'Ubuntu'
+
+- name: set JAVA_HOME
+  sudo: yes
+  sudo_user: root
+  lineinfile: dest=/etc/environment line="JAVA_HOME=/usr/lib/jvm/java-7-openjdk-amd64"
