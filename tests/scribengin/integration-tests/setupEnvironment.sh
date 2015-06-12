@@ -29,3 +29,4 @@ ROOT=$( dirname $( dirname $( dirname $( cd "$( dirname "${BASH_SOURCE[0]}" )" &
 
 
 export ANSIBLE_HOST_KEY_CHECKING=False
+export NEVERWINTERDP_HOME=$NEVERWINTER_HOME
