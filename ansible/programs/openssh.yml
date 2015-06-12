@@ -16,4 +16,5 @@
       
       
 - name: Start sshd service
+  sudo: yes
   service: name=ssh state=started enabled=yes

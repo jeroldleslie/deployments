@@ -7,5 +7,5 @@
 #- include: ../../../programs/bc.yml
 #- include: ../../../programs/vim.yml
 - include: ../../../programs/rsync.yml
-- include: ../../../programs/openssh.yml
+#- include: ../../../programs/openssh.yml
 
