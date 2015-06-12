@@ -1,9 +1,11 @@
 from os.path import expanduser, join, abspath, dirname
-from sys import path
+from sys import path, stdout
 from time import sleep
 from random import sample
 from tabulate import tabulate
 import paramiko, re, string, logging
+import new
+from itertools import cycle
 #Make sure the cluster package is on the path correctly
 path.insert(0, dirname(dirname(abspath(__file__))))
 
@@ -128,11 +130,9 @@ class KafkaProcess(Process):
     Process.__init__(self, role, hostname, "/opt/kafka", "Kafka")
    
   def setupClusterEnv(self, paramDict = {}):
-    zkServer = paramDict["zkList"] + paramDict["spareZkList"]
+    zkServer = paramDict["zkList"]
     zkConnect = ":2181,".join(zkServer) + ":2181"
     brokerID = int(re.search(r'\d+', self.hostname).group())
-    if self.role == "spare-kafka":
-      brokerID = brokerID + len(paramDict["kafkaServers"])
     
     fileStr = ""
     for line in open(paramDict["server_config"]).readlines():
@@ -144,10 +144,10 @@ class KafkaProcess(Process):
     return self.sshExecute("echo \"" + fileStr + "\" > " + join(self.homeDir, "config/server.properties"))
      
   def reassignReplicas(self, zkServer, new_brokers):
-    logging.debug("Reassigning replicas started")
+    logging.debug("Reassigning replicas started "+ str(new_brokers))
     zk_connect = ":2181,".join(zkServer) + ":2181"
     expand_json_path = ""
-    topics_json_list = []
+ 
     retry = True
     while retry:
       describePath = join(self.homeDir, "bin/kafka-topics.sh --describe --zookeeper "+zk_connect)
@@ -157,30 +157,8 @@ class KafkaProcess(Process):
       if not stderr:
         retry = False
         new_brokers = new_brokers.split(",")
-        #generating json
-        topics_to_move_json = "{\\\"version\\\":1,\\\"partitions\\\":["
-        for line in stdout.splitlines():
-          if not re.match('.*ReplicationFactor.*', line):
-            if re.match('.*Topic:.*', line):
-              line = string.replace(line, "\t", " ")
-              line = line + " end"
-              topic= re.search("(?<=\Topic:\s)(\w+)", line).group()
-              partition=re.search("(?<=\Partition:\s)(\w+)", line).group()
-              replicas_list = re.compile(r'Replicas:\s*(.*?)\s*Isr:', re.DOTALL).findall(line)[0].split(",")
-              isr_list = re.compile(r'Isr:\s*(.*?)\s*end', re.DOTALL).findall(line)[0].split(",")
-            
-              add_to_json = False
-              while len(isr_list) <  len(replicas_list):
-                add_to_json = True
-                broker_to_add = sample(new_brokers, 1)
-                if broker_to_add[0] not in isr_list:
-                  isr_list.append(broker_to_add[0])
-              if add_to_json:
-                topics_json_list.append("{\\\"topic\\\":\\\""+str(topic)+"\\\",\\\"partition\\\":"+str(partition)+",\\\"replicas\\\":["+",".join(map(str, isr_list))+"]}")
-            
-        topics_to_move_json = topics_to_move_json + ",".join(topics_json_list) + "]}"
-        
-        print topics_to_move_json
+        topics_json_list=[]
+        topics_to_move_json = self.generateReassignmentJson(stdout, topics_json_list, new_brokers)
         #Create Json file
         if len(topics_json_list) > 0:
           expand_json_path = join(self.homeDir, "expand-cluster-reassignment.json")
@@ -216,6 +194,36 @@ class KafkaProcess(Process):
     
             sleep(2)
           logging.debug("Reassignment Successfull....");
+          
+  def generateReassignmentJson(self, stdout,topics_json_list,new_brokers):
+    #generating json
+    topics_json_list=[]
+    new_brokers = map(str, new_brokers)
+    itert = cycle(new_brokers)
+    topics_to_move_json = "{\\\"version\\\":1,\\\"partitions\\\":["
+    for line in stdout.splitlines():
+      if not re.match('.*ReplicationFactor.*', line):
+        if re.match('.*Topic:.*', line):
+          line = string.replace(line, "\t", " ")
+          line = line + " end"
+          topic= re.search("(?<=\Topic:\s)(\w+)", line).group()
+          partition=re.search("(?<=\Partition:\s)(\w+)", line).group()
+          replicas_list = re.compile(r'Replicas:\s*(.*?)\s*Isr:', re.DOTALL).findall(line)[0].split(",")
+          if len(set(new_brokers).intersection(replicas_list))>0:
+            raise ValueError("One of the new brokers is already in Replica list")
+          isr_list = re.compile(r'Isr:\s*(.*?)\s*end', re.DOTALL).findall(line)[0].split(",")
+        
+          add_to_json = False
+          while len(isr_list) <  len(replicas_list):
+            add_to_json = True
+            broker_to_add = itert.next()
+            if broker_to_add[0] not in isr_list:
+              isr_list.append(broker_to_add[0])
+          if add_to_json:
+            topics_json_list.append("{\\\"topic\\\":\\\""+str(topic)+"\\\",\\\"partition\\\":"+str(partition)+",\\\"replicas\\\":["+",".join(map(str, isr_list))+"]}")
+        
+    topics_to_move_json = topics_to_move_json + ",".join(topics_json_list) + "]}"
+    return topics_to_move_json
     
   def start(self):
     self.printProgress("Starting ")
@@ -249,7 +257,7 @@ class ZookeeperProcess(Process):
       fileStr = fileStr + line
     self.sshExecute("mkdir -p "+ myid_path +" && echo '" + `hostID` + "' > " + join(myid_path, "myid"))
     
-    allZkServers = paramDict["zkList"] + paramDict["spareZkList"]
+    allZkServers = paramDict["zkList"]
     
     for zk in allZkServers:
       zkID = int(re.search(r'\d+', zk).group())

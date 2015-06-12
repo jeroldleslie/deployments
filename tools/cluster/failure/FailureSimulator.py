@@ -1,6 +1,6 @@
 from sys import exit
 from time import sleep,time
-from random import randint, sample
+from random import randint, sample, choice
 from junit_xml import TestSuite, TestCase
 import logging
 import os, re
@@ -11,28 +11,15 @@ class FailureSimulator():
   def __init__(self, role=None):
     self.roleName = role
     self.mainCluster = Cluster()
-    self.spareCluster = None
     self.cluster = None
     
-  def isSpareNode(self, hostname):
-    if re.match('.*spare-.*', hostname):
-      return True
-    else:
-      return False
-  
   def getRoleName(self, hostname):
-    if(self.isSpareNode(hostname)):
-      return "spare-"+self.roleName
-    else:
-      return self.roleName
+    return self.roleName
   
   def getExecutionCluster(self, hostname):
-    if(self.isSpareNode(hostname)):
-      return self.spareCluster
-    else:
-      return self.cluster
-    
-  def failureSimulation(self,failure_interval, wait_before_start, servers, min_servers, servers_to_fail_simultaneously, kill_method, initial_clean, config_path, use_spare, junit_report, restart_method):
+    return self.cluster
+    #restart-method is not used?
+  def failureSimulation(self,failure_interval, wait_before_start, servers, min_servers, servers_to_fail_simultaneously, kill_method, initial_clean, config_path, junit_report, restart_method):
     """
     Run the failure loop for a given role
     """
@@ -47,8 +34,6 @@ class FailureSimulator():
     
     testCases = []
     testNum = 0
-    spareRoleName = "spare-"+self.roleName
-    
     ''' 
     Set config path
     '''
@@ -77,22 +62,13 @@ class FailureSimulator():
       raise ValueError("--servers_to_fail_simultaneously is set too high")
       exit(-1)   
     
-    spareServersArray = []
-    if use_spare:
-      self.spareCluster = self.mainCluster.getServersByRole(spareRoleName)
-      for server in self.spareCluster.servers:
-        spareServersArray.append(server.getHostname())
-    
     if initial_clean:
       self.cluster.cleanProcess(self.roleName)
-      if use_spare:
-        self.spareCluster.cleanProcess(spareRoleName)
-    
     
     #Find running and Idle servers initially    
     runningServers = []
     idleServers = []
-    for server in self.cluster.servers + self.spareCluster.servers:
+    for server in self.cluster.servers:
       hostname = server.getHostname()
       if server.getProcess(self.getRoleName(hostname)).isRunning():
         runningServers.append(hostname)
@@ -106,13 +82,12 @@ class FailureSimulator():
       logging.debug("Sleeping for "+str(failure_interval)+" seconds")
       sleep(failure_interval)
       
-      serversToStart = []
+      serversToStart = sample(idleServers, servers_to_fail_simultaneously)
       #pick random servers to kill
       serversToKill = sample(runningServers, servers_to_fail_simultaneously)
       logging.debug("Servers selected to kill: "+ ','.join(serversToKill))
       
-      #assigning servers to start with servers to kill
-      serversToStart = serversToKill[:]
+      logging.debug("Servers to start: "+str(serversToStart))
       
       #Stop the running process based on kill_method
       currentExecutingCluster = None
@@ -120,7 +95,7 @@ class FailureSimulator():
         roleName = self.getRoleName(hostname)
         currentExecutingCluster = self.getExecutionCluster(hostname)
           
-        if kill_method == "restart" :
+        if kill_method == "shutdown" :
           #Shutting down process
           currentExecutingCluster.shutdownProcessOnHost(roleName, hostname)
         elif kill_method == "kill":
@@ -168,26 +143,7 @@ class FailureSimulator():
       start = time()
       sleep(wait_before_start)
       newServers = []
-      
-      if use_spare:
-        serversToStart = []
-        tempList = idleServers[:]
-        for hostname in serversToKill:
-          if restart_method == "flipflop":
-            if self.isSpareNode(hostname):
-              filtered_list = filter(lambda i: not re.match('.*spare-.*', i), tempList)
-            else:
-              filtered_list = filter(lambda i: re.match('.*spare-.*', i), tempList)
-            
-            if not filtered_list:
-              tempHostname = sample(tempList,1)
-            else:
-              tempHostname =  sample(filtered_list,1)
-          else:
-            tempHostname = sample(tempList, 1)
-          serversToStart.append(tempHostname[0])
-          tempList.remove(tempHostname[0])
-        
+
       for hostname in serversToStart:
         setupClusterEnv = False
         if hostname not in serversToKill:
@@ -201,8 +157,8 @@ class FailureSimulator():
         #starting process
         currentExecutingCluster.startProcessOnHost(roleName, hostname, setupClusterEnv)
       
-      
       #Reassign replicas processes
+      logging.debug("checking if we have new servers "+ str(newServers))
       if len(newServers) > 0:
         #Getting new broker list
         if self.roleName == "kafka":
@@ -211,8 +167,6 @@ class FailureSimulator():
             roleName = self.getRoleName(hostname)
             currentExecutingCluster = self.getExecutionCluster(hostname)
             brokerID = int(re.search(r'\d+', hostname).group())
-            if roleName == "spare-kafka":
-              brokerID = brokerID + len(currentExecutingCluster.paramDict["kafkaServers"])
             newBrokers.append(str(brokerID))
             
           #Select random server to run reassigning replicas script
