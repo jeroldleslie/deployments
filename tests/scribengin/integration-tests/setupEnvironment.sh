@@ -26,3 +26,6 @@ fi
 
 
 ROOT=$( dirname $( dirname $( dirname $( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd ))))
+
+
+export ANSIBLE_HOST_KEY_CHECKING=False
