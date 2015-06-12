@@ -33,25 +33,25 @@
   when: not(check_path.stat.exists)
   run_once: true
 
-- name: Echo local NEVERWINTERDP_HOME
-  debug: msg="This is NeverwinterDP Home on the local machine {{neverwinterdp_home}}"
-  run_once: true
+#- name: Echo local NEVERWINTERDP_HOME
+#  debug: msg="This is NeverwinterDP Home on the local machine {{neverwinterdp_home}}"
+#  run_once: true
 
 - name: Echo local_scribengin_release_folder
   debug: msg="This is Scribengin Release Directory on the local machine {{local_scribengin_release_folder}}"
   run_once: true
 
-- name: Building Scribengin locally
-  local_action: shell cd {{neverwinterdp_home}} && gradle clean build install -x test
-  register: stdout
-  run_once: true
+#- name: Building Scribengin locally
+#  local_action: shell cd {{neverwinterdp_home}} && gradle clean build install -x test
+#  register: stdout
+#  run_once: true
 
-- name: Output from gradle build
-  debug: var=stdout.stdout_lines
-  run_once: true
+#- name: Output from gradle build
+#  debug: var=stdout.stdout_lines
+#  run_once: true
 
 - name: Release Scribengin locally
-  local_action: shell cd {{local_scribengin_release_root_folder}} && gradle release -x test
+  local_action: shell cd {{local_scribengin_release_root_folder}} && gradle clean buid install release -x test
   register: stdout
   run_once: true
   
