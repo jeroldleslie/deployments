@@ -1,0 +1,9 @@
+- name: install lsof (CentOS)
+  yum: name='lsof' state=installed
+  sudo: yes
+  when: ansible_distribution == 'CentOS' or ansible_distribution == 'Red Hat Enterprise Linux'
+
+- name: install lsof (Ubuntu)
+  apt: pkg='lsof' state=installed
+  sudo: yes
+  when: ansible_distribution == 'Debian' or ansible_distribution == 'Ubuntu'

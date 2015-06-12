@@ -288,7 +288,6 @@ class HadoopDaemonProcess(Process):
     for hWorkers in paramDict["hadoopMasters"]:
       masterStr = masterStr + hWorkers + "\n"
     mastersOut = self.sshExecute("echo \"" + masterStr + "\" > " + join(self.homeDir, "etc/hadoop/masters"))
-    
     return slavesOut + mastersOut
   
   def start(self):
@@ -301,7 +300,7 @@ class HadoopDaemonProcess(Process):
   
   def clean(self):
     self.printProgress("Cleaning data of ")
-    return self.sshExecute("rm -rf "+ join(self.homeDir, "data") +" && rm -rf " + join(self.homeDir, "logs") +" && "+ join(self.homeDir, "bin/hdfs") + " namenode -format") 
+    return self.sshExecute("rm -rf "+ join(self.homeDir, "data") +" && rm -rf " + join(self.homeDir, "logs") +" && yes | "+ join(self.homeDir, "bin/hdfs") + " namenode -format") 
 
 ############
 class ScribenginProcess(Process):
@@ -429,16 +428,21 @@ class DataflowWorkerProcess(ScribenginProcess):
  
 class ElasticSearchProcess(Process): 
   def __init__(self, role, hostname):
-    Process.__init__(self, role, hostname, "/opt/elasticsearch/", "Main")
+    Process.__init__(self, role, hostname, "/opt/elasticsearch/", "org.elasticsearch.bootstrap.Elasticsearch")
   
   def setupClusterEnv(self, paramDict = {}):
     pass
+  
+  def getProcessCommand(self):
+    return "ps ax | grep "+self.processIdentifier+" | awk '{print $1 \" \" $27}' | grep -i elastic"
   
   #def getReportDict(self):
   #  pass
 
   #def getRunningPid(self):
   #  pass
+  
+  
   
   def start(self):
     stdout,stderr = self.sshExecute(join(self.homeDir, join("bin", "elasticsearch.sh")))

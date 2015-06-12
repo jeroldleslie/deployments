@@ -1,0 +1,15 @@
+- name: Reboot instance
+  command: shutdown -r now
+  register: reboot_result
+  sudo: yes
+
+- name: Wait for instance to come online
+  local_action:
+    module: wait_for
+    host: "{{ ansible_ssh_host|default(inventory_hostname) }}"
+    port: "{{ ansible_ssh_port|default(ssh_port) }}"
+    delay: 30
+    timeout: 600
+    state: started
+
+

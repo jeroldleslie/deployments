@@ -1,0 +1,10 @@
+- name: install wget (CentOS)
+  yum: name='wget' state=installed
+  sudo: yes
+  when: ansible_distribution == 'CentOS' or ansible_distribution == 'Red Hat Enterprise Linux'
+  
+- name: install wget (Ubuntu)
+  apt: pkg='wget' state=latest
+  sudo: yes
+  when: ansible_distribution == 'Debian' or ansible_distribution == 'Ubuntu'    
+

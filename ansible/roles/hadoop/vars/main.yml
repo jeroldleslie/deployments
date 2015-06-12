@@ -1,0 +1,3 @@
+---
+#hadoop_url: https://archive.apache.org/dist/hadoop/core/hadoop-2.4.0/hadoop-2.4.0.tar.gz
+hadoop_url: http://jenkinsdp.do.demandcube.com/hadoop-2.4.0.tar.gz

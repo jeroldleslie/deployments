@@ -19,6 +19,7 @@ class Cluster(ServerSet):
     re.compile('.*spare-hadoop-worker-\d+.*'),
     re.compile('.*elasticsearch-\d+.*'),
     re.compile('.*generic-\d+.*'),
+    re.compile('.*monitoring-\d+.*'),
   ]
   
   def __init__(self, etcHostsPath="/etc/hosts"):
@@ -74,6 +75,10 @@ class Cluster(ServerSet):
           self.addServer(ElasticSearchServer(hostname, "elasticsearch"))
           elasticsearchServers.append(hostname)
         if re.match("generic.*", hostname, re.IGNORECASE) is not None:
+          self.addServer(GenericServer(hostname, "generic"))
+          genericServers.append(hostname)
+        #TODO Make/refactor monitoring server 
+        if re.match("monitoring.*", hostname, re.IGNORECASE) is not None:
           self.addServer(GenericServer(hostname, "generic"))
           genericServers.append(hostname)
           

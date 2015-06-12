@@ -1,0 +1,9 @@
+- name: install nano (CentOS)
+  yum: name='nano' state=installed
+  sudo: yes
+  when: ansible_distribution == 'CentOS' or ansible_distribution == 'Red Hat Enterprise Linux'
+
+- name: install nano (Ubuntu)
+  apt: pkg='nano' state=installed
+  sudo: yes
+  when: ansible_distribution == 'Debian' or ansible_distribution == 'Ubuntu'

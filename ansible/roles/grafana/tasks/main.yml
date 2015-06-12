@@ -1,9 +1,36 @@
----
-- name: Check if home dir is created
-  stat: path=/opt/grafana/versions/{{ grafana_version }}
-  register: installed
-
-- name: Yum install Grafana
-  yum: name=https://s3-us-west-2.amazonaws.com/nvent-repo/rpm/grafana/2.0.0/grafana-2.0.0_beta1-1.x86_64.rpm state=present
+- name: install grafana dependencies (CentOS)
+  when: ansible_distribution == 'CentOS' or ansible_distribution == 'Red Hat Enterprise Linux'
   sudo: yes
-  when: installed.stat.exists == false
+  yum: pkg={{item}} state=installed
+  with_items:
+    - adduser
+    - libfontconfig
+
+- name: install grafana from remote repo (CentOS)
+  when: ansible_distribution == 'CentOS' or ansible_distribution == 'Red Hat Enterprise Linux'
+  sudo: yes
+  yum: name=https://grafanarel.s3.amazonaws.com/builds/grafana-2.0.2-1.x86_64.rpm state=present
+
+
+- name: install grafana dependencies (Ubuntu)
+  when: ansible_distribution == 'Debian' or ansible_distribution == 'Ubuntu'
+  sudo: yes
+  apt: pkg={{item}} state=installed
+  with_items:
+    - adduser
+    - libfontconfig
+
+- name: download grafana (DEB file - Ubuntu)
+  when: ansible_distribution == 'Debian' or ansible_distribution == 'Ubuntu'
+  get_url: url=https://grafanarel.s3.amazonaws.com/builds/grafana_2.0.2_amd64.deb dest=/tmp/grafana.deb
+
+
+- name: install grafana (Unbuntu)
+  when: ansible_distribution == 'Debian' or ansible_distribution == 'Ubuntu'
+  sudo: yes
+  apt: deb=/tmp/grafana.deb
+
+
+- name: Start grafana-server service
+  sudo: yes
+  service: name=grafana-server state=started enabled=yes

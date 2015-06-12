@@ -1,59 +1,11 @@
 ---
-- name: make kafka user
-  user: name={{ kafka_user }} state=present
-  sudo: yes
+- name: download tar 
+  get_url: url={{ kafka_tgz_url }} dest=/tmp/kafka.tar.gz
 
-- name: make kafka group
-  group: name={{ kafka_group }} state=present
-  sudo: yes
+- name: Create kafka directory
+  file: path=/opt/kafka state=directory
 
-- name: Create kafka data directory
-  file: path={{ kafka_data_dir }} state=directory mode=755 group={{ kafka_group }} owner={{ kafka_user }}
-  sudo: yes
+- name: Decompress tar
+  command: tar xfz /tmp/kafka.tar.gz -C /opt/kafka --strip-components=1
 
-# safety first, fun will follow
 
-## Creating home dir
-
-- name: Check if home dir is created
-  stat: path={{ kafka_home_dir }}
-  register: created
-
-- name: Create Kafka home directory if it has not been created yet
-  file: path={{ kafka_home_dir }} state=directory mode=755 group={{ kafka_group }} owner={{ kafka_user }}
-  when: created.stat.exists == false
-  sudo: yes
-
-## Downloading Kafka
-
-- name: Check if Kafka is already downloaded
-  stat: path={{ kafka_home_dir }}/{{ kafka_tgz  }}
-  register: downloaded
-
-- name: Downloading Kafka tgz
-  get_url: url={{ kafka_tgz_url  }} dest={{ kafka_home_dir }}
-  when: downloaded.stat.exists == false
-
-## Untar + unzip
-
-- name: Check if the tgz is already unarchived
-  stat: path={{ kafka_home_dir }}/bin
-  register: unarchived
-
-- name: Unarchive tgz
-  unarchive: src={{ kafka_home_dir }}/{{ kafka_tgz  }} dest={{ kafka_home_dir }} copy=no
-  sudo: yes
-  when: unarchived.stat.exists == false
-
-- name: Rename Kafka dir to use short path
-  shell: mv {{ kafka_home_dir }}/{{ kafka_dir }}/* {{ kafka_home_dir }}/.
-  sudo: yes
-  when: unarchived.stat.exists == false
-
-## Adding Kafka configuration
-
-- name: Rendering a server.properties
-  template: src={{ item }}.j2 dest={{ kafka_home_dir }}/config/{{ item }}
-  sudo: yes
-  with_items:
-    - server.properties

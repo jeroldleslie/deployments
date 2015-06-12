@@ -1,0 +1,11 @@
+- include: ../../../programs/wget.yml
+- include: ../../../programs/pip.yml
+- include: ../../../programs/openjdk7_java.yml
+- include: ../../../programs/sshkeys.yml
+- include: ../../../programs/nano.yml
+- include: ../../../programs/git.yml
+- include: ../../../programs/bc.yml
+- include: ../../../programs/vim.yml
+- include: ../../../programs/rsync.yml
+- include: ../../../programs/openssh.yml
+

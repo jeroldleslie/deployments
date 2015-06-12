@@ -1,0 +1,50 @@
+---
+
+- name: Common Requirements
+  hosts: all
+  remote_user: neverwinterdp
+  roles:
+    - common
+
+- name: Monitoring
+  hosts: monitoring
+  remote_user: neverwinterdp
+  roles:
+    #- influxdb
+    #- grafana
+    - kibana
+    
+- name: Kafka
+  hosts: kafka
+  remote_user: neverwinterdp
+  roles:
+    - kafka_broker
+
+- name: Hadoop Master and Workers
+  hosts: hadoop_master:hadoop_worker
+  remote_user: neverwinterdp
+  roles:
+    - hadoop
+    - scribengin
+
+- name: Hadoop Master
+  hosts: hadoop_master
+  remote_user: neverwinterdp
+  roles:
+    - clustercommander
+    #TODO remove kafka_configs and zk_configs and do kafka/zk right
+    #We'll have to update clustercommander as well
+    - kafka_configs
+    - zookeeper_configs
+
+- name: Zookeeper
+  hosts: zookeeper
+  remote_user: neverwinterdp
+  roles:
+    - zookeeper
+    
+- name: Elasticsearch
+  hosts: elasticsearch
+  remote_user: neverwinterdp
+  roles:
+    - elasticsearch

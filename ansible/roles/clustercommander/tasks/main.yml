@@ -1,0 +1,18 @@
+---
+- name: copy clustercommander 
+  copy: src={{ playbook_dir }}/../tools/cluster dest=/opt/
+  
+- name: make clustercommander setup executable
+  file: path=/opt/cluster/setup.sh mode=0777
+    
+- name: make clustercommander executable
+  file: path=/opt/cluster/clusterCommander.py mode=0777
+    
+- name: run setup script for clusterCommander
+  sudo: yes
+  shell: /opt/cluster/setup.sh
+  register: stdout
+
+- name: output from setup for clusterCommander
+  run_once: yes
+  debug: var=stdout.stdout_lines
