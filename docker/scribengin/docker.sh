@@ -60,6 +60,7 @@ function container_update_hosts() {
   h1 "Update /etc/hosts file on containers"
   HOSTS=$'## scribengin server ##\n'
   HOSTS+=$'127.0.0.1 localhost\n\n'
+  
   for container_id in $(container_ids); do
     #extract the container name
     container_name=$(docker inspect -f {{.Config.Hostname}} $container_id)
@@ -306,8 +307,8 @@ function cluster(){
   
   if [ $RUN_CONTAINERS == "true" ] || [ $LAUNCH == "true" ] ; then
     launch_containers $@
-    container_update_hosts $@
     host_machine_update_hosts
+    container_update_hosts $@
   fi
   
   if [ $ANSIBLE_INVENTORY == "true" ] || [ $LAUNCH == "true" ] ; then
@@ -376,6 +377,7 @@ function printUsage() {
 ##########################################################
 # Start script                                           #
 ##########################################################
+HOST_IP="127.0.0.1"
 OS=`uname`
 if [[ "$OS" == 'Linux' ]]; then
    OS='linux'
@@ -413,11 +415,11 @@ elif [ "$COMMAND" = "container" ] ; then
     clean_containers $@
   elif [ "$SUB_COMMAND" = "run" ] ; then
     launch_containers $@
-    container_update_hosts $@
     host_machine_update_hosts $@
+    container_update_hosts $@
   elif [ "$SUB_COMMAND" = "update-hosts" ] ; then
-    container_update_hosts $@
     host_machine_update_hosts $@
+    container_update_hosts $@
   else
     printUsage
   fi

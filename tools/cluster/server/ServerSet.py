@@ -228,7 +228,7 @@ class ServerSet(object):
   
   def cleanHadoopDataAtFirst(self):
     serverSet = self.getServersByRole("hadoop-worker")
-    if not serverSet.servers[0].getProcess("datanode").isDataDirExists():
+    if not ( serverSet.servers and len(serverSet.servers) > 1 and serverSet.servers[0].getProcess("datanode").isDataDirExists() ):
       self.cleanHadoopMaster()
       self.cleanHadoopWorker()
     
