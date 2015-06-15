@@ -23,6 +23,8 @@
   with_items: 
     - neverwinterdp_home
 
+
+
 - name: Get neverwinterdp_home path info locally
   local_action: stat path={{neverwinterdp_home}}
   register: check_path
