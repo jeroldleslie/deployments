@@ -1,0 +1,10 @@
+
+- name: install git (CentOS)
+  when: ansible_distribution == 'CentOS' or ansible_distribution == 'Red Hat Enterprise Linux'
+  sudo: yes
+  yum: pkg=git state=installed
+
+- name: install git (Ubuntu)
+  when: ansible_distribution == 'Debian' or ansible_distribution == 'Ubuntu'
+  sudo: yes
+  apt: pkg=git state=installed

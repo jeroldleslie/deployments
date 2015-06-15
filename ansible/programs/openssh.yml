@@ -1,0 +1,20 @@
+- name: install openssh (CentOS)
+  when: ansible_distribution == 'CentOS' or ansible_distribution == 'Red Hat Enterprise Linux'
+  sudo: yes
+  yum: name={{ item }} state=installed
+  with_items:
+    - openssh-server
+    - openssh-client
+
+- name: install openssh (Ubuntu)
+  when: ansible_distribution == 'Debian' or ansible_distribution == 'Ubuntu'
+  sudo: yes
+  apt: pkg={{ item }} state=installed
+  with_items:
+    - openssh-server
+    - openssh-client
+      
+      
+- name: Start sshd service
+  sudo: yes
+  service: name=ssh state=started enabled=yes

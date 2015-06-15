@@ -14,7 +14,12 @@ mkdir testresults
 sleep 5
 
 ssh -o "StrictHostKeyChecking no" neverwinterdp@hadoop-master "cd /opt/scribengin/scribengin && ./bin/shell.sh scribengin info"
-ssh -o "StrictHostKeyChecking no" neverwinterdp@hadoop-master "cd /opt/scribengin/scribengin && ./bin/shell.sh vm info"
+
+LAUNCH_COMMAND="\
+  ./scribengin/bin/shell.sh dataflow submit \
+    --deploy /opt/scribengin/dataflows/log-sample \
+    --dataflow-chain-config dataflows/log-sample/conf/log-dataflow-chain.json --wait-for-running-timeout 120000"
+ssh -o "StrictHostKeyChecking no" neverwinterdp@hadoop-master "cd /opt/scribengin && $LAUNCH_COMMAND"
 
 #Clean up
 #$ROOT/docker/scribengin/docker.sh cluster --clean-containers --neverwinterdp-home=$NEVERWINTER_HOME

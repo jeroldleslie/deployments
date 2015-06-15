@@ -1,0 +1,9 @@
+- name: Setting role as ringbearer
+  set_fact:
+     currentrole: ringbearer
+  
+- include: ../../common-tasks/main.yml
+
+
+
+

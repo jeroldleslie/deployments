@@ -1,4 +1,4 @@
-- name: Check if Java is already isntalled
+- name: Check if Java is already installed
   stat: path=/usr/bin/java
   register: installed
 
@@ -7,3 +7,6 @@
   sudo: yes
   when: installed.stat.exists == false
 
+- name: Set JAVA_HOME
+  command: echo "export JAVA_HOME=/usr/bin/java" >> /etc/profile
+  sudo: yes

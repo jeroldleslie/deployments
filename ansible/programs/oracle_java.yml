@@ -1,0 +1,79 @@
+# Download the rpm file directly into /vagrant (vagrant's shared folder), so
+# next time we don't need to download it again.
+# by pass Oracle's annoying licensing agreement
+- name: Download JDK (CentOS)
+  shell: "wget --quiet --no-cookies --no-check-certificate -O {{ jdk_archive }}.rpm --header 'Cookie: gpw_e24=http%3A%2F%2Fwww.oracle.com%2F; oraclelicense=accept-securebackup-cookie' {{ jdk_download_url }}.rpm --no-check-certificate creates={{ jdk_archive }}.rpm"
+  sudo: yes
+  when: ansible_distribution == 'CentOS' or ansible_distribution == 'Red Hat Enterprise Linux'
+
+- name: Install JDK (CentOS)
+  shell: "yum -y --nogpgcheck localinstall {{ jdk_archive }}.rpm creates=/usr/java"
+  sudo: yes
+  when: ansible_distribution == 'CentOS' or ansible_distribution == 'Red Hat Enterprise Linux'
+
+- name: symlink java (CentOS)
+  file: src=/usr/java/default/bin/java dest=/usr/bin/java state=link
+  sudo: yes
+  when: ansible_distribution == 'CentOS' or ansible_distribution == 'Red Hat Enterprise Linux'
+
+- name: symlink javac (CentOS)
+  file: src=/usr/java/default/bin/javac dest=/usr/bin/javac state=link
+  sudo: yes
+  when: ansible_distribution == 'CentOS' or ansible_distribution == 'Red Hat Enterprise Linux'
+
+- name: Download JDK (Ubuntu)
+  shell: "wget --quiet --no-cookies --no-check-certificate -O {{ jdk_archive }}.tar.gz --header 'Cookie: gpw_e24=http%3A%2F%2Fwww.oracle.com%2F; oraclelicense=accept-securebackup-cookie' {{ jdk_download_url }}.tar.gz --no-check-certificate creates={{ jdk_archive }}.tar.gz"
+  sudo: yes
+  when: ansible_distribution == 'Debian' or ansible_distribution == 'Ubuntu'
+
+- name: Create Java folder (Ubuntu)
+  file: state=directory path=/usr/java
+  sudo: yes
+  when: ansible_distribution == 'Debian' or ansible_distribution == 'Ubuntu'
+
+- name: Extract Java archive (Ubuntu)
+  shell: "tar zxvf {{ jdk_archive }}.tar.gz -C /usr/java"
+  sudo: yes
+  when: ansible_distribution == 'Debian' or ansible_distribution == 'Ubuntu'
+
+- name: Set java link (Ubuntu)
+  shell: 'update-alternatives --install /usr/bin/java java /usr/java/{{ jdk_name }}/bin/java 1'
+  sudo: yes
+  when: ansible_distribution == 'Debian' or ansible_distribution == 'Ubuntu'
+
+- name: Set jar link (Ubuntu)
+  shell: 'update-alternatives --install /usr/bin/jar jar /usr/java/{{ jdk_name }}/bin/jar 1'
+  sudo: yes
+  when: ansible_distribution == 'Debian' or ansible_distribution == 'Ubuntu'
+
+
+- name: Set JAVA_HOME for all users
+  sudo: yes
+  sudo_user: root
+  lineinfile: dest=/etc/environment line="JAVA_HOME=/usr/java/{{jdk_name}}"
+
+- name: Add Java bin to path
+  sudo: yes
+  sudo_user: root
+  lineinfile: dest=/etc/profile line="PATH=$PATH:/usr/java/{{jdk_name}}/bin/"
+
+- name: Get Path
+  sudo: yes
+  sudo_user: root
+  shell: /bin/bash -c "source /etc/profile && echo $PATH"
+  register: path
+
+- name: Set path for non-interactive shells (ssh)
+  sudo: yes
+  sudo_user: root
+  lineinfile: dest=/etc/environment line="PATH={{path.stdout}}:/usr/java/{{jdk_name}}/bin/"
+
+- name: Echo PATH
+  debug: msg="PATH {{path.stdout}}:/usr/java/{{jdk_name}}/bin/"
+  run_once: true
+  
+  
+
+    
+  
+

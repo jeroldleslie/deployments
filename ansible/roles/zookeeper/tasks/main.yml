@@ -1,0 +1,10 @@
+- name: download zookeeper tar
+  get_url: url={{ zookeeper_url }} dest=/tmp/zookeeper.tar.gz
+
+
+- name: Create zookeeper directory
+  file: path=/opt/zookeeper state=directory
+
+- name: Decompress zookeeper tar
+  command: tar xfz /tmp/zookeeper.tar.gz -C /opt/zookeeper --strip-components=1
+  

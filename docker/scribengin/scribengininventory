@@ -1,0 +1,13 @@
+
+[monitoring]
+
+[kafka]
+
+[hadoop_master]
+
+[hadoop_worker]
+
+[zookeeper]
+
+[elasticsearch]
+

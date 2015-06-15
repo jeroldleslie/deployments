@@ -1,0 +1,22 @@
+- name: download kibana
+  get_url: url=https://download.elastic.co/kibana/kibana/kibana-4.0.2-linux-x64.tar.gz dest=/tmp/kibana.tar.gz
+
+- name: download kibana service script
+  sudo: yes
+  get_url: url=https://gist.githubusercontent.com/thisismitch/8b15ac909aed214ad04a/raw/bce61d85643c2dcdfbc2728c55a41dab444dca20/kibana4 dest=/etc/init.d/kibana4 mode=0755
+  
+- name: initialize kibana4 service
+  command: update-rc.d kibana4 defaults 96 9
+  sudo: yes
+
+- name: creating /opt/kibana directory
+  sudo: yes
+  file: path=/opt/kibana state=directory mode=0755
+
+- name: uncompress tar
+  sudo: yes
+  command: tar xf /tmp/kibana.tar.gz -C /opt/kibana --strip 1
+
+- name: Start kibana service
+  sudo: yes
+  service: name=kibana4 state=started enabled=yes

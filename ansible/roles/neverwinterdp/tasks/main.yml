@@ -1,0 +1,11 @@
+---
+- include: ../../../programs/wget.yml
+- include: ../../../programs/oracle_java.yml
+
+- name: Copy NeverwinterDP
+  copy: src=NeverwinterDP dest=/opt force=yes
+  sudo: yes
+
+- name: Create cluster hosts file
+  template: src=hosts.j2 dest=/opt/NeverwinterDP/hosts
+  sudo: yes
