@@ -22,7 +22,8 @@ if rebuild:
   
   print "\nRebuilding Images..."
   p = subprocess.Popen(['./docker.sh', 'cluster','--clean-containers','--clean-image',
-                        '--build-image', '--neverwinterdp-home='+neverwinterdpHome],
+                        '--build-image', '--ansible-inventory', '--deploy',
+                        '--neverwinterdp-home='+neverwinterdpHome],
                         stdout=subprocess.PIPE,  stderr=subprocess.PIPE)
   out, err = p.communicate()
   print "STDERR: "+err
