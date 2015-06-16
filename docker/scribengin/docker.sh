@@ -325,12 +325,12 @@ function deploy(){
   
   INVENTORY_FILE_LOCATION=$(get_opt --inventory-file-location '/tmp/scribengininventory' $@)
   ANSIBLE_FORKS=$(get_opt --ansible-forks 10 $@)
-  NEVERWINTERDP_HOME=$(get_opt --neverwinterdp-home '' $@)
+  NEVERWINTERDP_HOME_OVERRIDE=$(get_opt --neverwinterdp-home '' $@)
   
   if [[ $NEVERWINTEDP_HOME == "" ]] ; then
     ansible-playbook $PLAYBOOK_FILE_LOCATION -i $INVENTORY_FILE_LOCATION -f $ANSIBLE_FORKS
   else
-    ansible-playbook $PLAYBOOK_FILE_LOCATION -i $INVENTORY_FILE_LOCATION -f $ANSIBLE_FORKS --extra-vars "neverwinterdp_home_override=$NEVERWINTERDP_HOME"
+    ansible-playbook $PLAYBOOK_FILE_LOCATION -i $INVENTORY_FILE_LOCATION -f $ANSIBLE_FORKS --extra-vars "neverwinterdp_home_override=$NEVERWINTERDP_HOME_OVERRIDE"
   fi
 }
 
