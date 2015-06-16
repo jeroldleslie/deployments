@@ -327,7 +327,7 @@ function deploy(){
   ANSIBLE_FORKS=$(get_opt --ansible-forks 10 $@)
   NEVERWINTERDP_HOME_OVERRIDE=$(get_opt --neverwinterdp-home '' $@)
   
-  if [[ $NEVERWINTEDP_HOME == "" ]] ; then
+  if [[ $NEVERWINTERDP_HOME_OVERRIDE == "" ]] ; then
     ansible-playbook $PLAYBOOK_FILE_LOCATION -i $INVENTORY_FILE_LOCATION -f $ANSIBLE_FORKS
   else
     ansible-playbook $PLAYBOOK_FILE_LOCATION -i $INVENTORY_FILE_LOCATION -f $ANSIBLE_FORKS --extra-vars "neverwinterdp_home_override=$NEVERWINTERDP_HOME_OVERRIDE"
