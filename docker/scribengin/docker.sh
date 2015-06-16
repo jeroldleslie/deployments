@@ -12,7 +12,7 @@ function has_opt() {
   shift
   #Par the parameters
   for i in "$@"; do
-    if [[ $i == $OPT_NAME* ]] ; then
+    if [[ $i == $OPT_NAME ]] ; then
       echo "true"
       return
     fi
@@ -127,11 +127,14 @@ function host_machine_update_hosts() {
 
 function clean_image() {
   h1 "Clean the images"
-  docker rmi -f ubuntu:scribengin
+  images=( $(docker images -a | grep -i scribengin |  awk '{print $1 ":" $2}') )
+  for image in "${images[@]}" ; do
+    docker rmi -f $image
+  done
 }
 
-function build_image() {
-  h1 "Building Image"
+function build_images() {
+  h1 "Building Images"
   
   #Direcotry this script is in
   DOCKERSCRIBEDIR=$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )
@@ -144,6 +147,8 @@ function build_image() {
   docker build -t ubuntu:scribengin $BIN_DIR
   
   rm -rf $DOCKERSCRIBEDIR/tmp
+  
+  launch_intermediate_containers $@
 }
 
 function clean_containers() {
@@ -155,6 +160,48 @@ function clean_containers() {
   done
 }
 
+function launch_intermediate_containers() {
+  h1 "Launching intermediate containers for final image configuration"
+  
+  #Launch 1 of each kind of container
+  h1 "Launch intermediate hadoop-master container"
+  docker run -d -p 22 -p 50070 -p 9000 -p 8030 -p 8032 -p 8088 --privileged -h hadoop-master --name hadoop-master  ubuntu:scribengin
+  
+  h1 "Launch intermediate hadoop-worker container"
+  docker run -d -p 22 --privileged -h hadoop-worker --name hadoop-worker ubuntu:scribengin
+  
+  h1 "Launch intermediate zookeeper container"
+  docker run -d -p 22 -p 2181 --privileged -h zookeeper --name zookeeper  ubuntu:scribengin
+
+  h1 "Launch intermediate kafka container"
+  docker run -d -p 22 -p 9092 --privileged -h kafka --name kafka  ubuntu:scribengin
+  
+  h1 "Launch intermediate elasticsearch container"
+  docker run -d -p 22 -p 9300 --privileged -h elasticsearch --name elasticsearch  ubuntu:scribengin
+  
+  h1 "Launch intermediate monitoring container"
+  docker run -d -p 22 -p 3000 -p 5601 --privileged -h monitoring --name monitoring ubuntu:scribengin
+  
+  #Get those intermediate containers set up with ansible
+  host_machine_update_hosts
+  #container_update_hosts $@
+  ansible_inventory $@ 
+  deploy_all $@
+  
+  #Create base images for each container
+  containers=( $(docker ps -a | grep scribengin | awk '{print $1 " " $NF}') )
+  for (( i=0; i<${#containers[@]}; i=$i+2 )); do
+    container_ID=${containers[i]}
+    #Removes trailing hyphen and digits
+    #image_name=`echo ${containers[i+1]} | sed -e 's/[0-9]*$//g' -e 's/-$//'`
+    image_name=${containers[i+1]}
+    h1 "Creating base image for $image_name"
+    docker commit $container_ID scribengin:$image_name
+  done
+  
+  clean_containers $@
+}
+
 function launch_containers() {
   h1 "Launching Containers"
   #Checks to make sure images exist
@@ -162,7 +209,7 @@ function launch_containers() {
   scribeImageLine=$(docker images | grep scribengin)
   if [ "$scribeImageLine" == "" ] ; then
     clean_image
-    build_image $@
+    build_images $@
   fi
   
   NUM_KAFKA_BROKER=$(get_opt --kafka-server '3' $@)
@@ -174,13 +221,13 @@ function launch_containers() {
   NUM_MONITORING=$(get_opt --monitoring-server 1 $@)
   
   h1 "Launch hadoop-master containers"
-  docker run -d -p 22 -p 50070:50070 -p 9000:9000 -p 8030:8030 -p 8032:8032 -p 8088:8088 --privileged -h hadoop-master --name hadoop-master  ubuntu:scribengin
+  docker run -d -p 22 -p 50070:50070 -p 9000:9000 -p 8030:8030 -p 8032:8032 -p 8088:8088 --privileged -h hadoop-master --name hadoop-master  scribengin:hadoop-master
   
   h1 "Launch hadoop-worker containers"
   for (( i=1; i<="$NUM_HADOOP_WORKER"; i++ ))
   do
     NAME="hadoop-worker-"$i
-    docker run -d -p 22 --privileged -h "$NAME" --name "$NAME" ubuntu:scribengin
+    docker run -d -p 22 --privileged -h "$NAME" --name "$NAME" scribengin:hadoop-worker
   done
 
   h1 "Launch zookeeper containers"
@@ -188,14 +235,14 @@ function launch_containers() {
   do
     NAME="zookeeper-"$i
     PORT_NUM=`expr 2181 - 1 + $i`
-    docker run -d -p 22 -p $PORT_NUM:2181 --privileged -h "$NAME" --name "$NAME"  ubuntu:scribengin
+    docker run -d -p 22 -p $PORT_NUM:2181 --privileged -h "$NAME" --name "$NAME"  scribengin:zookeeper
   done  
 
   h1 "Launch kafka containers"
   for (( i=1; i<="$NUM_KAFKA_BROKER"; i++ ))
   do
     NAME="kafka-"$i
-    docker run -d -p 22 -p 9092 --privileged -h "$NAME" --name "$NAME"  ubuntu:scribengin
+    docker run -d -p 22 -p 9092 --privileged -h "$NAME" --name "$NAME"  scribengin:kafka
   done
 
   h1 "Launch elasticsearch containers"
@@ -203,14 +250,14 @@ function launch_containers() {
   do
     NAME="elasticsearch-"$i
     PORT_NUM=`expr 9300 - 1 + $i`
-    docker run -d -p 22 -p $PORT_NUM:9300 --privileged -h "$NAME" --name "$NAME"  ubuntu:scribengin
+    docker run -d -p 22 -p $PORT_NUM:9300 --privileged -h "$NAME" --name "$NAME"  scribengin:elasticsearch
   done
   
   h1 "Launch monitoring containers"
   for (( i=1; i<="$NUM_MONITORING"; i++ ))
   do
     NAME="monitoring-"$i
-    docker run -d -p 22 -p 3000 -p 5601 --privileged -h "$NAME" --name "$NAME"  ubuntu:scribengin
+    docker run -d -p 22 -p 3000 -p 5601 --privileged -h "$NAME" --name "$NAME"  scribengin:monitoring
   done
   
   docker ps
@@ -220,7 +267,7 @@ function ansible_inventory(){
   h1 "Creating ansible inventory file"
   ANSIBLE_USER=$(get_opt    --ansible-user    'neverwinterdp' $@)
   ANSIBLE_SSH_KEY=$(get_opt --ansible-ssh-key '~/.ssh/id_rsa' $@)
-  INVENTORY_FILE_LOCATION=$(get_opt --inventory-file-location 'scribengininventory' $@)
+  INVENTORY_FILE_LOCATION=$(get_opt --inventory-file-location '/tmp/scribengininventory' $@)
   
   #list of container regex's - these must match the ansible group names
   regexList=("monitoring"
@@ -258,19 +305,32 @@ function ansible_inventory(){
   echo -e $filecontents
 }
 
+function deploy_scribengin(){
+  SCRIPT_DIR=$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )
+  PLAYBOOK_FILE_LOCATION="$(get_opt --playbook-file-location "$SCRIPT_DIR/../../ansible/scribengin.yml" $@)"
+  deploy $PLAYBOOK_FILE_LOCATION $@
+}
+
+deploy_all(){
+  SCRIPT_DIR=$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )
+  PLAYBOOK_FILE_LOCATION="$(get_opt --playbook-file-location "$SCRIPT_DIR/../../ansible/scribenginCluster.yml" $@)"
+  deploy $PLAYBOOK_FILE_LOCATION $@
+}
+
 function deploy(){
   h1 "Provisioning with Ansible"
-  #SCRIPT_DIR is the directory this script is in.  Allows us to execute without relative paths
-  SCRIPT_DIR=$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )
-  INVENTORY_FILE_LOCATION=$(get_opt --inventory-file-location 'scribengininventory' $@)
-  PLAYBOOK_FILE_LOCATION="$(get_opt --playbook-file-location "$SCRIPT_DIR/../../ansible/scribenginCluster.yml" $@)"
-  ANSIBLE_FORKS=$(get_opt --ansible-forks 10 $@)
-  NEVERWINTERDP_HOME=$(get_opt --neverwinterdp-home '' $@)
   
-  if [[ $NEVERWINTEDP_HOME == "" ]] ; then
+  PLAYBOOK_FILE_LOCATION=$1
+  shift
+  
+  INVENTORY_FILE_LOCATION=$(get_opt --inventory-file-location '/tmp/scribengininventory' $@)
+  ANSIBLE_FORKS=$(get_opt --ansible-forks 10 $@)
+  NEVERWINTERDP_HOME_OVERRIDE=$(get_opt --neverwinterdp-home '' $@)
+  
+  if [[ $NEVERWINTERDP_HOME_OVERRIDE == "" ]] ; then
     ansible-playbook $PLAYBOOK_FILE_LOCATION -i $INVENTORY_FILE_LOCATION -f $ANSIBLE_FORKS
   else
-    ansible-playbook $PLAYBOOK_FILE_LOCATION -i $INVENTORY_FILE_LOCATION -f $ANSIBLE_FORKS --extra-vars "neverwinterdp_home_override=$NEVERWINTERDP_HOME"
+    ansible-playbook $PLAYBOOK_FILE_LOCATION -i $INVENTORY_FILE_LOCATION -f $ANSIBLE_FORKS --extra-vars "neverwinterdp_home_override=$NEVERWINTERDP_HOME_OVERRIDE"
   fi
 }
 
@@ -286,6 +346,7 @@ function cluster(){
   RUN_CONTAINERS=$(has_opt "--run-containers" $@ )
   ANSIBLE_INVENTORY=$(has_opt "--ansible-inventory" $@ )
   DEPLOY=$(has_opt "--deploy" $@)
+  DEPLOY_SCRIBENGIN=$(has_opt "--deploy-scribengin" $@)
   STOP_CLUSTER=$(has_opt "--stop-cluster" $@ )
   FORCE_STOP_CLUSTER=$(has_opt "--force-stop-cluster" $@ )
   START=$(has_opt "--start" $@)
@@ -301,7 +362,7 @@ function cluster(){
   fi
   
   if [ $BUILD_IMAGE == "true" ] || [ $LAUNCH == "true" ] ; then
-    build_image $@
+    build_images $@
   fi
   
   
@@ -315,8 +376,12 @@ function cluster(){
     ansible_inventory $@
   fi
   
-  if [ $DEPLOY == "true" ] || [ $LAUNCH == "true" ] ; then
-    deploy $@
+  if [ $DEPLOY == "true" ] ; then
+    deploy_all $@
+  fi
+  
+  if [ $DEPLOY_SCRIBENGIN == "true" ] || [ $LAUNCH == "true" ] ; then
+    deploy_scribengin $@
   fi
   
   if [ $START == "true" ] || [ $LAUNCH == "true" ] ; then
@@ -355,15 +420,18 @@ function printUsage() {
   echo "         --run-containers      : Runs docker containers"
   echo "         --ansible-inventory   : Creates ansible inventory file"
   echo "         --deploy              : Run ansible playbook"
+  echo "         --deploy-scribengin   : Run ansible playbook for just Scribengin"
   echo "         --start               : Starts services"
   echo "         --stop-cluster        : Stops cluster services"
   echo "         --force-stop-cluster  : Force stops cluster services"
+  echo "         --neverwinterdp-home  : /Path/To/Neverwinterdp"
   echo "         --launch              : Cleans docker image and containers, Builds image and container, and starts"
   echo "    Examples:"
   echo "        ./docker.sh cluster [options]"
   echo "       ./docker.sh cluster --launch"
+  echo "       ./docker.sh cluster --launch --neverwinterdp-home=/home/user/NeverwinterDP"
   echo "  Extra options for cluster --deploy: "
-  echo "         --inventory-file-location : Path to ansible inventory file.                 Default='scribengininventory'"
+  echo "         --inventory-file-location : Path to ansible inventory file.                 Default='/tmp/scribengininventory'"
   echo "         --playbook-file-location  : Path to playbook to run.                        Default='SCRIPT_DIR/./../ansible/playbooks/scribenginCluster.yml'"
   echo "         --ansible-forks           : Number of number of parallel processes to use.  Default=10 "
   echo "         --neverwinterdp-home      : Path to NeverwinterDP home"
@@ -392,6 +460,9 @@ BIN_DIR=`dirname "$0"`
 BIN_DIR=`cd "$BIN_DIR"; pwd`
 
 
+
+
+
 # get command
 COMMAND=$1
 shift
@@ -401,7 +472,7 @@ if [ "$COMMAND" = "image" ] ; then
   SUB_COMMAND=$1
   shift
   if [ "$SUB_COMMAND" = "build" ] ; then
-    build_image $@
+    build_images $@
   elif [ "$SUB_COMMAND" = "clean" ] ; then
     clean_image $@
   else
@@ -423,6 +494,8 @@ elif [ "$COMMAND" = "container" ] ; then
   else
     printUsage
   fi
+elif [ "$COMMAND" = "deploy" ] ; then
+  deploy_all $@
 elif [ "$COMMAND" = "ansible-inventory" ] ; then
   ansible_inventory $@
 elif [ "$COMMAND" = "cluster" ] ; then

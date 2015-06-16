@@ -7,20 +7,6 @@
     - common
     - clustercommander
 
-- name: Monitoring
-  hosts: monitoring
-  remote_user: neverwinterdp
-  roles:
-    #- influxdb
-    #- grafana
-    - kibana
-    
-- name: Kafka
-  hosts: kafka
-  remote_user: neverwinterdp
-  roles:
-    - kafka_broker
-
 - name: Hadoop Master and Workers
   hosts: hadoop_master:hadoop_worker
   remote_user: neverwinterdp
@@ -42,6 +28,20 @@
   remote_user: neverwinterdp
   roles:
     - zookeeper
+    
+- name: Kafka
+  hosts: kafka
+  remote_user: neverwinterdp
+  roles:
+    - kafka_broker
+
+- name: Monitoring
+  hosts: monitoring
+  remote_user: neverwinterdp
+  roles:
+    #- influxdb
+    #- grafana
+    - kibana
     
 - name: Elasticsearch
   hosts: elasticsearch
