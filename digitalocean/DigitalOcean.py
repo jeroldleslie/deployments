@@ -3,8 +3,8 @@ from sys import stdout
 #python digitalocean.py image --clean --build hadoopmaster, zookeeper, kafka
 '''
   image 
-     --clean            #destroy the images
-        name            #name of image to be destroyed e.g hadoop-master, zookeeper, kibana
+     --clean            #destroy the snapshots
+        name            #name of snapshot to be destroyed e.g hadoop-master, zookeeper, kibana
      --build            #create snapshots
         name            #name of config file to build. e.g kafka, zookeeper.
   container
@@ -27,7 +27,6 @@ from sys import stdout
        --force                #force stop
     --status                #get status of cluster
 '''
-from clint.textui.colored import clean
 
 '''
 Snapshot names
@@ -74,10 +73,5 @@ class DigitalOcean(object):
   def cluster(self, start, stop,deploy, deploy_scribengin,status):
     pass      
 
-
-if __name__ == '__main__':
-  #Set the signal handler
-  signal.signal(signal.SIGINT, catchSignal)
-  
-  for job in _jobs:
-    job.join()
+if __name__ == "__main__":
+    main()
