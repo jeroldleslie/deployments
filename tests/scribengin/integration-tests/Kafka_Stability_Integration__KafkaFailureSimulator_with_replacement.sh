@@ -28,7 +28,7 @@ ssh -o StrictHostKeyChecking=no neverwinterdp@hadoop-master "cd /opt/cluster && 
                                   --kill-method shutdown                                                                \
                                   --servers-to-fail-simultaneously 1                                                   \
                                   --restart-method random                                                      	\
-                                  --junit-report /opt/scribengin/scribengin/tools/kafka/junit-reports/kafkaFailureReport.xml" &
+                                  --junit-report /opt/neverwinterdp/scribengin/tools/kafka/junit-reports/kafkaFailureReport.xml" &
 FAIL_SIM_PID=$!
 
 ssh -o StrictHostKeyChecking=no neverwinterdp@hadoop-master "cd /opt/cluster && \

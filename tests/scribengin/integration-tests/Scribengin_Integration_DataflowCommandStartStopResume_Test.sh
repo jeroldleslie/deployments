@@ -13,8 +13,8 @@ mkdir testresults
 #Give everything time to come up
 sleep 5
 
-ssh -o "StrictHostKeyChecking no" neverwinterdp@hadoop-master "cd /opt/scribengin/scribengin && ./bin/shell.sh scribengin info"
-ssh -o "StrictHostKeyChecking no" neverwinterdp@hadoop-master "cd /opt/scribengin/scribengin && ./bin/shell.sh vm info"
+ssh -o "StrictHostKeyChecking no" neverwinterdp@hadoop-master "cd /opt/neverwinterdp/scribengin && ./bin/shell.sh scribengin info"
+ssh -o "StrictHostKeyChecking no" neverwinterdp@hadoop-master "cd /opt/neverwinterdp/scribengin && ./bin/shell.sh vm info"
 
 #ssh -o "StrictHostKeyChecking no" neverwinterdp@hadoop-master "/opt/cluster/clusterCommander.py monitor --update-interval 15" &
 
@@ -22,7 +22,7 @@ ssh -o "StrictHostKeyChecking no" neverwinterdp@hadoop-master "cd /opt/scribengi
 
 #Run start/stop/resume
 ssh -o "StrictHostKeyChecking no" neverwinterdp@hadoop-master "mkdir -p /opt/junit-reports/ && \
-      cd /opt/scribengin/scribengin && ./bin/shell.sh dataflow-test start-stop-resume  \
+      cd /opt/neverwinterdp/scribengin && ./bin/shell.sh dataflow-test start-stop-resume  \
               --dataflow-id kafka-to-kafka-1 \
               --sleep-before-stop    30000 \
               --sleep-before-resume  15000 \
@@ -36,7 +36,7 @@ ssh -o "StrictHostKeyChecking no" neverwinterdp@hadoop-master "mkdir -p /opt/jun
 FAILURE_PID=$!
 
 #Run dataflow
-ssh -o "StrictHostKeyChecking no" neverwinterdp@hadoop-master "cd /opt/scribengin/scribengin && \
+ssh -o "StrictHostKeyChecking no" neverwinterdp@hadoop-master "cd /opt/neverwinterdp/scribengin && \
           ./bin/shell.sh dataflow-test kafka-to-kafka \
              --dataflow-id    kafka-to-kafka-1 \
              --dataflow-name  kafka-to-kafka \
