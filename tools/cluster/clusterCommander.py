@@ -329,7 +329,7 @@ def zookeeperfailure(failure_interval, wait_before_start, servers, min_servers, 
   p = multiprocessing.Process(name="ZookeeperFailure",
                               target=zf.failureSimulation, 
                               args=(failure_interval, wait_before_start, servers, min_servers, 
-                                    servers_to_fail_simultaneously, kill_method, initial_clean, zoo_cfg, None, junit_report, restart_method))
+                                    servers_to_fail_simultaneously, kill_method, initial_clean, zoo_cfg, junit_report, restart_method))
   _jobs.append(p)
   p.start()
   
