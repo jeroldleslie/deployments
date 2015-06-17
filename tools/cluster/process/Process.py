@@ -318,7 +318,7 @@ class ScribenginProcess(Process):
 ############
 class ScribenginMasterProcess(ScribenginProcess):
   def __init__(self, role, hostname):
-    Process.__init__(self, role, hostname, "/opt/scribengin/scribengin/bin/", "scribengin-master-*")
+    Process.__init__(self, role, hostname, "/opt/neverwinterdp/scribengin/bin/", "scribengin-master-*")
     self.hostname = hostname
   
   def setupClusterEnv(self, paramDict = {}):
@@ -351,7 +351,7 @@ class ScribenginMasterProcess(ScribenginProcess):
 ############
 class VmMasterProcess(ScribenginProcess):
   def __init__(self, role, hostname):
-    Process.__init__(self, role, hostname, "/opt/scribengin/scribengin/bin/", "vm-master-*")
+    Process.__init__(self, role, hostname, "/opt/neverwinterdp/scribengin/bin/", "vm-master-*")
     
   def setupClusterEnv(self, paramDict = {}):
     pass
@@ -383,7 +383,7 @@ class VmMasterProcess(ScribenginProcess):
 ############
 class DataflowMasterProcess(ScribenginProcess):
   def __init__(self, role, hostname, processIdentifier):
-    Process.__init__(self, role, hostname, "/opt/scribengin/scribengin/bin/", processIdentifier)
+    Process.__init__(self, role, hostname, "/opt/neverwinterdp/scribengin/bin/", processIdentifier)
     self.hostname = hostname
     
   def setupClusterEnv(self, paramDict = {}):
@@ -410,7 +410,7 @@ class DataflowMasterProcess(ScribenginProcess):
 ############
 class DataflowWorkerProcess(ScribenginProcess):
   def __init__(self, role, hostname, processIdentifier):
-    Process.__init__(self, role, hostname, "/opt/scribengin/scribengin/bin/", processIdentifier)
+    Process.__init__(self, role, hostname, "/opt/neverwinterdp/scribengin/bin/", processIdentifier)
     self.hostname = hostname
     
   def setupClusterEnv(self, paramDict = {}):

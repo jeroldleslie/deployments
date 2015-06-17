@@ -1,7 +1,6 @@
 ---
 neverwinterdp_home: "{{ lookup('env','NEVERWINTERDP_HOME') }}"
-#TODO: Move remote_scribengin_home to = /opt/neverwinterdp
 #TODO: Update clustercommander
-remote_scribengin_home: /opt/scribengin/
+remote_scribengin_home: /opt/neverwinterdp/
 local_scribengin_release_root_folder: "{{neverwinterdp_home}}/release/"
 local_scribengin_release_folder: "{{local_scribengin_release_root_folder}}/build/release/neverwinterdp/"
