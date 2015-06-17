@@ -8,7 +8,6 @@
 #    #> ansible-playbook playbooks/scribenginCluster.yml -i scribengininventory --extra-vars "neverwinterdp_home_override=/path/to/NeverwinterDP"
 #############################################################################################################################################################
 
-
 - name: Set neverwinterdp_home to neverwinterdp_home_override if its been passed in on command line
   when: neverwinterdp_home_override is defined
   run_once: true
