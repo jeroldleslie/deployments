@@ -69,5 +69,5 @@
   file: mode=u+rxw path={{remote_scribengin_home}}/scribengin/bin/shell.sh
 
 - name: Make kafka.sh executable
-  file: mode=u+rxw path={{remote_scribengin_home}}/release/scribengin/tools/kafka/kafka.sh
+  file: mode=u+rxw path={{remote_scribengin_home}}/scribengin/tools/kafka/kafka.sh
   
