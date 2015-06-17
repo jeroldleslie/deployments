@@ -61,7 +61,7 @@ kill -9 $FAILURE_PID
 #kill -9 $MONITOR_PID 
 
 #Get results
-scp -o stricthostkeychecking=no neverwinterdp@hadoop-master:/opt/junit-reports/*.xml ./testresults/
+scp -o stricthostkeychecking=no neverwinterdp@hadoop-master:/opt/neverwinterdp/scribengin/tools/kafka/junit-reports/*.xml ./testresults/
 
 #Clean up
 $ROOT/docker/scribengin/docker.sh cluster --clean-containers --neverwinterdp-home=$NEVERWINTER_HOME
