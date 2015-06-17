@@ -15,7 +15,7 @@ sleep 5
 
 
 #Run failure simulator in the background
-ssh -o StrictHostKeyChecking=no neverwinterdp@hadoop-master "cd /opt/cluster && mkdir -p /opt/scribengin/scribengin/tools/kafka/junit-reports"
+ssh -o StrictHostKeyChecking=no neverwinterdp@hadoop-master "cd /opt/cluster && mkdir -p /opt/neverwinterdp/scribengin/tools/kafka/junit-reports"
 ssh -o StrictHostKeyChecking=no neverwinterdp@hadoop-master "cd /opt/cluster &&                                   \
                                       python clusterCommander.py --debug                                                 \
                                        kafkafailure 		  				                         \
@@ -25,7 +25,7 @@ ssh -o StrictHostKeyChecking=no neverwinterdp@hadoop-master "cd /opt/cluster && 
                                       zookeeperfailure --servers zookeeper-1,zookeeper-2                                 \
                                       --wait-before-start 30 --failure-interval 30 --kill-method shutdown                 \
                                       --servers-to-fail-simultaneously 1                                                 \
-                                      --junit-report /opt/scribengin/scribengin/tools/kafka/junit-reports/zkFailureReport.xml " &
+                                      --junit-report /opt/neverwinterdp/scribengin/tools/kafka/junit-reports/zkFailureReport.xml " &
 
 FAIL_SIM_PID=$!
 
@@ -36,7 +36,7 @@ MONITOR_PID=$!
 
 
 #Run kafkaStabilityCheckTool
-ssh -o "StrictHostKeyChecking no" neverwinterdp@hadoop-master "cd /opt/scribengin/scribengin/tools/kafka/ &&      \
+ssh -o "StrictHostKeyChecking no" neverwinterdp@hadoop-master "cd /opt/neverwinterdp/scribengin/tools/kafka/ &&      \
                                           ./kafka.sh test stability --zk-connect zookeeper-1:2181                 \
                                           --topic stabilitytest --replication 2 --send-period 0                   \
                                           --send-writer-type ack --send-max-duration 1800000                      \
@@ -49,7 +49,7 @@ ssh -o "StrictHostKeyChecking no" neverwinterdp@hadoop-master "cd /opt/scribengi
                                           --junit-report junit-reports/KafkaMessageCheckTool.xml"
 
 #Get results
-scp -o stricthostkeychecking=no neverwinterdp@hadoop-master:/opt/scribengin/scribengin/tools/kafka/junit-reports/*.xml ./testresults/
+scp -o stricthostkeychecking=no neverwinterdp@hadoop-master:/opt/neverwinterdp/scribengin/tools/kafka/junit-reports/*.xml ./testresults/
 
 kill -9 $FAIL_SIM_PID $MONITOR_PID
 
