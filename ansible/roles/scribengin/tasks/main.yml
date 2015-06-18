@@ -8,7 +8,6 @@
 #    #> ansible-playbook playbooks/scribenginCluster.yml -i scribengininventory --extra-vars "neverwinterdp_home_override=/path/to/NeverwinterDP"
 #############################################################################################################################################################
 
-
 - name: Set neverwinterdp_home to neverwinterdp_home_override if its been passed in on command line
   when: neverwinterdp_home_override is defined
   run_once: true
@@ -67,4 +66,7 @@
   
 - name: Make shell.sh executable
   file: mode=u+rxw path={{remote_scribengin_home}}/scribengin/bin/shell.sh
+
+- name: Make kafka.sh executable
+  file: mode=u+rxw path={{remote_scribengin_home}}/scribengin/tools/kafka/kafka.sh
   

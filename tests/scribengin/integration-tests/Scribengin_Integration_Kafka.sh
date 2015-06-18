@@ -14,13 +14,13 @@ mkdir testresults
 #Give everything time to come up
 sleep 5
 
-ssh -o "StrictHostKeyChecking no" neverwinterdp@hadoop-master "cd /opt/scribengin/scribengin && ./bin/shell.sh scribengin info"
-ssh -o "StrictHostKeyChecking no" neverwinterdp@hadoop-master "cd /opt/scribengin/scribengin && ./bin/shell.sh vm info"
+ssh -o "StrictHostKeyChecking no" neverwinterdp@hadoop-master "cd /opt/neverwinterdp/scribengin && ./bin/shell.sh scribengin info"
+ssh -o "StrictHostKeyChecking no" neverwinterdp@hadoop-master "cd /opt/neverwinterdp/scribengin && ./bin/shell.sh vm info"
 
 
 
 #Run dataflow
-ssh -o "StrictHostKeyChecking no" neverwinterdp@hadoop-master "cd /opt/scribengin/scribengin && \
+ssh -o "StrictHostKeyChecking no" neverwinterdp@hadoop-master "cd /opt/neverwinterdp/scribengin && \
           ./bin/shell.sh dataflow-test kafka-to-kafka \
              --dataflow-id    kafka-to-kafka-1 \
              --dataflow-name  kafka-to-kafka \
@@ -42,7 +42,7 @@ ssh -o "StrictHostKeyChecking no" neverwinterdp@hadoop-master "cd /opt/scribengi
 
 
 #Get results
-scp -o stricthostkeychecking=no neverwinterdp@hadoop-master:/opt/scribengin/scribengin/KafkaIntegrationTest.xml ./testresults/
+scp -o stricthostkeychecking=no neverwinterdp@hadoop-master:/opt/neverwinterdp/scribengin/KafkaIntegrationTest.xml ./testresults/
 
 #Clean up
 $ROOT/docker/scribengin/docker.sh cluster --clean-containers --neverwinterdp-home=$NEVERWINTER_HOME

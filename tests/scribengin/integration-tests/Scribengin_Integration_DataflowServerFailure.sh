@@ -13,8 +13,8 @@ mkdir testresults
 #Give everything time to come up
 sleep 5
 
-ssh -o "StrictHostKeyChecking no" neverwinterdp@hadoop-master "cd /opt/scribengin/scribengin && ./bin/shell.sh scribengin info"
-ssh -o "StrictHostKeyChecking no" neverwinterdp@hadoop-master "cd /opt/scribengin/scribengin && ./bin/shell.sh vm info"
+ssh -o "StrictHostKeyChecking no" neverwinterdp@hadoop-master "cd /opt/neverwinterdp/scribengin && ./bin/shell.sh scribengin info"
+ssh -o "StrictHostKeyChecking no" neverwinterdp@hadoop-master "cd /opt/neverwinterdp/scribengin && ./bin/shell.sh vm info"
 ssh -o "StrictHostKeyChecking no" neverwinterdp@hadoop-master "mkdir -p /opt/junit-reports/"
 
 #ssh -o "StrictHostKeyChecking no" neverwinterdp@hadoop-master "/opt/cluster/clusterCommander.py monitor --update-interval 15" &
@@ -22,19 +22,18 @@ ssh -o "StrictHostKeyChecking no" neverwinterdp@hadoop-master "mkdir -p /opt/jun
 #MONITOR_PID=$!
 
 #Run server failure
-ssh -o "StrictHostKeyChecking no" neverwinterdp@hadoop-master "cd /opt/scribengin/scribengin && \
+ssh -o "StrictHostKeyChecking no" neverwinterdp@hadoop-master "cd /opt/neverwinterdp/scribengin && \
   ./bin/shell.sh dataflow-test random-server-failure \
     --dataflow-id kafka-to-kafka-1 \
     --wait-before-simulate-failure 60000 \
     --wait-for-running-dataflow 180000 \
     --failure-period 30000 --max-failure 20" &
 
-
 FAILURE_PID=$!
 
 #Run dataflow
 # --debug-dataflow-activity \
-ssh -o "StrictHostKeyChecking no" neverwinterdp@hadoop-master "cd /opt/scribengin/scribengin && \
+ssh -o "StrictHostKeyChecking no" neverwinterdp@hadoop-master "cd /opt/neverwinterdp/scribengin && \
           ./bin/shell.sh dataflow-test kafka-to-kafka \
              --dataflow-id    kafka-to-kafka-1 \
              --dataflow-name  kafka-to-kafka \
