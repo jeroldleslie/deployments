@@ -180,7 +180,7 @@ function launch_intermediate_containers() {
   docker run -d -p 22 -p 9300 --privileged -h elasticsearch --name elasticsearch  ubuntu:scribengin
   
   h1 "Launch intermediate monitoring container"
-  docker run -d -p 22 -p 3000 -p 5601 --privileged -h monitoring --name monitoring ubuntu:scribengin
+  docker run -d -p 22 -p 3000 -p 5601:5601 --privileged -h monitoring --name monitoring ubuntu:scribengin
   
   #Get those intermediate containers set up with ansible
   host_machine_update_hosts
@@ -249,8 +249,9 @@ function launch_containers() {
   for (( i=1; i<="$NUM_ELASTICSEARCH_SERVER"; i++ ))
   do
     NAME="elasticsearch-"$i
-    PORT_NUM=`expr 9300 - 1 + $i`
-    docker run -d -p 22 -p $PORT_NUM:9300 --privileged -h "$NAME" --name "$NAME"  scribengin:elasticsearch
+    EXPOSE_PORT_9300=`expr 9300 - 1 + $i`
+    EXPOSE_PORT_9200=`expr 9200 - 1 + $i`
+    docker run -d -p 22 -p $EXPOSE_PORT_9300:9300 -p $EXPOSE_PORT_9200:9200 --privileged -h "$NAME" --name "$NAME"  scribengin:elasticsearch
   done
   
   h1 "Launch monitoring containers"
@@ -311,7 +312,13 @@ function deploy_scribengin(){
   deploy $PLAYBOOK_FILE_LOCATION $@
 }
 
-deploy_all(){
+function deploy_tools(){
+  SCRIPT_DIR=$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )
+  PLAYBOOK_FILE_LOCATION="$(get_opt --playbook-file-location "$SCRIPT_DIR/../../ansible/clustercommander.yml" $@)"
+  deploy $PLAYBOOK_FILE_LOCATION $@
+}
+
+function deploy_all(){
   SCRIPT_DIR=$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )
   PLAYBOOK_FILE_LOCATION="$(get_opt --playbook-file-location "$SCRIPT_DIR/../../ansible/scribenginCluster.yml" $@)"
   deploy $PLAYBOOK_FILE_LOCATION $@
@@ -347,6 +354,7 @@ function cluster(){
   ANSIBLE_INVENTORY=$(has_opt "--ansible-inventory" $@ )
   DEPLOY=$(has_opt "--deploy" $@)
   DEPLOY_SCRIBENGIN=$(has_opt "--deploy-scribengin" $@)
+  DEPLOY_TOOLS=$(has_opt "--deploy-tools" $@)
   STOP_CLUSTER=$(has_opt "--stop-cluster" $@ )
   FORCE_STOP_CLUSTER=$(has_opt "--force-stop-cluster" $@ )
   START=$(has_opt "--start" $@)
@@ -382,6 +390,10 @@ function cluster(){
   
   if [ $DEPLOY_SCRIBENGIN == "true" ] || [ $LAUNCH == "true" ] ; then
     deploy_scribengin $@
+  fi  
+  
+  if [ $DEPLOY_TOOLS == "true" ] || [ $LAUNCH == "true" ] ; then
+    deploy_tools $@
   fi
   
   if [ $START == "true" ] || [ $LAUNCH == "true" ] ; then
