@@ -311,7 +311,13 @@ function deploy_scribengin(){
   deploy $PLAYBOOK_FILE_LOCATION $@
 }
 
-deploy_all(){
+function deploy_tools(){
+  SCRIPT_DIR=$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )
+  PLAYBOOK_FILE_LOCATION="$(get_opt --playbook-file-location "$SCRIPT_DIR/../../ansible/clustercommander.yml" $@)"
+  deploy $PLAYBOOK_FILE_LOCATION $@
+}
+
+function deploy_all(){
   SCRIPT_DIR=$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )
   PLAYBOOK_FILE_LOCATION="$(get_opt --playbook-file-location "$SCRIPT_DIR/../../ansible/scribenginCluster.yml" $@)"
   deploy $PLAYBOOK_FILE_LOCATION $@
@@ -347,6 +353,7 @@ function cluster(){
   ANSIBLE_INVENTORY=$(has_opt "--ansible-inventory" $@ )
   DEPLOY=$(has_opt "--deploy" $@)
   DEPLOY_SCRIBENGIN=$(has_opt "--deploy-scribengin" $@)
+  DEPLOY_TOOLS=$(has_opt "--deploy-tools" $@)
   STOP_CLUSTER=$(has_opt "--stop-cluster" $@ )
   FORCE_STOP_CLUSTER=$(has_opt "--force-stop-cluster" $@ )
   START=$(has_opt "--start" $@)
@@ -382,6 +389,10 @@ function cluster(){
   
   if [ $DEPLOY_SCRIBENGIN == "true" ] || [ $LAUNCH == "true" ] ; then
     deploy_scribengin $@
+  fi  
+  
+  if [ $DEPLOY_TOOLS == "true" ] || [ $LAUNCH == "true" ] ; then
+    deploy_tools $@
   fi
   
   if [ $START == "true" ] || [ $LAUNCH == "true" ] ; then
