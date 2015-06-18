@@ -436,13 +436,14 @@ class DataflowWorkerProcess(ScribenginProcess):
  
 class ElasticSearchProcess(Process): 
   def __init__(self, role, hostname):
-    Process.__init__(self, role, hostname, "/opt/elasticsearch/", "org.elasticsearch.bootstrap.Elasticsearch")
+    Process.__init__(self, role, hostname, "/opt/elasticsearch/", "com.neverwinterdp.es.Main")
   
   def setupClusterEnv(self, paramDict = {}):
     pass
   
   def getProcessCommand(self):
-    return "ps ax | grep "+self.processIdentifier+" | awk '{print $1 \" \" $27}' | grep -i elastic"
+    return "jps -l | grep -w '"+self.processIdentifier+"' | awk '{print $1 \" \" $2}'"
+  #  return "ps ax | grep "+self.processIdentifier+" | awk '{print $1 \" \" $27}' | grep -i elastic"
   
   #def getReportDict(self):
   #  pass
