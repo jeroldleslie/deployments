@@ -4,17 +4,11 @@ exec python $0 ${1+"$@"}
 """
 
 import click, logging, multiprocessing, signal, os
-from datetime import datetime
-from elasticsearch import Elasticsearch
-from random import random,sample
-import json,requests
 from sys import stdout, exit
 from time import sleep
 
 from failure.FailureSimulator import ZookeeperFailure,KafkaFailure,DataFlowFailure
 from Cluster import Cluster
-from uuid import uuid5
-import uuid
 
 _debug = False
 _logfile = ''
@@ -335,7 +329,7 @@ def zookeeperfailure(failure_interval, wait_before_start, servers, min_servers, 
   p = multiprocessing.Process(name="ZookeeperFailure",
                               target=zf.failureSimulation, 
                               args=(failure_interval, wait_before_start, servers, min_servers, 
-                                    servers_to_fail_simultaneously, kill_method, initial_clean, zoo_cfg, None, junit_report, restart_method))
+                                    servers_to_fail_simultaneously, kill_method, initial_clean, zoo_cfg, junit_report, restart_method))
   _jobs.append(p)
   p.start()
   
@@ -369,61 +363,6 @@ def monitor(update_interval):
   _jobs.append(p)
   p.start()
 
-@mastercommand.command("logclusterdetails",help="Monitor Cluster status")
-@click.option('--log-interval', default=5, help="Time interval (in seconds) to wait between log cluster status")
-def logclusterdetails(log_interval):
-
-  global _jobs
-  p = multiprocessing.Process(name="LogCPUMetrics",
-                              target=logCpuMemUsage, 
-                              args=(log_interval,))
-  _jobs.append(p)
-  p.start()
-  
-
-    
-def logCpuMemUsage(interval):
-    
-  while True:
-    cluster = Cluster()
-    es = Elasticsearch([{'host': 'elasticsearch-1', 'port': 9200}])
-    r = requests.get('http://elasticsearch-1:9200') 
-    currentTime = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
-    for server in cluster.servers:
-    
-      procs = server.getProcesses()
-    
-      #collecting process commands from all available processes from server
-      processCommand = []
-      for proc in procs:
-        processCommand.append(procs[proc].getProcessCommand())
-    
-      #ssh to run process command and get pid and process name
-      stdout,stderr = procs.values()[0].sshExecute(";".join(processCommand))
-    
-      #print serverReportDict["Hostname"] +" /// "+";".join(processCommand)+" /// "+stdout+ " /// "+stderr
-    
-      #extract pid and process name from stdout
-      runningProcesses = {}
-      for line in stdout.splitlines():
-        pid_and_name = line.split(" ")
-      
-        
-        stdout,stderr = procs.values()[0].sshExecute("ps -p "+pid_and_name[0]+" -o %cpu,%mem")
-        #runningProcesses[pid_and_name[0]] = pid_and_name[1]
-        for cpuoutline in stdout.splitlines():
-          if not "%CPU" in cpuoutline:
-            #print server.getHostname()
-            cpu_and_mem = cpuoutline.split()
-            runningProcesses[cpu_and_mem[0]] = cpu_and_mem[1]
-            print "cpu = " + cpu_and_mem[0] + ", mem = " +cpu_and_mem[1]
-            if r.status_code == 200:
-              jsonBody='{"host": "'+server.getHostname()+'","timestamp" : "'+currentTime+'", "processname": "'+pid_and_name[1]+'", "cpuusage" : '+cpu_and_mem[0]+', "memusage" : '+cpu_and_mem[1]+'}'
-              print jsonBody
-              es.index(index='metrics', doc_type='cpumem', id=uuid.uuid4(), body=jsonBody)
-    sleep(interval)
- 
-      
 def doMonitor(interval):
   while True:
     try:
