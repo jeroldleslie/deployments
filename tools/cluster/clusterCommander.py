@@ -257,8 +257,28 @@ def zookeeper(restart, start, stop, force_stop, clean, zk_servers, wait_before_s
 @click.option('--hadoop-nodes',      is_flag=True, help="Which hadoop nodes to effect (command separated list)")
 @click.option('--wait-before-start', default=0,    help="Time to wait before starting ZK server (seconds)")
 @click.option('--wait-before-kill',  default=0,    help="Time to wait before force killing ZK process (seconds)")
-def hadoop(restart, start, stop, force_stop, clean, hadoop_nodes, wait_before_start, wait_before_kill):
+@click.option('--servers',           default="",   help="Which hadoop servers to effect (command separated list)")
+@click.option('--grep-app-log',      is_flag=True,   help="Prints app log from hadoop cluster, or it can be restricted for specified hadoop nodes using --servers option")
+@click.option('--grep-app-stdout',   is_flag=True,   help="Prints stdout log from hadoop cluster, or it can be restricted for specified hadoop nodes using --servers option")
+@click.option('--grep-app-stderr',   is_flag=True,   help="Prints stderr log from hadoop cluster, or it can be restricted for specified hadoop nodes using --servers option")
+def hadoop(restart, start, stop, force_stop, clean, hadoop_nodes, wait_before_start, wait_before_kill,servers,grep_app_log,grep_app_stdout,grep_app_stderr):
   cluster = Cluster()
+  
+  cluster = cluster.getServersByRole("hadoop-master,hadoop-worker");
+  
+  if len(servers) > 0 :
+    serverList = servers.split(",")
+    cluster = cluster.getServersByHostname(serverList)
+    
+  if(grep_app_log):
+    cluster.sshExecute("find /opt/hadoop -name \"vm.log\" -exec grep -A 5 -B5 \"INFO\" {} \; -print")
+    
+  if(grep_app_stdout):
+    cluster.sshExecute("find /opt/hadoop -name \"stderr\" -exec grep -A 5 -B5 \"INFO\" {} \; -print")
+    
+  if(grep_app_stderr):
+    cluster.sshExecute("find /opt/hadoop -name \"stdout\" -exec grep -A 5 -B5 \"INFO\" {} \; -print")
+    
   if(restart or stop):
     logging.debug("Shutting down Hadoop")
     cluster.shutdownHadoopWorker()
