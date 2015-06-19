@@ -186,10 +186,11 @@ class ServerSet(object):
     """
     Returns a subset of the ServerSet that has the role passed in
     """
-    serverSet = ServerSet(role)
+    roles = role.split(",")
+    serverSet = ServerSet("subset")
     serverSet.paramDict = self.paramDict
     for server in self.servers :
-      if(server.getRole() == role) :
+      if(server.getRole() in roles) :
         serverSet.addServer(server)
     return serverSet
   
