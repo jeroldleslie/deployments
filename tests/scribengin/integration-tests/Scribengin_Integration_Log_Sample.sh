@@ -5,21 +5,18 @@ SCRIPT_DIR=$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )
 source $SCRIPT_DIR/setupEnvironment.sh $@
 
 #Set up docker images
-$ROOT/docker/scribengin/docker.sh cluster --clean-containers --run-containers --deploy-scribengin --start-cluster --neverwinterdp-home=$NEVERWINTER_HOME
+$ROOT/docker/scribengin/docker.sh cluster --clean-containers --run-containers --ansible-inventory --deploy-scribengin --start --neverwinterdp-home=$NEVERWINTER_HOME
 
 #make folder for test results
 mkdir testresults
 
 #Give everything time to come up
 sleep 5
+ssh -o "StrictHostKeyChecking no" neverwinterdp@hadoop-master "cd /opt/neverwinterdp && ./scribengin/bin/shell.sh scribengin info"
 
-ssh -o "StrictHostKeyChecking no" neverwinterdp@hadoop-master "cd /opt/scribengin/scribengin && ./bin/shell.sh scribengin info"
 
-LAUNCH_COMMAND="\
-  ./scribengin/bin/shell.sh dataflow submit \
-    --deploy /opt/scribengin/dataflows/log-sample \
-    --dataflow-chain-config dataflows/log-sample/conf/log-dataflow-chain.json --wait-for-running-timeout 120000"
-ssh -o "StrictHostKeyChecking no" neverwinterdp@hadoop-master "cd /opt/scribengin && $LAUNCH_COMMAND"
+ssh -o "StrictHostKeyChecking no" neverwinterdp@hadoop-master "chmod +x /opt/neverwinterdp/dataflow/log-sample/bin/run.sh"
+ssh -o "StrictHostKeyChecking no" neverwinterdp@hadoop-master "cd /opt/neverwinterdp && ./dataflow/log-sample/bin/run.sh"
 
 #Clean up
 #$ROOT/docker/scribengin/docker.sh cluster --clean-containers --neverwinterdp-home=$NEVERWINTER_HOME
