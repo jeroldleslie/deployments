@@ -1,4 +1,13 @@
-512MBMemory
-1 CoreProcessor
-20GBSSD Disk
-1TBTransfer
+---
+  name: kafka
+  region: sfo1
+  size: 512mb
+  image: ubuntu-14-04-x64
+  ssh_keys: null
+  backups: false
+  ipv6: true,
+  private_networking: true
+...
+
+
+
