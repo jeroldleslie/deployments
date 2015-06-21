@@ -2,6 +2,8 @@ import digitalocean
 import os
 from _yaml import yaml
 from os.path import expanduser
+import time
+import datetime
 
 class Image(object):
   
@@ -37,6 +39,12 @@ class Image(object):
   def __createDroplets(self,dropletNames):
     images =set(dropletNames.split(','))
     droplets=[]
+    userData='''#!/bin/bash
+        echo "Setup neverwinterdp user"
+        useradd -m -d /home/neverwinterdp -s /bin/bash -c "neverwinterdp user" -p $(openssl passwd -1 neverwinterdp)  neverwinterdp
+        echo "neverwinterdp ALL=(ALL) NOPASSWD: ALL" >> /etc/sudoers
+        chown -R neverwinterdp:neverwinterdp /opt
+      '''
     for image in images:
       with open(self.configsDir + image + '.yml') as imageConfig:
         dropletConfig= yaml.load(imageConfig)
@@ -51,8 +59,13 @@ class Image(object):
                                    size_slug=dropletConfig['size'],
                                    backups=dropletConfig['backups'],
                                    private_networking=dropletConfig['private_networking'],
+                                   user_data=userData,
                                    ssh_keys=self.manager.get_all_sshkeys())
         droplet.create()
+        #wait untill droplet is created
+        print "wait until droplet is on"
+        self.__wait_until(droplet.status=='on', 60, 10)
+        print "and now "+ str(droplet.status)
         droplets.append(droplet)
         
     return droplets
@@ -60,9 +73,8 @@ class Image(object):
   def __takeSnapshots(self, droplets):
     snapshots=[]
     for droplet in droplets:
-      snapshot=droplet.take_snapshot(droplet.name+'-'+str(5),power_off=True)
+      snapshot=droplet.take_snapshot(droplet.name+'-'+str(datetime.datetime.now()),return_dict=False, power_off=True).wait()
       snapshots.append(snapshot)
-    
     return snapshots
 
   def takeSnapshots(self, dropletNames):
@@ -70,9 +82,19 @@ class Image(object):
     droplets=[]
     for dropletName in dropletNames:
         droplet= next((droplet for droplet in self.manager.get_all_droplets() if droplet.name == dropletName), None)
+        if droplet.status != 'off':
+          droplet.power_off()
+          self.__wait_until(droplet.status=='off', 60, 10)
         if droplet is not None:
           for action in droplet.get_actions():
             print droplet.name+" : "+ action.status
           droplets.append(droplet)
-              
     return self.__takeSnapshots(droplets)
+
+  def __wait_until(self, somepredicate, timeout, period=0.25):
+    mustend = time.time() + timeout
+    while time.time() < mustend:
+      if somepredicate:
+        return True
+    time.sleep(period)
+    return False
