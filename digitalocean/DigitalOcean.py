@@ -62,15 +62,21 @@ class DigitalOcean(object):
   @click.option('--clean',default='',help='destroy the images')
   @click.option('--build',default='',help='build the images')
   @click.option('--snapshot',default='',help='snapshot the images')
-  def image(clean, build,snapshot):
+  @click.option('--ansible',default='',help='run the playbook against the droplet')
+  @click.option('--playbook',default='../ansible/scribenginCluster.yml',help='the playbook to be run')
+  @click.option('--neverwinterdp-home', required=True,help='neverwinterdp home')
+  def image(clean, build,snapshot, ansible, playbook, neverwinterdp_home):
     print "in image "
-    image = Image();
+    image = Image(neverwinterdp_home);
     if clean !='':
       image.clean(clean)
     elif build!='':
       image.build(build)
     elif snapshot!='':
       image.takeSnapshots(snapshot)
+    elif ansible != '':
+      image.runAnsible(ansible)
+      
     
 
   @mastercommand.command("container", help="commands pertaining to digital-ocean droplets")

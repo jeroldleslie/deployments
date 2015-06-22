@@ -4,6 +4,7 @@ from _yaml import yaml
 from os.path import expanduser
 import time
 import datetime
+from scribengin.ansibleRunner import ansibleRunner
 
 class Image(object):
   
@@ -11,7 +12,8 @@ class Image(object):
   tokenFile = configsDir+'accesstoken'
   validImageNames=[]
 
-  def __init__(self):
+  def __init__(self, neverwinterdp_home):
+    self.neverwinterdp_home = neverwinterdp_home
     with open(self.tokenFile) as f:
       self.token = f.readline()
     self.manager = digitalocean.Manager(token=self.token)
@@ -28,14 +30,12 @@ class Image(object):
       print "attempting to delete "+ str(droplet.id)
       self.manager.get_droplet(droplet.id).destroy()
 
-
   #create image, throws exception if we have an image of same name
   def build(self, imageNames):
     droplets= self.__createDroplets(imageNames)
-    #TODO run ansible on them
+    self.__runAnsible(droplets)
     snapshots= self.__takeSnapshots(droplets)
- 
-        
+
   def __createDroplets(self,dropletNames):
     images =set(dropletNames.split(','))
     droplets=[]
@@ -44,6 +44,8 @@ class Image(object):
         useradd -m -d /home/neverwinterdp -s /bin/bash -c "neverwinterdp user" -p $(openssl passwd -1 neverwinterdp)  neverwinterdp
         echo "neverwinterdp ALL=(ALL) NOPASSWD: ALL" >> /etc/sudoers
         chown -R neverwinterdp:neverwinterdp /opt
+        cp -R /root/.ssh/ /home/neverwinterdp/
+        chown -R neverwinterdp:neverwinterdp /home/neverwinterdp/.ssh
       '''
     for image in images:
       with open(self.configsDir + image + '.yml') as imageConfig:
@@ -64,11 +66,28 @@ class Image(object):
         droplet.create()
         #wait untill droplet is created
         print "wait until droplet is on"
-        self.__wait_until(droplet.status=='on', 60, 10)
+        self.__wait_until(droplet,'active', 60, 10)
         print "and now "+ str(droplet.status)
         droplets.append(droplet)
         
     return droplets
+
+  def __runAnsible(self, droplets):
+    runner = ansibleRunner()
+    inventory = runner.createInventory(droplets)
+    print "inventory "+ str( inventory)
+    
+    runner.runPlaybook('/home/anto/bitBucket/neverwinterdp-deployments/ansible/scribenginCluster.yml','/home/anto/github/artfullyContrived/NeverwinterDP')
+    
+  def runAnsible(self, dropletNames):
+    print "in run ansible"
+    droplets= self.__getDropletsFromName(dropletNames)
+    for droplet in droplets:
+      print "droplet status "+ droplet.status
+      if droplet.status != 'active':
+        droplet.power_on()
+        self.__wait_until(droplet, 'active', 60, 10)
+    self.__runAnsible(droplets)
 
   def __takeSnapshots(self, droplets):
     snapshots=[]
@@ -78,23 +97,27 @@ class Image(object):
     return snapshots
 
   def takeSnapshots(self, dropletNames):
+    print "in take snapshot."
+    droplets = self.__getDropletsFromName(dropletNames)
+    print "droplets "+str([droplet.name for droplet in droplets])
+
+    return self.__takeSnapshots(droplets)
+
+  def __wait_until(self, droplet, status, timeout, period=0.25):
+    mustend = time.time() + timeout
+    while time.time() < mustend:
+      if droplet.load().status == status:
+        print droplet.name +" status: "+ droplet.status
+        return True
+    time.sleep(period)
+    return False
+
+  def __getDropletsFromName(self, dropletNames):
     dropletNames= dropletNames.split(',')
     droplets=[]
     for dropletName in dropletNames:
         droplet= next((droplet for droplet in self.manager.get_all_droplets() if droplet.name == dropletName), None)
-        if droplet.status != 'off':
-          droplet.power_off()
-          self.__wait_until(droplet.status=='off', 60, 10)
         if droplet is not None:
-          for action in droplet.get_actions():
-            print droplet.name+" : "+ action.status
           droplets.append(droplet)
-    return self.__takeSnapshots(droplets)
-
-  def __wait_until(self, somepredicate, timeout, period=0.25):
-    mustend = time.time() + timeout
-    while time.time() < mustend:
-      if somepredicate:
-        return True
-    time.sleep(period)
-    return False
+    
+    return droplets  
