@@ -12,8 +12,9 @@ class Image(object):
   tokenFile = configsDir+'accesstoken'
   validImageNames=[]
 
-  def __init__(self, neverwinterdp_home):
+  def __init__(self, neverwinterdp_home, playbook=''):
     self.neverwinterdp_home = neverwinterdp_home
+    self.playbook= playbook
     with open(self.tokenFile) as f:
       self.token = f.readline()
     self.manager = digitalocean.Manager(token=self.token)
@@ -22,18 +23,17 @@ class Image(object):
 
   #allow list of image names
   def clean(self,imageName):
+    images= imageName.split(',')
     my_droplets = self.manager.get_all_droplets()
-    droplet = next((droplet for droplet in my_droplets if droplet.name == imageName), None)
-    if droplet is None:
-      print "No droplet named "+ imageName
-    else:
-      print "attempting to delete "+ str(droplet.id)
+    droplets = [droplet for droplet in my_droplets if droplet.name in images]
+    for droplet in droplets:
+      print "attempting to delete: " +droplet.name +". id: "+ str(droplet.id)
       self.manager.get_droplet(droplet.id).destroy()
 
   #create image, throws exception if we have an image of same name
   def build(self, imageNames):
     droplets= self.__createDroplets(imageNames)
-    self.__runAnsible(droplets)
+    self.runAnsible(imageNames)
     snapshots= self.__takeSnapshots(droplets)
 
   def __createDroplets(self,dropletNames):
@@ -73,11 +73,11 @@ class Image(object):
     return droplets
 
   def __runAnsible(self, droplets):
-    runner = ansibleRunner()
+    runner = ansibleRunner(self.neverwinterdp_home)
     inventory = runner.createInventory(droplets)
     print "inventory "+ str( inventory)
     
-    runner.runPlaybook('/home/anto/bitBucket/neverwinterdp-deployments/ansible/scribenginCluster.yml','/home/anto/github/artfullyContrived/NeverwinterDP')
+    runner.runPlaybook(self.playbook)
     
   def runAnsible(self, dropletNames):
     print "in run ansible"
@@ -104,11 +104,13 @@ class Image(object):
     return self.__takeSnapshots(droplets)
 
   def __wait_until(self, droplet, status, timeout, period=0.25):
+    print "now waiting."
     mustend = time.time() + timeout
     while time.time() < mustend:
       if droplet.load().status == status:
         print droplet.name +" status: "+ droplet.status
         return True
+    print "we have to wait "+ str(period)
     time.sleep(period)
     return False
 

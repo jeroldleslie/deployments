@@ -11,7 +11,8 @@ from ansible.utils.template import template
 class ansibleRunner(object):
     
     
-  def __init__(self):
+  def __init__(self, neverwinterdp_home):
+    self.neverwinterdp_home = neverwinterdp_home
     os.environ['ANSIBLE_HOST_KEY_CHECKING'] = 'False'
 
   def createInventory(self, droplets):
@@ -28,7 +29,7 @@ class ansibleRunner(object):
     
     return myTemplate
 
-  def runPlaybook(self, playbook,neverwinterdp_home_override):
+  def runPlaybook(self, playbook):
     utils.VERBOSITY = 0
     playbook_cb = callbacks.PlaybookCallbacks(verbose=utils.VERBOSITY)
     stats = callbacks.AggregateStats()
@@ -41,7 +42,7 @@ class ansibleRunner(object):
       callbacks=playbook_cb,
       runner_callbacks=runner_cb,
       stats=stats,
-      extra_vars={'neverwinterdp_home_override':neverwinterdp_home_override}
+      extra_vars={'neverwinterdp_home_override':self.neverwinterdp_home}
     )
     playbook_cb.on_stats(pb.stats)
     return pb.run()
