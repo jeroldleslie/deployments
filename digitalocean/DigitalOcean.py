@@ -91,7 +91,7 @@ class DigitalOcean(object):
     if start!='':
       container.start(start)
     elif deploy !='':
-      container.status(deploy)
+      container.updateHosts(deploy)
     
     
       

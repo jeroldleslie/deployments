@@ -17,8 +17,11 @@ class Container(Base):
     containerNames = [name[:name.index('-')] for name in containerName.split(',')]
     print containerNames
     images = [image for image in self.manager.get_images(private=False,type='snapshot') if '-' in image.name and image.name[:image.name.index('-')] in containerNames]
+    droplets=[]
     for snapshot, container in izip(images,containerName.split(',')):
-      self.createContainer(snapshot,container)
+      droplets.append(self.createContainer(snapshot,container))
+      
+      self.updateHostsFile(droplets)
     
 
   def createContainer(self, snapshot, containerName):
@@ -26,32 +29,44 @@ class Container(Base):
     imageName=snapshot.name.index('-')
     baseDroplet =snapshot.name[0:imageName]
     print baseDroplet
-    print "hahahahahahha "+containerName
-    droplet =  digitalocean.Droplet(token=self.token,
-                                    name=containerName,
-                                    size_slug='512mb')
-    droplet.create()
+    print "hahahahahahha containerName "+containerName
+    print "hohoho baseDroplet "+ baseDroplet
+    droplet =  super(Container, self).createDroplets(baseDroplet, containerName)
     #wait untill droplet is created
-    print "wait until droplet is on"
-    self.wait_until(droplet,'active', 90, 10)
+
     print "current status "+ str(droplet.status)
-    droplet.rebuild(snapshot.id.id, return_dict=False).wait(10)
+    droplet.rebuild(snapshot.id, return_dict=False).wait(10)
+    
+    return droplet
+    
+  def updateHostsFile(self, droplets):
+    hostsFile ='/etc/hosts'
+    
+    startString="##SCRIBENGIN CLUSTER START##"
+    endString="##SCRIBENGIN CLUSTER END##"
+    hostString = startString
+    hostString +='\n'
+    for droplet in droplets:
+      hostString += droplet.ip_address
+      hostString += '  '
+      hostString += droplet.name
+      hostString += '\n' 
+    
+    hostString +=endString
+    
+    print hostString
+    
+    with open(hostsFile) as input:
+      content = input.read()
+    print content
+      
+
     
     
-  """  latestImage=  images.pop()
-    print latestImage.slug
-    droplet = super(Container, self).createDroplets(containerName)[0]
-    print "ndio hii "+ str(droplet)
-    for action in droplet.get_actions():
-      print action
-    #droplet.load()
-    #droplet.rebuild(latestImage.id, return_dict=False).wait(10)
-    #droplet.rename(containerName+'-1')
-    time.sleep(30)
-    self.status(containerName)
-    print droplet.status"""
-    #add to etc/hosts
     
+  def updateHosts(self, dropletsNames):
+      droplets= super(Container, self).getDropletsFromName(dropletsNames)
+      self.updateHostsFile(droplets)     
 
   def stop(self, containerName):
     pass
