@@ -1,6 +1,6 @@
 import digitalocean
 import os
-from _yaml import yaml
+import yaml
 from os.path import expanduser
 import time
 import datetime
