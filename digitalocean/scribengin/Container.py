@@ -4,6 +4,7 @@ from sys import path
 from os.path import expanduser, join, abspath, dirname
 import os
 import time
+from itertools import izip
 
 path.insert(0, "../tools/cluster/")
 from Cluster import Cluster
@@ -15,9 +16,29 @@ class Container(Base):
     print "attempting to start "+ containerName
     containerNames = [name[:name.index('-')] for name in containerName.split(',')]
     print containerNames
-    images = [image for image in sorted(self.manager.get_images(private=False,type='snapshot'),key=lambda x: x.name) if image.name[:name.index('-')] in containerNames]
-    print images[1]
-    #latestImage=  images.pop()
+    images = [image for image in self.manager.get_images(private=False,type='snapshot') if '-' in image.name and image.name[:image.name.index('-')] in containerNames]
+    for snapshot, container in izip(images,containerName.split(',')):
+      self.createContainer(snapshot,container)
+    
+
+  def createContainer(self, snapshot, containerName):
+    print snapshot
+    imageName=snapshot.name.index('-')
+    baseDroplet =snapshot.name[0:imageName]
+    print baseDroplet
+    print "hahahahahahha "+containerName
+    droplet =  digitalocean.Droplet(token=self.token,
+                                    name=containerName,
+                                    size_slug='512mb')
+    droplet.create()
+    #wait untill droplet is created
+    print "wait until droplet is on"
+    self.wait_until(droplet,'active', 90, 10)
+    print "current status "+ str(droplet.status)
+    droplet.rebuild(snapshot.id.id, return_dict=False).wait(10)
+    
+    
+  """  latestImage=  images.pop()
     print latestImage.slug
     droplet = super(Container, self).createDroplets(containerName)[0]
     print "ndio hii "+ str(droplet)
@@ -28,7 +49,7 @@ class Container(Base):
     #droplet.rename(containerName+'-1')
     time.sleep(30)
     self.status(containerName)
-    print droplet.status
+    print droplet.status"""
     #add to etc/hosts
     
 

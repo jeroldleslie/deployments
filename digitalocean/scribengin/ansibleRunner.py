@@ -17,6 +17,7 @@ class ansibleRunner(object):
 
   def createInventory(self, droplets):
     print os.environ['ANSIBLE_HOST_KEY_CHECKING']
+    #todo use a map 
     myTemplate=''
     for droplet in droplets:
       myTemplate += '\n['+ droplet.name +']\n'

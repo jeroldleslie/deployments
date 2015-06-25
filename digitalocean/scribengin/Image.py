@@ -56,9 +56,9 @@ class Image(Base):
                                    ssh_keys=self.manager.get_all_sshkeys())
         droplet.create()
         #wait untill droplet is created
-        print "wait until droplet is on"
+        logging.debug("waiting until droplet is on")
         super(Image, self).wait_until(droplet,'active', 60, 10)
-        print "and now "+ str(droplet.status)
+        logging.debug("Current status "+ str(droplet.status))
         droplets.append(droplet)
         
     return droplets
