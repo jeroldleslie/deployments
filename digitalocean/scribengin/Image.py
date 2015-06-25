@@ -5,21 +5,10 @@ from os.path import expanduser
 import time
 import datetime
 from scribengin.ansibleRunner import ansibleRunner
+from scribengin.Base import Base
+import logging
 
-class Image(object):
-  
-  configsDir ='configs/'
-  tokenFile = configsDir+'accesstoken'
-  validImageNames=[]
-
-  def __init__(self, neverwinterdp_home, playbook=''):
-    self.neverwinterdp_home = neverwinterdp_home
-    self.playbook= playbook
-    with open(self.tokenFile) as f:
-      self.token = f.readline()
-    self.manager = digitalocean.Manager(token=self.token)
-    #get a better way of doing it
-    self.validImageNames = [i.split('.')[0] for i in os.listdir(self.configsDir)] 
+class Image(Base):
 
   #allow list of image names
   def clean(self,imageName):
@@ -32,9 +21,11 @@ class Image(object):
 
   #create image, throws exception if we have an image of same name
   def build(self, imageNames):
+    logging.debug("in build")
     droplets= self.__createDroplets(imageNames)
     self.runAnsible(imageNames)
     snapshots= self.__takeSnapshots(droplets)
+    self.__deleteDroplets(droplets)
 
   def __createDroplets(self,dropletNames):
     images =set(dropletNames.split(','))
@@ -66,11 +57,15 @@ class Image(object):
         droplet.create()
         #wait untill droplet is created
         print "wait until droplet is on"
-        self.__wait_until(droplet,'active', 60, 10)
+        super(Image, self).wait_until(droplet,'active', 60, 10)
         print "and now "+ str(droplet.status)
         droplets.append(droplet)
         
     return droplets
+
+  def  __deleteDroplets(self, droplets):
+    for droplet in droplets:
+      droplet.destroy()
 
   def __runAnsible(self, droplets):
     runner = ansibleRunner(self.neverwinterdp_home)
@@ -81,14 +76,15 @@ class Image(object):
     
   def runAnsible(self, dropletNames):
     print "in run ansible"
-    droplets= self.__getDropletsFromName(dropletNames)
+    droplets= super(Image, self).getDropletsFromName(dropletNames)
     for droplet in droplets:
-      print "droplet status "+ droplet.status
+      print "droplet status: "+ droplet.status
       if droplet.status != 'active':
         droplet.power_on()
-        self.__wait_until(droplet, 'active', 60, 10)
+        super(Image, self).wait_until(droplet, 'active', 60, 10)
+      time.sleep(25) #just enough time to create neverwinterdp user
     self.__runAnsible(droplets)
-
+  #TODO: delete previous snapshots before creating new one
   def __takeSnapshots(self, droplets):
     snapshots=[]
     for droplet in droplets:
@@ -98,28 +94,16 @@ class Image(object):
 
   def takeSnapshots(self, dropletNames):
     print "in take snapshot."
-    droplets = self.__getDropletsFromName(dropletNames)
+    droplets = super(Image, self).getDropletsFromName(dropletNames)
     print "droplets "+str([droplet.name for droplet in droplets])
+    
+    self.deleteExistingSnaphots(dropletNames)
 
     return self.__takeSnapshots(droplets)
 
-  def __wait_until(self, droplet, status, timeout, period=0.25):
-    print "now waiting."
-    mustend = time.time() + timeout
-    while time.time() < mustend:
-      if droplet.load().status == status:
-        print droplet.name +" status: "+ droplet.status
-        return True
-    print "we have to wait "+ str(period)
-    time.sleep(period)
-    return False
-
-  def __getDropletsFromName(self, dropletNames):
-    dropletNames= dropletNames.split(',')
-    droplets=[]
-    for dropletName in dropletNames:
-        droplet= next((droplet for droplet in self.manager.get_all_droplets() if droplet.name == dropletName), None)
-        if droplet is not None:
-          droplets.append(droplet)
-    
-    return droplets  
+  def deleteExistingSnapshots(self,dropletNames):
+    names = dropletNames.split(',')
+    allExistingSnapshots= [snapshot for snapshot in sorted(self.manager.get_images(private=False),key=lambda x: x.name) if snapshot.name in dropletNames]
+    for snapshot in allExistingSnapshots:
+        print snapshot
+        #snapshot.destroy()

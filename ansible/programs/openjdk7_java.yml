@@ -4,7 +4,7 @@
   when: ansible_distribution == 'CentOS' or ansible_distribution == 'Red Hat Enterprise Linux'
 
 - name: install openjdk7 (Ubuntu)
-  apt: pkg='openjdk-7-jdk' state=installed
+  apt: pkg='openjdk-7-jdk' state=installed update_cache=yes
   sudo: yes
   when: ansible_distribution == 'Debian' or ansible_distribution == 'Ubuntu'
 

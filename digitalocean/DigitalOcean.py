@@ -1,6 +1,7 @@
 import click, logging, signal
 from sys import stdout
 from scribengin.Image import Image
+from scribengin.Container import Container
 #python digitalocean.py image --clean --build hadoopmaster, zookeeper, kafka
 '''
   image 
@@ -64,7 +65,7 @@ class DigitalOcean(object):
   @click.option('--snapshot',default='',help='snapshot the images')
   @click.option('--ansible',default='',help='run the playbook against the droplet')
   @click.option('--playbook',default='../ansible/scribenginCluster.yml',help='the playbook to be run')
-  @click.option('--neverwinterdp-home', required=(clean != '' | snapshot !='' ),help='neverwinterdp home')
+  @click.option('--neverwinterdp-home', required=True,help='neverwinterdp home')
   def image(clean, build,snapshot, ansible, playbook, neverwinterdp_home):
     print "in image "
     image = Image(neverwinterdp_home, playbook);
@@ -83,9 +84,17 @@ class DigitalOcean(object):
   @click.option('--clean',default='',help='clean the container')
   @click.option('--deploy',default='',help='deploy teh container')
   @click.option('--status',default='',help='get the status of the container')
-  def container(self, start, stop, clean, deploy, status):
+  @click.option('--neverwinterdp-home', required=True,help='neverwinterdp home')
+  def container(start, stop, clean, deploy, status, neverwinterdp_home):
     print "container commands."
-  
+    container = Container(neverwinterdp_home);
+    if start!='':
+      container.start(start)
+    elif deploy !='':
+      container.status(deploy)
+    
+    
+      
   @mastercommand.command("cluster", help="commands pertaining to the digital-ocean scribengin cluster")
   @click.option('--start',default='',help='start the cluster')
   @click.option('--stop',default='',help='stop the cluster')
