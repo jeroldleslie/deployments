@@ -5,7 +5,7 @@ from os.path import expanduser, join, abspath, dirname
 import os
 import time
 
-path.insert(0, "/home/anto/bitBucket/neverwinterdp-deployments/tools/cluster/")
+path.insert(0, "../tools/cluster/")
 from Cluster import Cluster
 #create a droplet with name containerName e.g zookeeper-1
 #start process
@@ -13,16 +13,19 @@ class Container(Base):
 
   def start(self, containerName):
     print "attempting to start "+ containerName
-    images = [image for image in sorted(self.manager.get_images(),key=lambda x: x.name) if image.name.startswith(containerName)]
-    latestImage=  images.pop()
+    containerNames = [name[:name.index('-')] for name in containerName.split(',')]
+    print containerNames
+    images = [image for image in sorted(self.manager.get_images(private=False,type='snapshot'),key=lambda x: x.name) if image.name[:name.index('-')] in containerNames]
+    print images[1]
+    #latestImage=  images.pop()
     print latestImage.slug
     droplet = super(Container, self).createDroplets(containerName)[0]
     print "ndio hii "+ str(droplet)
     for action in droplet.get_actions():
       print action
-    droplet.load()
-    droplet.rebuild(latestImage.id, return_dict=False).wait(10)
-    droplet.rename(containerName+'-1')
+    #droplet.load()
+    #droplet.rebuild(latestImage.id, return_dict=False).wait(10)
+    #droplet.rename(containerName+'-1')
     time.sleep(30)
     self.status(containerName)
     print droplet.status
