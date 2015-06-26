@@ -33,8 +33,8 @@ class Process(object):
     stderr = stderr.read()
     c.close()
     
-    print stdout
-    print stderr
+    #print stdout
+    #print stderr
     
     return stdout,stderr
   
