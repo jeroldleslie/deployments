@@ -13,8 +13,7 @@ import subprocess
 
 path.insert(0, "../tools/cluster/")
 from Cluster import Cluster
-#create a droplet with name containerName e.g zookeeper-1
-#start process
+
 class Container(Base):
   #if droplet with that name exists start service.
   def start(self, containerName):
@@ -37,35 +36,25 @@ class Container(Base):
             else:
               print "droplet "+ droplet.name +" already exists and is powered on."
       else:
-          print " no droplet called "+ container + " we need to create it"
+          print "No droplet called "+ container + " we need to create it"
           for snapshot in images:
-            print snapshot.name
-            #self.createContainer(snapshot,container)
-            
-    """
-    
-    for snapshot, container in izip(images,containerName.split(',')):
-      if container in [droplet.name for droplet in self.manager.get_all_droplets()]:
-        print droplet.name
-        if droplet.status != 'active':
-          droplet.power_on(return_dict=False).wait()
-      else:
-        droplets.append(self.createContainer(snapshot,container))
-      
+            if snapshot.name[:snapshot.name.index('-')] == container[:container.index('-')]:
+                self.createContainer(snapshot,container)
+
     self.updateLocalHostsFile(containerName)
-"""
+    self.deploy(containerName)
+
   def createContainer(self, snapshot, containerName):
     print snapshot
     imageName=snapshot.name.index('-')
     baseDroplet =snapshot.name[0:imageName]
-    print baseDroplet
-    print "hahahahahahha containerName "+containerName
-    print "hohoho baseDroplet "+ baseDroplet
+    logging.debug("containerName "+containerName)
+    logging.debug("baseDroplet "+ baseDroplet)
     droplet =  super(Container, self).createDroplets(baseDroplet, containerName)
     #wait untill droplet is created
     super(Container, self).wait_until(droplet, 'active', 60, period=10)
     
-    print "current status "+ str(droplet.status)
+    logging.debug("current status "+ str(droplet.status))
     droplet.rebuild(snapshot.id, return_dict=False).wait(10)
     
     return droplet
@@ -117,16 +106,20 @@ class Container(Base):
   def clean(self, containerName):
     pass
 
+  #TODO rename this
   def deploy(self, containerNames):
+    cluster= Cluster()
+    #TODO externalize these
+    cluster.paramDict["zoo_cfg"] = '../../neverwinterdp-deployments/docker/scribengin/bootstrap/post-install/zookeeper/conf/zoo_sample.cfg'
+    cluster.paramDict["server_config"] = '../../neverwinterdp-deployments/docker/scribengin/bootstrap/post-install/kafka/config/server.properties'
+    
     droplets = super(Container, self).getDropletsFromName(containerNames)
     for droplet in droplets:
-        print " attempting to deploy "+ droplet.name
-    
-    cluster= Cluster()
-    cluster.paramDict["zoo_cfg"] = '../../neverwinterdp-deployments/docker/scribengin/bootstrap/post-install/zookeeper/conf/zoo_sample.cfg'
-    
-    cluster.startZookeeper()
-    cluster.startKafka()
-    
+        print "Attempting to deploy "+ droplet.name
+        if droplet.name.startswith("zookeeper"):
+          cluster.startZookeeper()
+        elif droplet.name.startswith("kafka"):
+          cluster.startKafka()
+
   def status(self, containerName):
     pass

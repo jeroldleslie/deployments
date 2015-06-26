@@ -103,7 +103,7 @@ class Image(Base):
 
   def deleteExistingSnapshots(self,dropletNames):
     names = dropletNames.split(',')
-    allExistingSnapshots= [snapshot for snapshot in sorted(self.manager.get_images(private=False),key=lambda x: x.name) if snapshot.name in dropletNames]
-    for snapshot in allExistingSnapshots:
+    allExistingSnapshotsOfDroplet= [snapshot for snapshot in sorted(self.manager.get_images(private=False),key=lambda x: x.name) if snapshot.name in dropletNames]
+    for snapshot in allExistingSnapshotsOfDroplet:
         print snapshot
-        #snapshot.destroy()
+        snapshot.destroy()
