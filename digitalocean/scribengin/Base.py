@@ -1,7 +1,7 @@
 import digitalocean
 import time
 import os
-from _yaml import yaml
+import yaml
 import logging
 
 class Base(object):
