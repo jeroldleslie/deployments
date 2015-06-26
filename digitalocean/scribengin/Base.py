@@ -47,8 +47,8 @@ class Base(object):
       return droplet
   
   
-  def wait_until(self, droplet, status, timeout, period=0.25):
-    print "now waiting."
+  def wait_until(self, droplet, status, timeout, period=5):
+    print "Waiting until status becomes: " + status
     mustend = time.time() + timeout
     while time.time() < mustend:
       if droplet.load().status == status:
@@ -58,8 +58,8 @@ class Base(object):
     time.sleep(period)
     return False
 
-  def getDropletsFromName(self, dropletNames):
-    dropletNames= dropletNames.split(',')
+  def getDropletsFromName(self, dropletName):
+    dropletNames= dropletName.split(',')
     droplets=[]
     for dropletName in dropletNames:
         droplet= next((droplet for droplet in self.manager.get_all_droplets() if droplet.name == dropletName), None)
