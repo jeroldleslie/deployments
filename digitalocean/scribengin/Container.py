@@ -2,7 +2,7 @@ from scribengin.Base import Base
 import digitalocean
 import logging
 from sys import path
-from os.path import expanduser, join, abspath, dirname
+from os.path import expanduser, join, abspath, dirname, realpath
 import os
 import time
 from itertools import izip
@@ -12,13 +12,13 @@ import os
 import subprocess
 import tempfile
 
-path.insert(0, "../tools/cluster/")
+path.insert(0,  join(dirname(dirname(dirname(realpath(__file__)))),'tools/cluster'))
 from Cluster import Cluster
 
 class Container(Base):
     
   startString="##SCRIBENGIN CLUSTER START##"
-  endString="##SCRIBENGIN CLUSTER END##"
+  endString=  "##SCRIBENGIN CLUSTER END##"
   #if droplet with that name exists start service.
   def start(self, containerName):
     containers = containerName.split(',')
@@ -94,7 +94,7 @@ class Container(Base):
   def updateRemoteHostsFiles(self, dropletsNames):
     #get all the droplets powered on
     hostsString = self.startString +'\n'
-
+    
     existingDroplets = self.manager.get_all_droplets()
     droplets=[]
     for droplet in existingDroplets:
@@ -128,6 +128,7 @@ ff02::3 ip6-allhosts
     
   def updateLocalHostsFile(self, dropletsNames):
     print dropletsNames
+
     droplets= super(Container, self).getDropletsFromName(dropletsNames)
     self.updateHostsFile(droplets)     
 
@@ -147,8 +148,14 @@ ff02::3 ip6-allhosts
   def deploy(self, containerNames):
     cluster= Cluster()
     #TODO externalize these
-    cluster.paramDict["zoo_cfg"] = '../../neverwinterdp-deployments/docker/scribengin/bootstrap/post-install/zookeeper/conf/zoo_sample.cfg'
-    cluster.paramDict["server_config"] = '../../neverwinterdp-deployments/docker/scribengin/bootstrap/post-install/kafka/config/server.properties'
+    currentDir= dirname(dirname(dirname(realpath(__file__))))
+    print currentDir
+    
+    cluster.paramDict["zoo_cfg"] = join(currentDir,'docker/scribengin/bootstrap/post-install/zookeeper/conf/zoo_sample.cfg' )
+    cluster.paramDict["server_config"] = join(currentDir, 'docker/scribengin/bootstrap/post-install/kafka/config/server.properties')
+    
+    print cluster.paramDict["zoo_cfg"]
+    print cluster.paramDict["server_config"]
     
     droplets = super(Container, self).getDropletsFromName(containerNames)
     for droplet in droplets:

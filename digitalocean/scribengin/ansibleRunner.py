@@ -1,10 +1,11 @@
 from ansible.playbook import PlayBook
 from ansible.inventory import Inventory
-from ansible import callbacks
+from ansible import callbacks, runner
 from ansible import utils
 
 from tempfile import NamedTemporaryFile
 import os
+import json
 from ansible.utils.template import template
 
 class ansibleRunner(object):
@@ -47,5 +48,8 @@ class ansibleRunner(object):
       stats=stats,
       extra_vars={'neverwinterdp_home_override':self.neverwinterdp_home}
     )
+    runner.Runner
     playbook_cb.on_stats(pb.stats)
-    return pb.run()
+    pb.run()
+    print stats
+    

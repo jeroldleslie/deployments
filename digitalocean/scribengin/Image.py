@@ -7,6 +7,7 @@ import datetime
 from scribengin.ansibleRunner import ansibleRunner
 from scribengin.Base import Base
 import logging
+from random import shuffle
 
 class Image(Base):
 
@@ -68,6 +69,20 @@ class Image(Base):
       droplet.destroy()
 
   def __runAnsible(self, droplets):
+    droplets=[]
+    for i in range(1,5):
+      droplet = digitalocean.Droplet()
+      droplet.name='zookeeper-1'
+      droplet.ip_address = '192.168.0.'+str(i)
+      droplets.append(droplet)
+      
+    for i in range(1,3):
+      droplet = digitalocean.Droplet()
+      droplet.name='kafka-1'
+      droplet.ip_address = '192.168.10.'+str(i)
+      droplets.append(droplet)
+        
+    shuffle(droplets)
     runner = ansibleRunner(self.neverwinterdp_home)
     inventory = runner.createInventory(droplets)
     print "inventory "+ str( inventory)
