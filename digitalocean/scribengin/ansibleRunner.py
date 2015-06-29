@@ -3,32 +3,35 @@ from ansible.inventory import Inventory
 from ansible import callbacks
 from ansible import utils
 
-import jinja2
 from tempfile import NamedTemporaryFile
 import os
 from ansible.utils.template import template
 
 class ansibleRunner(object):
-    
-    
+
   def __init__(self, neverwinterdp_home):
     self.neverwinterdp_home = neverwinterdp_home
     os.environ['ANSIBLE_HOST_KEY_CHECKING'] = 'False'
 
   def createInventory(self, droplets):
     print os.environ['ANSIBLE_HOST_KEY_CHECKING']
-    #todo use a map 
-    myTemplate=''
-    for droplet in droplets:
-      myTemplate += '\n['+ droplet.name +']\n'
-      myTemplate += droplet.ip_address + '\n'
+    #todo use a multimap
+    servers = {}
+    inventory=''
 
-    # Create a temporary file and write the template string to it
+    for droplet in droplets:
+      if not droplet.name in servers:
+        servers[droplet.name]=[]
+        inventory += '\n['+ droplet.name +']\n'
+      servers[droplet.name].append(droplet.ip_address)
+      inventory += droplet.ip_address+'\n'
+
+    # Create a temporary file and write the inventory string to it
     self.hosts = NamedTemporaryFile(delete=False)
-    self.hosts.write(myTemplate)
+    self.hosts.write(inventory)
     self.hosts.close()
-    
-    return myTemplate
+
+    return inventory
 
   def runPlaybook(self, playbook):
     utils.VERBOSITY = 0
@@ -38,7 +41,6 @@ class ansibleRunner(object):
     
     pb = PlayBook(
       playbook=playbook,
-      #playbook='../../ansible/test.yml',
       host_list=self.hosts.name,
       callbacks=playbook_cb,
       runner_callbacks=runner_cb,
