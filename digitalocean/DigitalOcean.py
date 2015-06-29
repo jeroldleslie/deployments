@@ -2,6 +2,7 @@ import click, logging, signal
 from sys import stdout
 from scribengin.Image import Image
 from scribengin.Container import Container
+from os.path import join, dirname
 #python digitalocean.py image --clean --build hadoopmaster, zookeeper, kafka
 '''
   image 
@@ -64,7 +65,7 @@ class DigitalOcean(object):
   @click.option('--build',default='',help='build the images')
   @click.option('--snapshot',default='',help='snapshot the images')
   @click.option('--ansible',default='',help='run the playbook against the droplet')
-  @click.option('--playbook',default='../ansible/scribenginCluster.yml',help='the playbook to be run')
+  @click.option('--playbook',default= join(dirname(dirname(__file__)), 'ansible/scribenginCluster.yml'),help='the playbook to be run')
   @click.option('--neverwinterdp-home', required=True,help='neverwinterdp home')
   def image(clean, build,snapshot, ansible, playbook, neverwinterdp_home):
     print "in image "

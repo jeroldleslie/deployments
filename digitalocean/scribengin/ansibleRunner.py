@@ -19,6 +19,7 @@ class ansibleRunner(object):
     #todo use a multimap
     servers = {}
     inventory=''
+    droplets.sort(key=lambda x: x.name)
 
     for droplet in droplets:
       if not droplet.name in servers:
