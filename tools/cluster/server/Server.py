@@ -67,9 +67,9 @@ class Server(object):
     for key in self.processes:
       self.processes[key].kill()
                 
-  def sshExecute(self, command, enableConsoleOutput = True):
+  def sshExecute(self, command, user="neverwinterdp", enableConsoleOutput = True):
     process = self.processes.values()[0]
-    output = process.sshExecute(command)
+    output = process.sshExecute(command, user)
     if enableConsoleOutput:
       self.printTitle("Executing '" + command + "' on " + process.hostname)
       if not output[1]:

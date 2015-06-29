@@ -17,21 +17,27 @@ class Process(object):
     self.processIdentifier = processIdentifier;
     self.sshKeyPath = sshKeyPath
     
-  def sshExecute(self, command, user = "neverwinterdp"):
+  def sshExecute(self, command, user = "neverwinterdp", maxRetries=5, retries=0):
     """
     SSH onto a machine, execute a command
     Returns [stdout,stderr]
     """
-    key = paramiko.RSAKey.from_private_key_file(self.sshKeyPath)
-    
-    c = paramiko.SSHClient()
-    c.set_missing_host_key_policy(paramiko.AutoAddPolicy())
-    c.connect( hostname = self.hostname, username = user, pkey = key, timeout = 10 )
-    stdin, stdout, stderr = c.exec_command(command)
-    
-    stdout = stdout.read()
-    stderr = stderr.read()
-    c.close()
+    try:
+      key = paramiko.RSAKey.from_private_key_file(self.sshKeyPath)
+      
+      c = paramiko.SSHClient()
+      c.set_missing_host_key_policy(paramiko.AutoAddPolicy())
+      c.connect( hostname = self.hostname, username = user, pkey = key, timeout = 10 )
+      stdin, stdout, stderr = c.exec_command(command)
+      
+      stdout = stdout.read()
+      stderr = stderr.read()
+      c.close()
+    except:
+      if retries < maxRetries:
+        return self.sshExecute(command, user, maxRetries, retries+1)
+      else:
+        raise
     
     #print stdout
     #print stderr
