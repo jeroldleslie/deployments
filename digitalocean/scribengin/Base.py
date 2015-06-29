@@ -3,10 +3,12 @@ import time
 import os
 import yaml
 import logging
+from os.path import  join, dirname, realpath
 
 class Base(object):
-    
-  configsDir ='configs/'
+  
+  fileFolder= dirname(dirname(realpath(__file__)))  
+  configsDir =join(fileFolder, 'configs/')
   tokenFile = configsDir+'accesstoken'
   validImageNames=[]
     
