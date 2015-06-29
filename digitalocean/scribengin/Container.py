@@ -10,11 +10,15 @@ import string
 import sys 
 import os 
 import subprocess
+import tempfile
 
 path.insert(0, "../tools/cluster/")
 from Cluster import Cluster
 
 class Container(Base):
+    
+  startString="##SCRIBENGIN CLUSTER START##"
+  endString="##SCRIBENGIN CLUSTER END##"
   #if droplet with that name exists start service.
   def start(self, containerName):
     containers = containerName.split(',')
@@ -62,9 +66,7 @@ class Container(Base):
   def updateHostsFile(self, droplets):
     hostsFile ='/etc/hosts'
     
-    startString="##SCRIBENGIN CLUSTER START##"
-    endString="##SCRIBENGIN CLUSTER END##"
-    hostString = startString
+    hostString = self.startString
     hostString +='\n'
     for droplet in droplets:
       hostString += droplet.ip_address
@@ -72,14 +74,14 @@ class Container(Base):
       hostString += droplet.name
       hostString += '\n' 
 
-    hostString +=endString
+    hostString +=self.endString
     hostString += '\n' 
 
     with open(hostsFile) as inputFile:
       content = inputFile.read()
 
     out_file = open("testFile", "w")
-    sub = subprocess.check_output(['sed', "/"+startString+"/,/"+endString+"/d", hostsFile])
+    sub = subprocess.check_output(['sed', "/"+self.startString+"/,/"+self.endString+"/d", hostsFile])
     sub += hostString
     
     try:
@@ -89,10 +91,45 @@ class Container(Base):
       logging.error("Unable to open "+ hostsFile +" please ensure you have write permissions.")
       
 
+  def updateRemoteHostsFiles(self, dropletsNames):
+    #get all the droplets powered on
+    hostsString = self.startString +'\n'
+
+    existingDroplets = self.manager.get_all_droplets()
+    droplets=[]
+    for droplet in existingDroplets:
+        if droplet.status=='active' and '-' in droplet.name and droplet.name[:droplet.name.index('-')] in self.validImageNames:
+          droplets.append(droplet)
+          hostsString += droplet.private_ip_address + (' ' * 5) + droplet.name
+          hostsString += '\n'
+          
+    hostsString += self.endString + '\n'
+
+    print hostsString    
+    for droplet in droplets:
+      self.updateThem(droplet, hostsString)
+      
+  def updateThem(self, droplet,hostsString):
+    
+    hosts ='''127.0.1.1 dropletName
+127.0.0.1 localhost
+
+# The following lines are desirable for IPv6 capable hosts
+::1 ip6-localhost ip6-loopback
+fe00::0 ip6-localnet
+ff00::0 ip6-mcastprefix
+f02::1 ip6-allnodes
+ff02::2 ip6-allrouters
+ff02::3 ip6-allhosts
+'''
+    hosts=hosts.replace('dropletName', droplet.name)
+    print hosts
+    
+    
   def updateLocalHostsFile(self, dropletsNames):
-      print dropletsNames
-      droplets= super(Container, self).getDropletsFromName(dropletsNames)
-      self.updateHostsFile(droplets)     
+    print dropletsNames
+    droplets= super(Container, self).getDropletsFromName(dropletsNames)
+    self.updateHostsFile(droplets)     
 
   def stop(self, containerNames):
     print containerNames

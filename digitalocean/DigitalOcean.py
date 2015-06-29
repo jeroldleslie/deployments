@@ -83,10 +83,11 @@ class DigitalOcean(object):
   @click.option('--stop',default='',help='stop the container')
   @click.option('--clean',default='',help='clean the container')
   @click.option('--update-local-host-file',default='',help='clean the container')
+  @click.option('--update-remote-host-files',default='',help='update remote host files')
   @click.option('--deploy',default='',help='deploy the container')
   @click.option('--status',default='',help='get the status of the container')
   @click.option('--neverwinterdp-home', required=True,help='neverwinterdp home')
-  def container(start, stop, clean, update_local_host_file, deploy, status, neverwinterdp_home):
+  def container(start, stop, clean, update_local_host_file,update_remote_host_files, deploy, status, neverwinterdp_home):
     print "container commands."
     container = Container(neverwinterdp_home);
     if start!='':
@@ -95,6 +96,8 @@ class DigitalOcean(object):
       container.stop(stop)
     elif update_local_host_file !='':
       container.updateLocalHostsFile(update_local_host_file)
+    elif update_remote_host_files !='':
+      container.updateRemoteHostsFiles(update_remote_host_files)
     elif deploy != '':
       container.deploy(deploy)
     
