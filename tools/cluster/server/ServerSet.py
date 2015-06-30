@@ -99,7 +99,7 @@ class ServerSet(object):
   def addServer(self, server):
     self.servers.append(server)
   
-  def sshExecute(self, command, user="neverwinterdp", enableConsoleOutput = True, numThreads=10):
+  def sshExecute(self, command, user="neverwinterdp", enableConsoleOutput = True, numThreads=10, timeout_sec=60):
     output = {}
     threads = []
     pool = ThreadPool(processes=numThreads)
@@ -108,7 +108,7 @@ class ServerSet(object):
       #output[server.getHostname()] = server.sshExecute(command, user)
     
     for t in threads:
-      output[ t[0] ] = t[1].get()
+      output[ t[0] ] = t[1].get(timeout=timeout_sec)
     return output 
   
   def sync(self, hostname, src="/opt/", dst="/opt"):

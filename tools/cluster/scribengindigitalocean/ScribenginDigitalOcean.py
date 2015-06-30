@@ -32,6 +32,8 @@ class ScribenginDigitalOcean():
     
     logging.debug("Token: "+self.token)
 
+
+
   def createAndWait(self, droplet, sleeptime=5):
     logging.debug("Creating: "+droplet.name)
     print "Creating: "+droplet.name
@@ -58,10 +60,18 @@ class ScribenginDigitalOcean():
     
     
   
-  def destroyDroplet(self, droplet):
+  def destroyDropletAndWait(self, droplet, sleeptime=5, maxRetries=60):
     logging.debug("Destroying: "+droplet.name)
     print "Destroying: "+droplet.name
     droplet.destroy()
+    try:
+      for i in range(0, maxRetries):
+        status = droplet.load().status
+        #Sleep is here to keep us from hitting the API Rate Limit
+        sleep(sleeptime)
+    except Exception as e:
+      #Once we get an exception, then the droplet is gone
+      pass
   
   
   def destroyAllScribenginDroplets(self):
@@ -71,11 +81,9 @@ class ScribenginDigitalOcean():
     for droplet in my_droplets:
       if any(regex.match(droplet.name) for regex in Cluster.serverRegexes):
         logging.debug("Destroying: "+droplet.name)
-        t = Process(target=self.destroyDroplet, args=(droplet,))
+        t = Process(target=self.destroyDropletAndWait, args=(droplet,))
         t.start()
         threads.append(t)
-        
-    
     for t in threads:
       t.join()
   
@@ -161,7 +169,7 @@ class ScribenginDigitalOcean():
   def updateRemoteHostsFile(self, hostsFile='/etc/hosts', user="root"):
     cluster = Cluster()
     hostString = self.getHostsString()
-    cluster.sshExecute("echo '"+hostString+"'  >> /etc/hosts", user, False)
+    cluster.sshExecute("echo '"+hostString+"'  > /etc/hosts", user, False)
   
   
   def updateLocalHostsFile(self, hostsFile='/etc/hosts'):
@@ -177,6 +185,12 @@ class ScribenginDigitalOcean():
     outFile = open(hostsFile, "w")
     outFile.write(hostFileContent+"\n"+hostString)
     outFile.close()
+    
+    logging.debug("Runnging ssh-keygen -R")
+    hostAndIps = self.getScribenginHostsAndIPs()
+    for host in hostAndIps:
+      command = "ssh-keygen -R "+host["name"]
+      os.system(command)
       
   
   #Must be executed *AFTER* updateLocalHostsFile is called on cluster
