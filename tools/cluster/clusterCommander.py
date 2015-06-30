@@ -9,6 +9,7 @@ from time import sleep
 
 from failure.FailureSimulator import ZookeeperFailure,KafkaFailure,DataFlowFailure
 from Cluster import Cluster
+from scribengindigitalocean.ScribenginDigitalOcean import ScribenginDigitalOcean
 
 _debug = False
 _logfile = ''
@@ -352,6 +353,61 @@ def zookeeperfailure(failure_interval, wait_before_start, servers, min_servers, 
                                     servers_to_fail_simultaneously, kill_method, initial_clean, zoo_cfg, junit_report, restart_method))
   _jobs.append(p)
   p.start()
+
+@mastercommand.command("digitalocean", help="commands pertaining to digital-ocean droplets")
+@click.option('--launch',                   is_flag=True,  help='Create containers, deploy, and run ansible')
+@click.option('--create-containers',        default=None,  help='create the container using specified config')
+@click.option('--update-local-host-file',   is_flag=True,  help='clean the container')
+@click.option('--update-host-file',         is_flag=True,  help='clean the container')
+@click.option('--setup-neverwinterdp-user', is_flag=True,  help='Sets up the neverwinterdp user')
+@click.option('--ansible-inventory',        is_flag=True,  help='Creates ansible inventory file')
+@click.option('--ansible-inventory-location', default="/tmp/scribengininventoryDO",  help='Where to save ansible inventory file')
+@click.option('--deploy',                   is_flag=True,  help='Run ansible')
+@click.option('--destroy',                  is_flag=True,  help='destroys all scribengin containers')
+@click.option('--neverwinterdp-home',       default=None, help='neverwinterdp home')
+@click.option('--digitaloceantoken',        default=None,  help='digital ocean token in plain text')
+@click.option('--digitaloceantokenfile',    default='~/.digitaloceantoken', help='digital ocean token file location')
+def digitalocean(launch, create_containers, update_local_host_file, update_host_file, setup_neverwinterdp_user,
+                 ansible_inventory, ansible_inventory_location, deploy, destroy, 
+                 neverwinterdp_home, digitaloceantoken, digitaloceantokenfile):
+  
+  #Make sure neverwinterdp_home is set
+  if (deploy or launch) and neverwinterdp_home is None:
+    raise click.BadParameter("--neverwinterdp-home is needed to deploy", param_hint = "--neverwinterdp-home")
+  
+  if launch and create_containers is None:
+    raise click.BadParameter("--create-containers is needed to deploy", param_hint = "--create_containers")
+  
+  digitalOcean = ScribenginDigitalOcean(digitalOceanToken=digitaloceantoken, digitalOceanTokenFileLocation=digitaloceantokenfile)
+  
+  if create_containers or launch:
+    click.echo("Creating containers")
+    digitalOcean.launchContainers(create_containers)
+  
+  if update_local_host_file or launch:
+    click.echo("Updating local hosts file")
+    digitalOcean.updateLocalHostsFile()
+  if update_host_file or launch:
+    click.echo("Updating remote hosts file")
+    digitalOcean.updateRemoteHostsFile()
+  
+  if setup_neverwinterdp_user or launch:
+    click.echo("Setting up neverwinterdp user")
+    digitalOcean.setupNeverwinterdpUser()
+  
+  if ansible_inventory or launch:
+    click.echo("Writing ansible inventory file")
+    digitalOcean.writeAnsibleInventory(inventoryFileLocation=ansible_inventory_location)
+  
+  if deploy or launch:
+    click.echo("Running ansible")
+    digitalOcean.deploy(neverwinterdp_home)
+  
+  if destroy:
+    click.echo("Destroying Scribengin droplets")
+    digitalOcean.destroyAllScribenginDroplets()
+  
+  
   
 
 @mastercommand.command("dataflowfailure",help="Failure Simulation for dataflow")

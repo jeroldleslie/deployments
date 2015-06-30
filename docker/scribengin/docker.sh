@@ -258,7 +258,7 @@ function launch_containers() {
   for (( i=1; i<="$NUM_MONITORING"; i++ ))
   do
     NAME="monitoring-"$i
-    docker run -d -p 22 -p 3000 -p 5601 --privileged -h "$NAME" --name "$NAME"  scribengin:monitoring
+    docker run -d -p 22 -p 3000:3000 -p 5601:5601 --privileged -h "$NAME" --name "$NAME"  scribengin:monitoring
   done
   
   docker ps

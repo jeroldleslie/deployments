@@ -16,3 +16,4 @@ wget https://bootstrap.pypa.io/ez_setup.py -O - | sudo python
 sudo easy_install nose==1.3.4 tabulate paramiko junit-xml click requests pip
 sudo pip install kazoo
 sudo pip install elasticsearch
+sudo pip install python-digitalocean

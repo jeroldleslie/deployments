@@ -2,6 +2,7 @@ from tabulate import tabulate
 from multiprocessing import Pool
 import os, sys, re
 from os.path import join, expanduser
+from multiprocessing.pool import ThreadPool
 
 #This function is outside the ServerSet class
 #because otherwise it wouldn't be pickleable 
@@ -98,10 +99,16 @@ class ServerSet(object):
   def addServer(self, server):
     self.servers.append(server)
   
-  def sshExecute(self, command, enableConsoleOutput = True):
+  def sshExecute(self, command, user="neverwinterdp", enableConsoleOutput = True, numThreads=10):
     output = {}
+    threads = []
+    pool = ThreadPool(processes=numThreads)
     for server in self.servers :
-      output[server.getHostname()] = server.sshExecute(command)
+      threads.append([server.getHostname(), pool.apply_async(server.sshExecute, (command, user))] )
+      #output[server.getHostname()] = server.sshExecute(command, user)
+    
+    for t in threads:
+      output[ t[0] ] = t[1].get()
     return output 
   
   def sync(self, hostname, src="/opt/", dst="/opt"):
