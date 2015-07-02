@@ -3,20 +3,17 @@
 This project automates the installation, configuration and integration tests of scribengin. It works independently. To launch scribengin cluster, it need  to set NEVERWINTERDP_HOME env variable or you can give --neverwinterdp-home option when running the commands.
 
 
-##Three important components in neverwinter deployments
+Components
+======
 ###ansible
-Used for provisioning
+Used for provisioning, configuring
 ###docker.sh
-docker.sh is used for several functionalities.
-
-1. Build docker image with hadoop, zookeeper, kafka, scribengin installed.
-2. Launch docker containers for hadoop-master, hadoop-workers, zookeeper, kafka.
-
+Used to build and configure docker images, and launch containers
 ###clusterCommander.py
-
 Is used to start/stop/restart cluster or specific processes with the given hostmachine. Also used to monitor running and none running processes in the cluster.
 
-##Usage
+Usage
+======
 ###Setup neverwinterdp_home
 
 - Checkout Scribengin into neverwinterdp_home
@@ -39,7 +36,8 @@ export NEVERWINTERDP_HOME=/your/path/to/NeverwinterDP
 
 
 
-###Running neverwinterdp deployments - SIMPLE STEPS
+Running neverwinterdp deployments - SIMPLE STEPS
+======
 
 
 ```
@@ -64,14 +62,12 @@ cd neverwinterdp-deployments/tools/cluster/
 
 
 
-
-
-
 ***  
 
 
 
-###Running neverwinterdp deployments - DETAIL  
+Running neverwinterdp deployments - DETAIL
+======
 
 ####Build docker image with scribengin (explained)
 
