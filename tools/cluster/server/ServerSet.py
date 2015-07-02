@@ -387,11 +387,11 @@ class ServerSet(object):
     os.chdir(neverwinterdp_home)
     os.system(join(neverwinterdp_home, "gradlew",) +command)
     
-    os.chdir(join(neverwinterdp_home, "module/elasticsearch"))
-    os.system(join(neverwinterdp_home, "gradlew")+" clean build install release -x test")
+    #os.chdir(join(neverwinterdp_home, "module/elasticsearch"))
+    #os.system(join(neverwinterdp_home, "gradlew")+" clean build install release -x test")
     
     os.chdir(join(neverwinterdp_home,"scribengin/release"))
-    os.system(join(neverwinterdp_home, "gradlew")+" clean release")
+    os.system(join(neverwinterdp_home, "gradlew",) +command)
     os.chdir(self.module_path())
     
   def scribenginDeploy(self, hostname, aws_credential_path, clean, neverwinterdp_home):
