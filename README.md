@@ -26,16 +26,24 @@ git clone https://github.com/Nventdata/NeverwinterDP
 ```
 
 - Set NEVERWINTERDP_HOME environment variable (optional) or you can give --neverwinterdp-home option value in the commandline arguments.
+
 ```
 export NEVERWINTERDP_HOME=/your/path/to/NeverwinterDP
 ```
    
+   
+   
+   
+***
 
 
-###Running neverwinterdp deployments
-Checkout neverwinterdp-deployments project into any of your directory.
-	
+
+
+###Running neverwinterdp deployments - SIMPLE STEPS
+
+
 ```
+#Checkout neverwinterdp-deployments project 
 git clone git clone https://<bitbucket_user>@bitbucket.org/nventdata/neverwinterdp-deployments.git
 cd /path/to/neverwinterdp-deployments
 ```
@@ -53,7 +61,18 @@ cd neverwinterdp-deployments/tools/cluster/
   --kafka-server-config ../../configs/bootstrap/post-install/kafka/config/server.properties     \
   --zookeeper-server-config ../../configs/bootstrap/post-install/zookeeper/conf/zoo.cfg
 ```
-  
+
+
+
+
+
+
+***  
+
+
+
+###Running neverwinterdp deployments - DETAIL  
+
 ####Build docker image with scribengin (explained)
 
 ```
