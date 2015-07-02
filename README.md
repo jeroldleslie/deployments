@@ -28,7 +28,7 @@ mkdir neverwinterdp
 
 ```
 cd neverwinterdp
-git clone https://github.com/DemandCube/Scribengin
+git clone https://github.com/Nventdata/NeverwinterDP
 ```
 
 - Set NEVERWINTERDP_HOME environment variable (optional) or you can give --neverwinterdp-home option value in the commandline arguments.
