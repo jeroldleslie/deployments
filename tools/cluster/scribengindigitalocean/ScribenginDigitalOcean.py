@@ -5,7 +5,8 @@ from multiprocessing import Process
 from time import sleep
 path.insert(0, dirname(dirname(abspath(__file__))))
 from Cluster import Cluster
-
+from server.Server import Server
+from process.Process import Process as ScribeProcess
 
 class ScribenginDigitalOcean():
   def __init__(self, digitalOceanToken=None, digitalOceanTokenFileLocation="~/.digitaloceantoken"):
@@ -61,6 +62,9 @@ class ScribenginDigitalOcean():
     
   
   def destroyDropletAndWait(self, droplet, sleeptime=5, maxRetries=60):
+    if droplet is None:
+      logging.debug("Droplet is none, returning")
+      return
     logging.debug("Destroying: "+droplet.name)
     print "Destroying: "+droplet.name
     droplet.destroy()
@@ -121,6 +125,20 @@ class ScribenginDigitalOcean():
     self.createDropletSet(droplets)
     return droplets
   
+  def getDropletIp(self, dropletName):
+    hostAndIP = {}
+    manager = digitalocean.Manager(token=self.token)
+    my_droplets = manager.get_all_droplets()
+    for droplet in my_droplets:
+      if droplet.name == dropletName:
+        return droplet.ip_address
+  
+  def getDroplet(self, dropletName):
+    manager = digitalocean.Manager(token=self.token)
+    all_droplets = manager.get_all_droplets()
+    for droplet in all_droplets:
+      if droplet.name == dropletName:
+        return droplet
   
   def getScribenginHostsAndIPs(self):
     hostAndIPs = []
@@ -193,9 +211,14 @@ class ScribenginDigitalOcean():
       os.system(command)
       
   
+  
   #Must be executed *AFTER* updateLocalHostsFile is called on cluster
-  def setupNeverwinterdpUser(self, user="root"):
-    cluster = Cluster()
+  def setupNeverwinterdpUser(self, user="root", serverName=None):
+    if serverName is None:
+      cluster = Cluster()
+    else:
+      cluster = Server(serverName)
+      cluster.addProcess(ScribeProcess(serverName, self.getDropletIp(serverName), "~/", None))
     userScript='''
         useradd -m -d /home/neverwinterdp -s /bin/bash -c "neverwinterdp user" -p $(openssl passwd -1 neverwinterdp)  neverwinterdp && 
         echo "neverwinterdp ALL=(ALL) NOPASSWD: ALL" >> /etc/sudoers && 
@@ -204,6 +227,7 @@ class ScribenginDigitalOcean():
         chown -R neverwinterdp:neverwinterdp /home/neverwinterdp/.ssh
       '''
     cluster.sshExecute(userScript, user)
+    return cluster
 
 
   def deploy(self, neverwinterdpHome, 

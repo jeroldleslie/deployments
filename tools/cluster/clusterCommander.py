@@ -4,8 +4,10 @@ exec python $0 ${1+"$@"}
 """
 
 import click, logging, multiprocessing, signal, os
+from digitalocean import Droplet
 from sys import stdout, exit
 from time import sleep
+from os.path import join, expanduser
 
 from failure.FailureSimulator import ZookeeperFailure,KafkaFailure,DataFlowFailure
 from Cluster import Cluster
@@ -408,7 +410,81 @@ def digitalocean(launch, create_containers, update_local_host_file, update_host_
     digitalOcean.destroyAllScribenginDroplets()
   
   
+@mastercommand.command("digitaloceandevsetup", help="commands to help launch a developer box in digital ocean")
+@click.option('--name',     required=True,  help='Name of droplet to create or destroy')
+@click.option('--size',     default="16gb",  type=click.Choice(['512mb', '1gb', '2gb', '4gb', '8gb', '16gb', '32gb', '48gb', '64gb']),  help='Size of machine to spawn')
+@click.option('--region',   default="lon1",  type=click.Choice(['lon1','sgp1','nyc1','nyc2','nyc3','sfo1']), help='Region to spawn droplet in')
+@click.option('--image',   default="ubuntu-14-04-x64",  help='Which image to launch from (Choose an ubuntu image)')
+@click.option('--private-networking',   default="true",  type=click.Choice(["true","false"]),help='Whether to turn on private networking')
+@click.option('--create',  is_flag=True,    help='Create image')
+@click.option('--destroy',  is_flag=True,    help='Destroy image')
+@click.option('--digitaloceantoken',        default=None,  help='digital ocean token in plain text')
+@click.option('--digitaloceantokenfile',    default='~/.digitaloceantoken', help='digital ocean token file location')
+@click.option('--sshKeyPath',    default='~/.ssh/id_rsa', help='path to private key')
+@click.option('--sshKeyPathPublic',    default='~/.ssh/id_rsa.pub', help='path to public key')
+def digitaloceandevsetup(name, size, region, image, private_networking, create, destroy, 
+                         digitaloceantoken, digitaloceantokenfile, sshkeypath, sshkeypathpublic):
+  if "~/" in sshkeypath:
+      sshkeypath = join( expanduser("~"), sshkeypath.replace("~/",""))
+  if "~/" in sshkeypathpublic:
+      sshkeypathpublic = join( expanduser("~"), sshkeypathpublic.replace("~/",""))
   
+  
+  digitalOcean = ScribenginDigitalOcean(digitalOceanToken=digitaloceantoken, digitalOceanTokenFileLocation=digitaloceantokenfile)
+  
+  droplet = Droplet(token=digitalOcean.token,
+                    name=name,
+                    region=region,
+                    image=image,
+                    size_slug=size,
+                    backups=False,
+                    ssh_keys=digitalOcean.defaultDropletConfig["ssh_keys"],
+                    private_networking=private_networking,)
+  if create:
+    digitalOcean.createAndWait(droplet)
+    print "Setting up neverwinterdp user"
+    sshHandle = digitalOcean.setupNeverwinterdpUser(serverName=name)
+    print "Setting up keys"
+    with open (sshkeypath, "r") as myfile:
+      privateKeyContent = myfile.read()
+    with open (sshkeypathpublic, "r") as myfile:
+      publicKeyContent = myfile.read()
+    sshHandle.sshExecute("mkdir -p ~/.ssh && chmod 700 ~/.ssh && echo \""+privateKeyContent+
+                         "\" > ~/.ssh/id_rsa && echo \""+publicKeyContent+
+                         "\" > ~/.ssh/id_rsa.pub && chmod 600 ~/.ssh/id_rsa ~/.ssh/id_rsa.pub && "+
+                         "sudo chmod 777 /etc/hosts")
+    
+    print "Install wget, git, nano, java, vim"
+    sshHandle.sshExecute("sudo apt-get update && sudo apt-get install wget git nano openjdk-7-jdk vim -y")
+    sshHandle.sshExecute(r'echo -e "JAVA_HOME=/usr/lib/jvm/java-7-openjdk-amd64\\n" >> /etc/environment', "root")
+    print "Install gradle"
+    sshHandle.sshExecute("sudo add-apt-repository ppa:cwchien/gradle -y && sudo apt-get update && sudo apt-get install gradle-1.12 -y ")
+    print "Install Docker"
+    sshHandle.sshExecute("wget -qO- https://get.docker.com/ | sudo sh")
+    print "Configure neverwinterdp user for Docker"
+    sshHandle.sshExecute("sudo gpasswd -a neverwinterdp docker && sudo service docker restart")
+    print "Install Ansible"
+    sshHandle.sshExecute("sudo apt-get install software-properties-common -y && sudo apt-add-repository ppa:ansible/ansible -y && sudo apt-get update && sudo apt-get install ansible -y")
+    print "Check out NeverwinterDP"
+    sshHandle.sshExecute("git clone https://github.com/Nventdata/NeverwinterDP/ && cd NeverwinterDP && git checkout dev/master")
+    print "Check out neverwinterdp-deployments"
+    sshHandle.sshExecute("echo -e \"StrictHostKeyChecking no\\n\" >> ~/.ssh/config")
+    sshHandle.sshExecute("git clone git@bitbucket.org:nventdata/neverwinterdp-deployments.git")
+    
+    print "Your droplet "+name+" is ready at 'ssh neverwinterdp@"+digitalOcean.getDropletIp(droplet.name)+"'"
+  if destroy:
+    click.echo("Are you SURE you wish to destroy "+name+"? (yes/no) ", nl=False)
+    yes = set(['yes','y', 'ye'])
+    no = set(['no','n'])
+    
+    choice = raw_input().lower()
+    if choice in yes:
+       digitalOcean.destroyDropletAndWait(digitalOcean.getDroplet(name))
+    elif choice in no:
+       click.echo("Skipping destruction")
+    else:
+       click.echo("Please respond with 'yes' or 'no'.  Exiting.")
+    
 
 @mastercommand.command("dataflowfailure",help="Failure Simulation for dataflow")
 @click.option('--role',                           default='dataflow-worker', type=click.Choice(['dataflow-worker', 'dataflow-master']), help="'dataflow-worker' will run failure simulation on dataflow-worker, 'dataflow-master' will run failure simulation on dataflow-master,")
