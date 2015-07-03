@@ -60,6 +60,16 @@ cd neverwinterdp-deployments/tools/cluster/
   --zookeeper-server-config ../../configs/bootstrap/post-install/zookeeper/conf/zoo.cfg
 ```
 
+####Build digital ocean container for development in one step
+```
+cd neverwinterdp-deployments/tools/cluster/
+
+#Create it
+./clusterCommander.py digitaloceandevsetup --name [name of your machine] --create
+
+#Destroy it
+./clusterCommander.py digitaloceandevsetup --name [name of your machine] --destroy
+```
 
 
 ***  

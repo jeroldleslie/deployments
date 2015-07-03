@@ -467,12 +467,22 @@ def digitaloceandevsetup(name, size, region, image, private_networking, create, 
     sshHandle.sshExecute("sudo apt-get install software-properties-common -y && sudo apt-add-repository ppa:ansible/ansible -y && sudo apt-get update && sudo apt-get install ansible -y")
     print "Check out NeverwinterDP"
     sshHandle.sshExecute("git clone https://github.com/Nventdata/NeverwinterDP/ && cd NeverwinterDP && git checkout dev/master")
+    sshHandle.sshExecute(r'echo -e "NEVERWINTERDP_HOME=/home/neverwinterdp/NeverwinterDP\\n" >> ~/.bashrc')
     print "Check out neverwinterdp-deployments"
     sshHandle.sshExecute("echo -e \"StrictHostKeyChecking no\\n\" >> ~/.ssh/config")
     sshHandle.sshExecute("git clone git@bitbucket.org:nventdata/neverwinterdp-deployments.git")
     
     print "Your droplet "+name+" is ready at 'ssh neverwinterdp@"+digitalOcean.getDropletIp(droplet.name)+"'"
+  
   if destroy:
+    import re
+    doNotDestroy = [ re.compile('.*jenkins.*'),
+                    re.compile('.*crucible.*'), ]
+    
+    if any(regex.match(name) for regex in doNotDestroy):
+      click.echo(name+" matches a machine that will not be destroyed.  Returning")
+      return
+    
     click.echo("Are you SURE you wish to destroy "+name+"? (yes/no) ", nl=False)
     yes = set(['yes','y', 'ye'])
     no = set(['no','n'])
@@ -483,7 +493,7 @@ def digitaloceandevsetup(name, size, region, image, private_networking, create, 
     elif choice in no:
        click.echo("Skipping destruction")
     else:
-       click.echo("Please respond with 'yes' or 'no'.  Exiting.")
+       click.echo("Please respond with 'yes' or 'no'.  Returning.")
     
 
 @mastercommand.command("dataflowfailure",help="Failure Simulation for dataflow")
