@@ -3,10 +3,12 @@ from os.path import abspath, dirname, join, expanduser, realpath
 from sys import path
 from multiprocessing import Process
 from time import sleep
+from digitalocean.Region import Region
 path.insert(0, dirname(dirname(abspath(__file__))))
 from Cluster import Cluster
 from server.Server import Server
 from process.Process import Process as ScribeProcess
+from digitalocean.baseapi import DataReadError
 
 class ScribenginDigitalOcean():
   def __init__(self, digitalOceanToken=None, digitalOceanTokenFileLocation="~/.digitaloceantoken"):
@@ -35,17 +37,24 @@ class ScribenginDigitalOcean():
 
 
 
-  def createAndWait(self, droplet, sleeptime=5):
+  def createAndWait(self, droplet, sleeptime=5, maxRetries=12):
     logging.debug("Creating: "+droplet.name)
     print "Creating: "+droplet.name
     droplet.create()
+    
     status = None
+    retries = 0
+    
     while status != "active":
       try:
-        status = droplet.load().status
+        drop = self.getDroplet(droplet.name)
+        status = drop.load().status
       except DataReadError as e:
-        print e.value
-      logging.debug(droplet.name+": "+status)
+        pass
+      logging.debug(droplet.name+": "+str(status))
+      retries+=1
+      if retries > maxRetries:
+        break
       #Sleep is here to keep us from hitting the API Rate Limit
       sleep(sleeptime)
   
@@ -67,7 +76,16 @@ class ScribenginDigitalOcean():
       return
     logging.debug("Destroying: "+droplet.name)
     print "Destroying: "+droplet.name
-    droplet.destroy()
+    
+    retry = True
+    while retry is True:
+      try:
+        droplet.destroy()
+        retry = False
+      except DataReadError as e:
+        print "RETRYING "+droplet.name+": "+str(e)
+        sleep(5)
+      
     try:
       for i in range(0, maxRetries):
         status = droplet.load().status
@@ -75,19 +93,20 @@ class ScribenginDigitalOcean():
         sleep(sleeptime)
     except Exception as e:
       #Once we get an exception, then the droplet is gone
-      pass
+      print droplet.name+" DESTROYED"
   
   
-  def destroyAllScribenginDroplets(self):
+  def destroyAllScribenginDroplets(self, subdomain=None):
     threads = []
     manager = digitalocean.Manager(token=self.token)
     my_droplets = manager.get_all_droplets()
     for droplet in my_droplets:
       if any(regex.match(droplet.name) for regex in Cluster.serverRegexes):
-        logging.debug("Destroying: "+droplet.name)
-        t = Process(target=self.destroyDropletAndWait, args=(droplet,))
-        t.start()
-        threads.append(t)
+        if subdomain is None or subdomain in droplet.name: 
+          logging.debug("Destroying: "+droplet.name)
+          t = Process(target=self.destroyDropletAndWait, args=(droplet,))
+          t.start()
+          threads.append(t)
     for t in threads:
       t.join()
   
@@ -101,7 +120,7 @@ class ScribenginDigitalOcean():
     
     return config
   
-  def launchContainers(self, configLocation):
+  def launchContainers(self, configLocation, region=None, subdomain=None):
     config = self.loadMachineConfig(configLocation)
     droplets = []
     for machine in config:
@@ -112,11 +131,22 @@ class ScribenginDigitalOcean():
         omitNumberedName = ["hadoop-master",]
         if machine["role"] in omitNumberedName and machine["num"] == 1:
           hostname =machine["role"] 
-          
         
+        #If region is passed in, use that
+        #Otherwise use what's set in the config
+        digitalOceanRegion = region
+        if digitalOceanRegion is None:
+            digitalOceanRegion = machine["region"]
+        
+        #Add subdomain to hostname if its passed in
+        if subdomain is not None:
+          digitalOceanName=hostname+"."+subdomain
+        else:
+          digitalOceanName = hostname
+          
         droplets.append(digitalocean.Droplet(token=self.token,
-                                 name=hostname,
-                                 region=machine["region"],
+                                 name=digitalOceanName,
+                                 region=digitalOceanRegion,
                                  image=machine["image"],
                                  size_slug=machine["memory"],
                                  backups=False,
@@ -140,21 +170,29 @@ class ScribenginDigitalOcean():
       if droplet.name == dropletName:
         return droplet
   
-  def getScribenginHostsAndIPs(self):
+  def getScribenginHostsAndIPs(self, subdomain=None):
     hostAndIPs = []
     manager = digitalocean.Manager(token=self.token)
     my_droplets = manager.get_all_droplets()
     for droplet in my_droplets:
       if any(regex.match(droplet.name) for regex in Cluster.serverRegexes):
-        hostAndIPs.append(
+        if subdomain is None or subdomain in droplet.name:
+          
+          #If there is a subdomain involved, remove it
+          dropletName = droplet.name
+          if subdomain is not None:
+            dropletName = dropletName.replace("."+subdomain, "")
+          
+          hostAndIPs.append(
                           {
-                           "name": droplet.name,
+                           "name": dropletName,
                            "ip"  : droplet.ip_address,
                            })
     return hostAndIPs
   
   def writeAnsibleInventory(self, inventoryFileLocation="/tmp/scribengininventoryDO", 
-                            ansibleSshUser="neverwinterdp", ansibleSshKey="~/.ssh/id_rsa"):
+                            ansibleSshUser="neverwinterdp", ansibleSshKey="~/.ssh/id_rsa",
+                            subdomain=None):
     inventory = ""
     hostsAndIps = self.getScribenginHostsAndIPs()
     groupList = ["monitoring",
@@ -168,15 +206,19 @@ class ScribenginDigitalOcean():
       inventory += "\n["+group.replace("-","_")+"]\n"
       for host in hostsAndIps:
         if group in host["name"]:
-          inventory += host["name"]+" ansible_ssh_user="+ansibleSshUser+" ansible_ssh_private_key_file="+ansibleSshKey+"\n"
+          if subdomain is None or subdomain in host["name"]:
+            if subdomain is None:
+              inventory += host["name"]+" ansible_ssh_user="+ansibleSshUser+" ansible_ssh_private_key_file="+ansibleSshKey+"\n"
+            else:
+              inventory += host["name"].replace("."+subdomain, "")+" ansible_ssh_user="+ansibleSshUser+" ansible_ssh_private_key_file="+ansibleSshKey+"\n"
     
     f = open(inventoryFileLocation,'w')
     f.write(inventory)
     f.close()
     logging.debug("Ansible inventory contents: \n"+inventory)
   
-  def getHostsString(self):
-    hostAndIps = self.getScribenginHostsAndIPs()
+  def getHostsString(self, subdomain=None):
+    hostAndIps = self.getScribenginHostsAndIPs(subdomain)
     hostString = self.hostsFileStartString+"\n"
     for host in hostAndIps:
       hostString += host["ip"]+" "+host["name"]+"\n"
@@ -184,14 +226,21 @@ class ScribenginDigitalOcean():
     return hostString
     
     
-  def updateRemoteHostsFile(self, hostsFile='/etc/hosts', user="root"):
+  def updateRemoteHostsFile(self, subdomain=None, hostsFile='/etc/hosts', user="root"):
     cluster = Cluster()
-    hostString = self.getHostsString()
-    cluster.sshExecute("echo '"+hostString+"'  > /etc/hosts", user, False)
+    hostString = self.getHostsString(subdomain)
+    threads = []
+    for server in cluster.servers:
+      t = Process(target=server.sshExecute, args=("echo '"+hostString+"'  > /etc/hosts",user,False,))
+      t.start()
+      threads.append(t)
+    
+    for t in threads:
+      t.join()
   
   
-  def updateLocalHostsFile(self, hostsFile='/etc/hosts'):
-    hostString = self.getHostsString()
+  def updateLocalHostsFile(self, subdomain=None, hostsFile='/etc/hosts'):
+    hostString = self.getHostsString(subdomain)
     
     with open(hostsFile) as inputFile:
       hostFileContent = inputFile.read()
@@ -207,7 +256,7 @@ class ScribenginDigitalOcean():
     logging.debug("Runnging ssh-keygen -R")
     hostAndIps = self.getScribenginHostsAndIPs()
     for host in hostAndIps:
-      command = "ssh-keygen -R "+host["name"]
+      command = "ssh-keygen -R "+host["name"] +" 2> /dev/null"
       os.system(command)
       
   
@@ -226,27 +275,49 @@ class ScribenginDigitalOcean():
         cp -R /root/.ssh/ /home/neverwinterdp/ && 
         chown -R neverwinterdp:neverwinterdp /home/neverwinterdp/.ssh
       '''
-    cluster.sshExecute(userScript, user)
+    threads = []
+    for server in cluster.servers:
+      t = Process(target=server.sshExecute, args=(userScript,user,))
+      t.start()
+      threads.append(t)
+    
+    for t in threads:
+      t.join()
+      
     return cluster
 
 
   def deploy(self, neverwinterdpHome, 
              playbook=join(dirname(dirname(dirname(dirname(realpath(__file__))))), "ansible/scribenginCluster.yml"), 
              inventory="/tmp/scribengininventoryDO",
-             outputToStdout=True):
+             outputToStdout=True,
+             retry=0,
+             retryLine=None,
+             maxRetries=5):
     #ansible-playbook playbooks/scribenginCluster.yml -i scribengininventory --extra-vars "neverwinterdp_home_override=/path/to/NeverwinterDP"
     command = "ansible-playbook "+playbook+" -i "+inventory+" --extra-vars \"neverwinterdp_home_override="+neverwinterdpHome+"\""
+    if retryLine is not None:
+      command = command+" "+retryLine
     logging.debug("ansible-playbook command: "+command)
     
     #Outputs stdout/stderr to stdout while command is running
+    toRetry = False
     p = subprocess.Popen(command, stdout=subprocess.PIPE, stderr=subprocess.STDOUT, shell=True)
     while(True):
       retcode = p.poll() #returns None while subprocess is running
       line = p.stdout.readline()
       if(outputToStdout):
         print line.rstrip()
+      #Looking for "to retry, use: --limit @/Users/user/scribenginCluster.retry"
+      if "to retry, use: --limit" in line :
+        toRetry = True
+        retryLine = line.split(":")[1]
       if(retcode is not None):
         break
+    
+    if(toRetry and retry < maxRetries):
+      print "Retrying Ansible"
+      self.deploy(neverwinterdpHome, playbook, inventory, outputToStdout, retry+1, retryLine)
     
     
     

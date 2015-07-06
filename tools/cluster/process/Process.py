@@ -37,6 +37,7 @@ class Process(object):
       if retries < maxRetries:
         return self.sshExecute(command, user, maxRetries, retries+1)
       else:
+        print "Error connecting to "+self.hostname+" as user "+user
         raise
     
     #print stdout

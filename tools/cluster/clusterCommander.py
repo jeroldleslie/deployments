@@ -364,18 +364,27 @@ def zookeeperfailure(failure_interval, wait_before_start, servers, min_servers, 
 @click.option('--setup-neverwinterdp-user', is_flag=True,  help='Sets up the neverwinterdp user')
 @click.option('--ansible-inventory',        is_flag=True,  help='Creates ansible inventory file')
 @click.option('--ansible-inventory-location', default="/tmp/scribengininventoryDO",  help='Where to save ansible inventory file')
+@click.option('--region',                    default="lon1",  type=click.Choice(['lon1','sgp1','nyc1','nyc2','nyc3','sfo1']), help='Region to spawn droplet in')
 @click.option('--deploy',                   is_flag=True,  help='Run ansible')
 @click.option('--destroy',                  is_flag=True,  help='destroys all scribengin containers')
 @click.option('--neverwinterdp-home',       default=None, help='neverwinterdp home')
 @click.option('--digitaloceantoken',        default=None,  help='digital ocean token in plain text')
 @click.option('--digitaloceantokenfile',    default='~/.digitaloceantoken', help='digital ocean token file location')
+@click.option('--subdomain',                default="dev",  help='Subdomain to name hosts with in DO - i.e. hadoop-master.dev')
+@click.option('--extra-sleep',              default=20,  help='Amount of extra time to sleep between launching DO and executing commands over SSH')
 def digitalocean(launch, create_containers, update_local_host_file, update_host_file, setup_neverwinterdp_user,
-                 ansible_inventory, ansible_inventory_location, deploy, destroy, 
-                 neverwinterdp_home, digitaloceantoken, digitaloceantokenfile):
+                 ansible_inventory, ansible_inventory_location, region, deploy, destroy, 
+                 neverwinterdp_home, digitaloceantoken, digitaloceantokenfile,
+                 subdomain, extra_sleep):
   
   #Make sure neverwinterdp_home is set
   if (deploy or launch) and neverwinterdp_home is None:
-    raise click.BadParameter("--neverwinterdp-home is needed to deploy", param_hint = "--neverwinterdp-home")
+    if os.environ.get('NEVERWINTERDP_HOME') == "":
+      raise click.BadParameter("--neverwinterdp-home is needed to deploy", param_hint = "--neverwinterdp-home")
+    else:
+      neverwinterdp_home = os.environ.get('NEVERWINTERDP_HOME')
+      if neverwinterdp_home is None or neverwinterdp_home == "":
+        raise click.BadParameter("--neverwinterdp-home is needed to deploy", param_hint = "--neverwinterdp-home")
   
   if launch and create_containers is None:
     raise click.BadParameter("--create-containers is needed to deploy", param_hint = "--create_containers")
@@ -384,14 +393,16 @@ def digitalocean(launch, create_containers, update_local_host_file, update_host_
   
   if create_containers or launch:
     click.echo("Creating containers")
-    digitalOcean.launchContainers(create_containers)
+    digitalOcean.launchContainers(create_containers, region, subdomain)
   
   if update_local_host_file or launch:
     click.echo("Updating local hosts file")
-    digitalOcean.updateLocalHostsFile()
+    digitalOcean.updateLocalHostsFile(subdomain)
   if update_host_file or launch:
+    click.echo("Sleeping for "+str(extra_sleep)+" seconds")
+    sleep(extra_sleep)
     click.echo("Updating remote hosts file")
-    digitalOcean.updateRemoteHostsFile()
+    digitalOcean.updateRemoteHostsFile(subdomain)
   
   if setup_neverwinterdp_user or launch:
     click.echo("Setting up neverwinterdp user")
@@ -399,7 +410,7 @@ def digitalocean(launch, create_containers, update_local_host_file, update_host_
   
   if ansible_inventory or launch:
     click.echo("Writing ansible inventory file")
-    digitalOcean.writeAnsibleInventory(inventoryFileLocation=ansible_inventory_location)
+    digitalOcean.writeAnsibleInventory(inventoryFileLocation=ansible_inventory_location, subdomain=subdomain)
   
   if deploy or launch:
     click.echo("Running ansible")
@@ -407,7 +418,7 @@ def digitalocean(launch, create_containers, update_local_host_file, update_host_
   
   if destroy:
     click.echo("Destroying Scribengin droplets")
-    digitalOcean.destroyAllScribenginDroplets()
+    digitalOcean.destroyAllScribenginDroplets(subdomain)
   
   
 @mastercommand.command("digitaloceandevsetup", help="commands to help launch a developer box in digital ocean")
