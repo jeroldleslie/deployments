@@ -2,6 +2,7 @@ from tabulate import tabulate
 from multiprocessing import Pool
 import os, sys, re
 from os.path import join, expanduser
+from multiprocessing.pool import ThreadPool
 
 #This function is outside the ServerSet class
 #because otherwise it wouldn't be pickleable 
@@ -98,10 +99,16 @@ class ServerSet(object):
   def addServer(self, server):
     self.servers.append(server)
   
-  def sshExecute(self, command, enableConsoleOutput = True):
+  def sshExecute(self, command, user="neverwinterdp", enableConsoleOutput = True, numThreads=10, timeout_sec=60):
     output = {}
+    threads = []
+    pool = ThreadPool(processes=numThreads)
     for server in self.servers :
-      output[server.getHostname()] = server.sshExecute(command)
+      threads.append([server.getHostname(), pool.apply_async(server.sshExecute, (command, user))] )
+      #output[server.getHostname()] = server.sshExecute(command, user)
+    
+    for t in threads:
+      output[ t[0] ] = t[1].get(timeout=timeout_sec)
     return output 
   
   def sync(self, hostname, src="/opt/", dst="/opt"):
@@ -380,11 +387,11 @@ class ServerSet(object):
     os.chdir(neverwinterdp_home)
     os.system(join(neverwinterdp_home, "gradlew",) +command)
     
-    os.chdir(join(neverwinterdp_home, "module/elasticsearch"))
-    os.system(join(neverwinterdp_home, "gradlew")+" clean build install release -x test")
+    #os.chdir(join(neverwinterdp_home, "module/elasticsearch"))
+    #os.system(join(neverwinterdp_home, "gradlew")+" clean build install release -x test")
     
     os.chdir(join(neverwinterdp_home,"scribengin/release"))
-    os.system(join(neverwinterdp_home, "gradlew")+" clean release")
+    os.system(join(neverwinterdp_home, "gradlew",) +command)
     os.chdir(self.module_path())
     
   def scribenginDeploy(self, hostname, aws_credential_path, clean, neverwinterdp_home):

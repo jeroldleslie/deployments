@@ -1,6 +1,6 @@
 ---
 - name: copy clustercommander 
-  copy: src={{ playbook_dir }}/../tools/cluster dest=/opt/
+  synchronize: src={{ playbook_dir }}/../tools/cluster dest=/opt/
   
 - name: make clustercommander setup executable
   file: path=/opt/cluster/setup.sh mode=0777

@@ -62,7 +62,7 @@
 
 #TODO: Move dest = /opt/neverwinterdp
 - name: Copy local files from {{local_scribengin_release_folder}} to remote hosts {{remote_scribengin_home}}
-  copy: src={{local_scribengin_release_folder}} dest={{remote_scribengin_home}}
+  synchronize: src={{local_scribengin_release_folder}} dest={{remote_scribengin_home}}
   
 - name: Make shell.sh executable
   file: mode=u+rxw path={{remote_scribengin_home}}/scribengin/bin/shell.sh

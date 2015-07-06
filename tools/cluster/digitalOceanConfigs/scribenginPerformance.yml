@@ -1,0 +1,23 @@
+- memory: 16gb
+  num: 3
+  role: kafka
+
+- memory: 8gb
+  num: 2
+  role: zookeeper
+
+- memory: 16gb
+  num: 3
+  role: hadoop-worker
+
+- memory: 16gb
+  num: 1
+  role: hadoop-master
+
+- memory: 16gb
+  num: 1
+  role: elasticsearch
+
+- memory: 2gb
+  num: 1
+  role: monitoring

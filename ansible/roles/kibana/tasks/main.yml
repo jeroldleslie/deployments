@@ -17,6 +17,10 @@
   sudo: yes
   command: tar xf /tmp/kibana.tar.gz -C /opt/kibana --strip 1
 
+- name: set location of elasticsearch
+  sudo: yes
+  lineinfile: 'dest=/opt/kibana/config/kibana.yml regexp="elasticsearch_url.*9200" line="elasticsearch_url: \"http://elasticsearch-1:9200\""'
+
 - name: Start kibana service
   sudo: yes
   service: name=kibana4 state=started enabled=yes

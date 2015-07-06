@@ -26,7 +26,7 @@ ssh -o "StrictHostKeyChecking no" neverwinterdp@hadoop-master "cd /opt/neverwint
              --dataflow-name  kafka-to-kafka \
              --worker 3 \
              --executor-per-worker 1 \
-             --duration 90000 \
+             --duration 120000 \
              --task-max-execute-time 1000 \
              --source-name input \
              --source-num-of-stream 10 \

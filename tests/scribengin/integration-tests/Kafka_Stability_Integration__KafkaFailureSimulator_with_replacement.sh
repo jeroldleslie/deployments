@@ -32,7 +32,7 @@ ssh -o StrictHostKeyChecking=no neverwinterdp@hadoop-master "cd /opt/cluster && 
 FAIL_SIM_PID=$!
 
 ssh -o StrictHostKeyChecking=no neverwinterdp@hadoop-master "cd /opt/cluster && \
-                                    python clusterCommander.py  monitor --update-interval 10 " &
+                                    python clusterCommander.py monitor --update-interval 10 " &
 
 MONITOR_PID=$!
 
