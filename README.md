@@ -54,10 +54,16 @@ docker/scribengin/docker.sh  cluster --launch --neverwinterdp-home=/your/path/to
 ####Build digital ocean containers with scribengin in one step
 ```
 cd neverwinterdp-deployments/tools/cluster/
+
+#Create cluster
 ./clusterCommander.py digitalocean --launch --neverwinterdp-home /your/path/to/NeverwinterDP/   \
   --create-containers ./digitalOceanConfigs/scribenginPerformance.yml  cluster --start          \
   --kafka-server-config ../../configs/bootstrap/post-install/kafka/config/server.properties     \
   --zookeeper-server-config ../../configs/bootstrap/post-install/zookeeper/conf/zoo.cfg
+  
+  
+#Destroy cluster
+./clusterCommander.py digitalocean --destroy
 ```
 
 ####Build digital ocean container for development in one step
