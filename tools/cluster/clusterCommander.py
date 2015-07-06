@@ -418,11 +418,12 @@ def digitalocean(launch, create_containers, update_local_host_file, update_host_
 @click.option('--private-networking',   default="true",  type=click.Choice(["true","false"]),help='Whether to turn on private networking')
 @click.option('--create',  is_flag=True,    help='Create image')
 @click.option('--destroy',  is_flag=True,    help='Destroy image')
+@click.option('--branch',        default="dev/master",  help='Branch of NeverwinterDP to check out')
 @click.option('--digitaloceantoken',        default=None,  help='digital ocean token in plain text')
 @click.option('--digitaloceantokenfile',    default='~/.digitaloceantoken', help='digital ocean token file location')
 @click.option('--sshKeyPath',    default='~/.ssh/id_rsa', help='path to private key')
 @click.option('--sshKeyPathPublic',    default='~/.ssh/id_rsa.pub', help='path to public key')
-def digitaloceandevsetup(name, size, region, image, private_networking, create, destroy, 
+def digitaloceandevsetup(name, size, region, image, private_networking, create, destroy, branch,
                          digitaloceantoken, digitaloceantokenfile, sshkeypath, sshkeypathpublic):
   if "~/" in sshkeypath:
       sshkeypath = join( expanduser("~"), sshkeypath.replace("~/",""))
@@ -466,7 +467,7 @@ def digitaloceandevsetup(name, size, region, image, private_networking, create, 
     print "Install Ansible"
     sshHandle.sshExecute("sudo apt-get install software-properties-common -y && sudo apt-add-repository ppa:ansible/ansible -y && sudo apt-get update && sudo apt-get install ansible -y")
     print "Check out NeverwinterDP"
-    sshHandle.sshExecute("git clone https://github.com/Nventdata/NeverwinterDP/ && cd NeverwinterDP && git checkout dev/master")
+    sshHandle.sshExecute("git clone https://github.com/Nventdata/NeverwinterDP/ && cd NeverwinterDP && git checkout "+branch)
     sshHandle.sshExecute(r'echo -e "NEVERWINTERDP_HOME=/home/neverwinterdp/NeverwinterDP\\n" >> ~/.bashrc')
     print "Check out neverwinterdp-deployments"
     sshHandle.sshExecute("echo -e \"StrictHostKeyChecking no\\n\" >> ~/.ssh/config")
