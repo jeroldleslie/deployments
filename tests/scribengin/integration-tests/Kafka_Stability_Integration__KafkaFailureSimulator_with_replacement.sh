@@ -4,19 +4,6 @@ SCRIPT_DIR=$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )
 #This Script will set root directory and Neverwinter_home
 source $SCRIPT_DIR/setupEnvironment.sh $@
 
-#Set up docker images
-$ROOT/docker/scribengin/docker.sh cluster --clean-containers --run-containers --ansible-inventory --deploy-scribengin --kafka-server=5 --monitoring-server=0 --elasticsearch-server=0 --deploy-scribengin --neverwinterdp-home=$NEVERWINTER_HOME
-
-ssh -o StrictHostKeyChecking=no neverwinterdp@hadoop-master "export NEVERWINTERDP_HOME=$NEVERWINTER_HOME && cd /opt/cluster && python clusterCommander.py zookeeper --start kafka --start --brokers kafka-1,kafka-2,kafka-3 hadoop --start scribengin --start"
-
-#make folder for test results
- if [ ! -d testresults ] ; then
-   mkdir testresults 
- fi
-
-#Give everything time to come up
-sleep 5
-
 
 #Run failure simulator in the background
 ssh -o StrictHostKeyChecking=no neverwinterdp@hadoop-master "cd /opt/cluster && mkdir -p /opt/neverwinterdp/scribengin/tools/kafka/junit-reports"
@@ -50,9 +37,7 @@ ssh -o "StrictHostKeyChecking no" neverwinterdp@hadoop-master "cd /opt/neverwint
 
 
 #Get results
-scp -o stricthostkeychecking=no neverwinterdp@hadoop-master:/opt/neverwinterdp/scribengin/tools/kafka/junit-reports/*.xml ./testresults/
+scp -o stricthostkeychecking=no neverwinterdp@hadoop-master:/opt/neverwinterdp/scribengin/tools/kafka/junit-reports/*.xml $TEST_RESULTS_LOCATION
 
 kill -9 $FAIL_SIM_PID $MONITOR_PID
 
-#Clean up
-$ROOT/docker/scribengin/docker.sh cluster --clean-containers --neverwinterdp-home=$NEVERWINTER_HOME

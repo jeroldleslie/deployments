@@ -4,11 +4,6 @@ SCRIPT_DIR=$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )
 #This Script will set root directory and Neverwinter_home
 source $SCRIPT_DIR/setupEnvironment.sh $@
 
-#make folder for test results
-mkdir testresults
-
-#Give everything time to come up
-sleep 5
 
 ssh -o "StrictHostKeyChecking no" neverwinterdp@hadoop-master "cd /opt/neverwinterdp/scribengin && ./bin/shell.sh scribengin info"
 ssh -o "StrictHostKeyChecking no" neverwinterdp@hadoop-master "cd /opt/neverwinterdp/scribengin && ./bin/shell.sh vm info"
@@ -38,5 +33,5 @@ ssh -o "StrictHostKeyChecking no" neverwinterdp@hadoop-master "cd /opt/neverwint
 
 
 #Get results
-scp -o stricthostkeychecking=no neverwinterdp@hadoop-master:/opt/neverwinterdp/scribengin/KafkaIntegrationTest.xml ./testresults/
+scp -o stricthostkeychecking=no neverwinterdp@hadoop-master:/opt/neverwinterdp/scribengin/KafkaIntegrationTest.xml $TEST_RESULTS_LOCATION
 

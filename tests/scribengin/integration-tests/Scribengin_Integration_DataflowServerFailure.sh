@@ -4,14 +4,6 @@ SCRIPT_DIR=$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )
 #This Script will set root directory and Neverwinter_home
 source $SCRIPT_DIR/setupEnvironment.sh $@
 
-#Set up docker images
-$ROOT/docker/scribengin/docker.sh cluster --clean-containers --run-containers --ansible-inventory --deploy-scribengin --start --neverwinterdp-home=$NEVERWINTER_HOME
-
-#make folder for test results
-mkdir testresults
-
-#Give everything time to come up
-sleep 5
 
 ssh -o "StrictHostKeyChecking no" neverwinterdp@hadoop-master "cd /opt/neverwinterdp/scribengin && ./bin/shell.sh scribengin info"
 ssh -o "StrictHostKeyChecking no" neverwinterdp@hadoop-master "cd /opt/neverwinterdp/scribengin && ./bin/shell.sh vm info"
@@ -60,7 +52,5 @@ kill -9 $FAILURE_PID
 #kill -9 $MONITOR_PID 
 
 #Get results
-scp -o stricthostkeychecking=no neverwinterdp@hadoop-master:/opt/junit-reports/*.xml ./testresults/
+scp -o stricthostkeychecking=no neverwinterdp@hadoop-master:/opt/junit-reports/*.xml $TEST_RESULTS_LOCATION
 
-#Clean up
-$ROOT/docker/scribengin/docker.sh cluster --clean-containers --neverwinterdp-home=$NEVERWINTER_HOME
