@@ -10,7 +10,7 @@ class Kibana(object):
 
   def __init__(self, elasticsearch_url, temp_path):
     self.elasticsearch_url = elasticsearch_url
-    self.temp_path = temp_path
+    self.temp_path = join(temp_path,"kibana.json")
     self.kibana_json_file_path=join(dirname(dirname(dirname(dirname(realpath(__file__))))), "configs/bootstrap/post-install/kibana/config/kibana.json")
   
   def import_kibana_from_host(self):
@@ -28,9 +28,9 @@ class Kibana(object):
     print "*** Importing kibana data ***\n", output
 
   def export_kibana(self):
-    command = "elasticdump --input='"+self.elasticsearch_url+"/.kibana' --output=$ --type=data > "+join(self.temp_path,"kibana.json")
+    command = "elasticdump --input='"+self.elasticsearch_url+"/.kibana' --output=$ --type=data > "+self.temp_path
     
-    readFile = open("kibana.json")
+    readFile = open(self.temp_path)
     lines = readFile.readlines()
     lines = lines[:-1]
     readFile.close()
