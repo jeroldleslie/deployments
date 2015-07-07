@@ -17,7 +17,7 @@ class Process(object):
     self.processIdentifier = processIdentifier;
     self.sshKeyPath = sshKeyPath
     
-  def sshExecute(self, command, user = "neverwinterdp", maxRetries=5, retries=0):
+  def sshExecute(self, command, user = "neverwinterdp", maxRetries=10, retries=0, sleepTime=10):
     """
     SSH onto a machine, execute a command
     Returns [stdout,stderr]
@@ -35,9 +35,10 @@ class Process(object):
       c.close()
     except:
       if retries < maxRetries:
-        return self.sshExecute(command, user, maxRetries, retries+1)
+        sleep(sleepTime)
+        return self.sshExecute(command, user, maxRetries, retries+1, sleepTime)
       else:
-        print "Error connecting to "+self.hostname+" as user "+user
+        print "Error connecting to "+str(self.hostname)+" as user "+str(user)
         raise
     
     #print stdout
