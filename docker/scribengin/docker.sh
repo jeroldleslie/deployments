@@ -359,6 +359,7 @@ function cluster(){
   FORCE_STOP_CLUSTER=$(has_opt "--force-stop-cluster" $@ )
   START=$(has_opt "--start" $@)
   LAUNCH=$(has_opt "--launch" $@ )
+  DEPLOY_KIBANA=$(has_opt "--deploy-kibana" $@)
   
   
   if [ $CLEAN_CONTAINERS == "true" ] || [ $LAUNCH == "true" ] ; then
@@ -400,6 +401,10 @@ function cluster(){
     startCluster $@
   fi
   
+  if [ $DEPLOY_KIBANA == "true" ] ; then
+    ssh -o StrictHostKeyChecking=no neverwinterdp@monitoring-1 "cd /opt/cluster && python clusterCommander.py kibana --import-kibana"
+  fi
+ 
   if [ $STOP_CLUSTER == "true" ] ; then
     ssh -o StrictHostKeyChecking=no neverwinterdp@hadoop-master "cd /opt/cluster && python clusterCommander.py cluster --stop status"
   fi
@@ -407,8 +412,6 @@ function cluster(){
   if [ $FORCE_STOP_CLUSTER == "true" ] ; then
     ssh -o StrictHostKeyChecking=no neverwinterdp@hadoop-master "cd /opt/cluster && python clusterCommander.py cluster --force-stop status"
   fi
-  
-  
 }
 
 function printUsage() {
@@ -438,6 +441,7 @@ function printUsage() {
   echo "         --force-stop-cluster  : Force stops cluster services"
   echo "         --neverwinterdp-home  : /Path/To/Neverwinterdp"
   echo "         --launch              : Cleans docker image and containers, Builds image and container, and starts"
+  echo "         --deploy-kibana       : Deploy kibana visualizations and dashboards"
   echo "    Examples:"
   echo "        ./docker.sh cluster [options]"
   echo "       ./docker.sh cluster --launch"
