@@ -314,7 +314,7 @@ function deploy_scribengin(){
 
 function deploy_tools(){
   SCRIPT_DIR=$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )
-  PLAYBOOK_FILE_LOCATION="$(get_opt --playbook-file-location "$SCRIPT_DIR/../../ansible/clustercommander.yml" $@)"
+  PLAYBOOK_FILE_LOCATION="$(get_opt --playbook-file-location "$SCRIPT_DIR/../../ansible/scribenginTools.yml" $@)"
   deploy $PLAYBOOK_FILE_LOCATION $@
 }
 

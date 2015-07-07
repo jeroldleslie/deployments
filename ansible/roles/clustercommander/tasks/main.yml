@@ -1,4 +1,12 @@
 ---
+- name: Check if remote cluster directory exists
+  stat: path=/opt/cluster
+  register: cluster_home_status
+
+- name: Delete remote cluster directory home if it exists
+  command: rm -rf /opt/cluster
+  when: cluster_home_status.stat.exists
+  
 - name: copy clustercommander 
   synchronize: src={{ playbook_dir }}/../tools/cluster dest=/opt/
   

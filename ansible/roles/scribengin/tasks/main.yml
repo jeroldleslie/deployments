@@ -60,7 +60,15 @@
   debug: var=stdout.stdout_lines
   run_once: true
 
-#TODO: Move dest = /opt/neverwinterdp
+
+- name: Check if remote neverwinterdp home exists
+  stat: path={{remote_scribengin_home}}
+  register: neverwinterdp_home_status
+
+- name: Delete neverwinterdp home if it exists
+  command: rm -rf {{remote_scribengin_home}}
+  when: neverwinterdp_home_status.stat.exists
+
 - name: Copy local files from {{local_scribengin_release_folder}} to remote hosts {{remote_scribengin_home}}
   synchronize: src={{local_scribengin_release_folder}} dest={{remote_scribengin_home}}
   

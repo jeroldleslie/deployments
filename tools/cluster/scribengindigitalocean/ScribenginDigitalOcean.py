@@ -225,8 +225,8 @@ class ScribenginDigitalOcean():
                             subdomain=None):
     ans = ScribenginAnsible()
     ans.writeAnsibleInventory(self.getScribenginHostsAndIPs(subdomain),
-                                            inventoryFileLocation, ansibleSshUser,
-                                            ansibleSshKey)
+                              inventoryFileLocation, ansibleSshUser,
+                              ansibleSshKey)
     
   
   def getHostsString(self, subdomain=None):
@@ -251,9 +251,8 @@ class ScribenginDigitalOcean():
       #Insert localhost info into hostString. Example:
       ##SCRIBENGIN CLUSTER START##
       #127.0.0.1 localhost
-      #127.0.1.1 hadoop-worker-1.test hadoop-worker-1
       serverHostString = hostString
-      #Zookeeper requires some black magic to get working
+      #However, Zookeeper requires some black magic to get working
       #If localhost is defined, Zookeeper nodes won't connect to each other (issue with hostname resolution???)
       #https://issues.apache.org/jira/browse/ZOOKEEPER-2184
       #So if zookeeper is in the hostname, omit adding the localhost info
@@ -324,30 +323,9 @@ class ScribenginDigitalOcean():
              retry=0,
              retryLine=None,
              maxRetries=5):
-    #ansible-playbook playbooks/scribenginCluster.yml -i scribengininventory --extra-vars "neverwinterdp_home_override=/path/to/NeverwinterDP"
-    command = "ansible-playbook "+playbook+" -i "+inventory+" --extra-vars \"neverwinterdp_home_override="+neverwinterdpHome+"\""
-    if retryLine is not None:
-      command = command+" "+retryLine
-    logging.debug("ansible-playbook command: "+command)
     
-    #Outputs stdout/stderr to stdout while command is running
-    toRetry = False
-    p = subprocess.Popen(command, stdout=subprocess.PIPE, stderr=subprocess.STDOUT, shell=True)
-    while(True):
-      retcode = p.poll() #returns None while subprocess is running
-      line = p.stdout.readline()
-      if(outputToStdout):
-        print line.rstrip()
-      #Looking for "to retry, use: --limit @/Users/user/scribenginCluster.retry"
-      if "to retry, use: --limit" in line :
-        toRetry = True
-        retryLine = line.split(":")[1]
-      if(retcode is not None):
-        break
-    
-    if(toRetry and retry < maxRetries):
-      print "Retrying Ansible"
-      self.deploy(neverwinterdpHome, playbook, inventory, outputToStdout, retry+1, retryLine)
+    ans = ScribenginAnsible()
+    ans.deploy(playbook, inventory, neverwinterdpHome, outputToStdout, retry, retryLine, maxRetries)
     
     
     

@@ -110,18 +110,6 @@ class ServerSet(object):
     for t in threads:
       output[ t[0] ] = t[1].get(timeout=timeout_sec)
     return output 
-  
-  def sync(self, hostname, src="/opt/", dst="/opt"):
-    omitSync = [ re.compile("generic.*") ]
-    for hostmachine in self.servers :
-      if hostmachine.getHostname() == hostname:
-        for server in self.servers :
-          if server.getHostname() != hostname:
-            if not any(regex.match(server.getHostname()) for regex in omitSync):
-              self.printTitle("Sync data with " + server.getHostname() + " from " + hostname)
-              command = "rsync -a -r -c -P --delete " +src+ " " + server.user +"@"+ server.getHostname() + ":"+dst
-              hostmachine.sshExecute(command, enableConsoleOutput=False)
-        break
     
   def startProcessOnHost(self, processName, hostname, setupClusterEnv = False):
     for server in self.servers :
@@ -376,51 +364,7 @@ class ServerSet(object):
     self.cleanHadoopWorker()
     self.cleanHadoopMaster()
   
-  def scribenginBuild(self, with_test, neverwinterdp_home):
-    self.printTitle("Build Scribengin")
-    command = ""
-    if(with_test):
-      command=" clean build install"
-    else:
-      command=" clean build install -x test"
-    #scribengin_home=join(neverwinterdp_home,"scribengin/")
-    os.chdir(neverwinterdp_home)
-    os.system(join(neverwinterdp_home, "gradlew",) +command)
-    
-    #os.chdir(join(neverwinterdp_home, "module/elasticsearch"))
-    #os.system(join(neverwinterdp_home, "gradlew")+" clean build install release -x test")
-    
-    
-    if(with_test):
-      command=" clean build release"
-    else:
-      command=" clean build release -x test"
-    os.chdir(join(neverwinterdp_home,"release"))
-    os.system(join(neverwinterdp_home, "gradlew",) +command)
-    os.chdir(self.module_path())
-    
-  def scribenginDeploy(self, hostname, aws_credential_path, clean, neverwinterdp_home, killCluster=True):
-    self.printTitle("Deploy Scribengin")
-    
-    print "Building scribengin from " + neverwinterdp_home
-    if(killCluster):
-      self.killCluster()
-    if(clean):
-      self.cleanCluster()
-    self.sshExecute("rm -rf /opt/neverwintedp")
-    self.sshExecute("rm -rf /opt/cluster")
-    os.chdir(neverwinterdp_home)
-    #os.system("scp -q -o StrictHostKeyChecking=no -r "+join(neverwinterdp_home,"module/elasticsearch/build/release/elasticsearch")+" neverwinterdp@"+hostname+":/opt/elasticsearch")
-    os.system("scp -q -o StrictHostKeyChecking=no -r "+join(neverwinterdp_home,"release/build/release/neverwinterdp/")+" neverwinterdp@"+hostname+":/opt/neverwinterdp")
-    os.chdir(self.module_path())
-    os.system("scp -q -o StrictHostKeyChecking=no -r "+join(os.getcwd(),"../../cluster")+" neverwinterdp@"+hostname+":/opt/cluster")
-    #if aws_credential_path == "":
-    #  aws_credential_path = join(expanduser("~"),".aws")
-    #print aws_credential_path
-    #os.system("scp -q -o StrictHostKeyChecking=no -r "+aws_credential_path+" neverwinterdp@"+hostname+":/home/neverwinterdp")
-    #self.sync(hostname, src="/home/neverwinterdp/.aws", dst="/home/neverwinterdp")
-    os.chdir(self.module_path())
-    self.sync(hostname)
+  
     
   def getReport(self):
     serverReport = []

@@ -1,5 +1,7 @@
+---
+
 - name: Cluster Commander
-  hosts: hadoop_master:hadoop_worker
+  hosts: all
   remote_user: neverwinterdp
   roles:
     - clustercommander

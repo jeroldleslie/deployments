@@ -9,10 +9,12 @@ function usage(){
   echo "           --test-results-location   - Where to store test results (default is ./testresults)"
   echo "     Flags that can be set: "
   echo "           --clean    - Clean the cluster with clusterCommander"
+  echo "           --stop     - Stop the cluster with clusterCommander"
   echo "           --start    - Start the cluster with clusterCommander"
   echo "           --restart  - Restart the cluster with clusterCommander"
-  echo "           --deploy   - Deploy the cluster with clusterCommander"
-  echo "           --build    - Build Scribengin with clusterCommander"
+  echo "           --deploy   - Build then deploy scribengin with clusterCommander"
+  echo "           --kafka-config-file        - Kafka config file to use when restarting cluster"
+  echo "           --zookeeper-config-file    - Zookeeper config filt to use when restarting cluster"
   
 }
 
@@ -46,19 +48,32 @@ function get_opt() {
   echo $DEFAULT_VALUE
 }
 
+
+#ROOT dir for neverwinterdp-deployments
+ROOT=$( dirname $( dirname $( dirname $( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd ))))
+
 NEVERWINTER_HOME=$(get_opt --neverwinterdp-home $NEVERWINTERDP_HOME $@)
 TEST_RESULTS_LOCATION=$(get_opt --test-results-location './testresults/' $@)
+KAFKA_CONFIG_FILE=$(get_opt --kafka-config-file $ROOT/configs/bootstrap/post-install/kafka/config/server.properties $@)
+ZOOKEEPER_CONFIG_FILE=$(get_opt --zookeeper-config-file $ROOT/configs/bootstrap/post-install/zookeeper/conf/zoo.cfg $@)
 CLEAN=$(has_opt --clean $@)
 START=$(has_opt --start $@)
+STOP=$(has_opt --stop $@)
 RESTART=$(has_opt --restart $@)
 DEPLOY=$(has_opt --deploy $@)
-BUILD=$(has_opt --build $@)
 HELP=$(has_opt --help $@)
+
 
 if [ $HELP == "true" ] ; then
   usage
   exit
 fi
+
+if [ $RESTART == "true" ] ; then
+  START="true"
+  STOP="true"
+fi
+
 
 if [ ! -d $NEVERWINTER_HOME ] ; then
   echo "$NEVERWINTER_HOME is not a valid directory!"
@@ -70,8 +85,7 @@ elif [ "$NEVERWINTER_HOME" = "" ] ; then
   exit
 fi
 
-#ROOT dir for neverwinterdp-deployments
-ROOT=$( dirname $( dirname $( dirname $( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd ))))
+
 
 
 export ANSIBLE_HOST_KEY_CHECKING=False
@@ -79,8 +93,8 @@ export NEVERWINTERDP_HOME=$NEVERWINTER_HOME
 export SKIP_DOCKER=$SKIP_DOCKER
 export TEST_RESULTS_LOCATION=$TEST_RESULTS_LOCATION
 export CLEAN=$CLEAN
-export BUILD=$BUILD
 export START=$START
+export STOP=$STOP
 export RESTART=$RESTART
 export DEPLOY=$DEPLOY
 
@@ -89,25 +103,20 @@ if [ ! -d $TEST_RESULTS_LOCATION ] ; then
   mkdir $TEST_RESULTS_LOCATION
 fi
 
-command="$ROOT/tools/cluster/clusterCommander.py --neverwinterdp-home $NEVERWINTER_HOME scribengin "
-if [ $CLEAN == "true" ] ; then
-  command="$command --clean"
-fi
-if [ $START == "true" ] ; then
-  command="$command --start"
-fi
-if [ $RESTART == "true" ] ; then
-  command="$command --restart"
+clusterCommander="$ROOT/tools/cluster/clusterCommander.py"
+if [ $STOP == "true" ] ; then
+  $clusterCommander cluster --force-stop
 fi
 if [ $DEPLOY == "true" ] ; then
-  command="$command --deploy"
+  $clusterCommander ansible --write-inventory-file --deploy-scribengin
 fi
-if [ $BUILD == "true" ] ; then
-  command="$command --build"
+if [ $CLEAN == "true" ] ; then
+  $clusterCommander cluster --clean
+fi
+if [ $START == "true" ] ; then
+  $clusterCommander cluster --kafka-server-config $KAFKA_CONFIG_FILE --zookeeper-server-config $ZOOKEEPER_CONFIG_FILE --start
+  #Give everything time to come up
+  sleep 5
 fi
 
 
-$command
-
-#Give everything time to come up
-sleep 5

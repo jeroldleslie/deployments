@@ -84,14 +84,7 @@ def vmmaster(restart, start, stop,force_stop, wait_before_start, wait_before_rep
 @click.option('--stop',              is_flag=True, help="stop Scribengin")
 @click.option('--force-stop',        is_flag=True, help="kill Scribengin")
 @click.option('--wait-before-start', default=0,    help="Time to wait before restarting Scribengin (seconds)")
-@click.option('--wait-before-report', default=5,    help="Time to wait before restarting reporting cluster status (seconds)")
-@click.option('--build',   is_flag=True, help="Build Scribengin")
-@click.option('--with-test',   is_flag=True, help="Build Scribengin with test")
-@click.option('--deploy',   is_flag=True, help="Deploy Scribengin")
-@click.option('--aws-credential-path', default="", help="Deploy Scribengin with aws credential. (--aws-credential-path='/root/.aws')")
-@click.option('--clean',   is_flag=True, help="Clean cluster")
-@click.option('--deploy-no-kill-cluster',   is_flag=True, help="Set this flag to not kill the cluster while deploying scribengin")
-def scribengin(restart, start, stop, force_stop, wait_before_start, wait_before_report, build, with_test, deploy, aws_credential_path, clean, deploy_no_kill_cluster):
+def scribengin(restart, start, stop, force_stop, wait_before_start):
   cluster = Cluster()
   neverwinterdp_home = _neverwinterdp_home
   if neverwinterdp_home == '':
@@ -99,12 +92,6 @@ def scribengin(restart, start, stop, force_stop, wait_before_start, wait_before_
     if neverwinterdp_home == 0:
       raise click.BadParameter("or set environment variable NEVERWINTERDP_HOME", param_hint = "--neverwinterdp-home")
 
-  if(build):
-    cluster.scribenginBuild(with_test, neverwinterdp_home)
-    
-  if(deploy):
-    cluster.scribenginDeploy("hadoop-master", aws_credential_path, clean, neverwinterdp_home, killCluster=(not deploy_no_kill_cluster))
-      
   if(restart or stop):
     logging.debug("Shutting down Scribengin")
     cluster.shutdownScribengin()
@@ -118,10 +105,7 @@ def scribengin(restart, start, stop, force_stop, wait_before_start, wait_before_
     sleep(wait_before_start)
     logging.debug("Starting Scribengin")
     cluster.startScribengin()
-  
-  logging.debug("Waiting for "+str(wait_before_report)+" seconds")
-  sleep(wait_before_report)
-  #click.echo(cluster.getReport())  
+    
 
 @mastercommand.command("cluster", help="Cluster commands")
 @click.option('--restart',             is_flag=True, help="restart cluster")
@@ -129,22 +113,13 @@ def scribengin(restart, start, stop, force_stop, wait_before_start, wait_before_
 @click.option('--stop',                is_flag=True, help="stop cluster")
 @click.option('--force-stop',          is_flag=True, help="kill cluster")
 @click.option('--clean',               is_flag=True, help="Clean old cluster data")
-@click.option('--sync',                default="",   help="Sync cluster datas from the given hostname")
 @click.option('--wait-before-start',   default=0,    help="Time to wait before restarting cluster (seconds)")
 @click.option('--wait-before-kill',    default=0,    help="Time to wait before force killing cluster (seconds)")
 @click.option('--kafka-server-config', default='/opt/kafka/config/default.properties', help='Kafka server configuration template path, default is /opt/kafka/config/default.properties', type=click.Path(exists=False))
 @click.option('--zookeeper-server-config',  default='/opt/zookeeper/conf/zoo_sample.cfg', help='Zookeeper configuration template path, default is /opt/zookeeper/conf/zoo_sample.cfg', type=click.Path(exists=False))
 @click.option('--execute',                           help='execute given command on all nodes')
-def cluster(restart, start, stop, force_stop, clean, sync, wait_before_start, wait_before_kill, kafka_server_config, zookeeper_server_config, execute):
+def cluster(restart, start, stop, force_stop, clean, wait_before_start, wait_before_kill, kafka_server_config, zookeeper_server_config, execute):
   cluster = Cluster()
-      
-  if(sync != ""):
-    #Validating hostname
-    hostname = sync
-    if hostname in cluster.getHostnames():
-      cluster.sync(sync)
-    else:
-      raise click.BadParameter("Host \"" + sync + "\" does not exist in the cluster.", param_hint = "--sync")
     
   if(execute is not None):
     cluster.sshExecute(execute)
