@@ -8,6 +8,7 @@ path.insert(0, dirname(dirname(abspath(__file__))))
 from Cluster import Cluster
 from server.Server import Server
 from process.Process import Process as ScribeProcess
+from scribenginansible.ScribenginAnsible import ScribenginAnsible
 from digitalocean.baseapi import DataReadError
 
 class ScribenginDigitalOcean():
@@ -222,29 +223,11 @@ class ScribenginDigitalOcean():
   def writeAnsibleInventory(self, inventoryFileLocation="/tmp/scribengininventoryDO", 
                             ansibleSshUser="neverwinterdp", ansibleSshKey="~/.ssh/id_rsa",
                             subdomain=None):
-    inventory = ""
-    hostsAndIps = self.getScribenginHostsAndIPs()
-    groupList = ["monitoring",
-                 "kafka",
-                 "hadoop-master",
-                 "hadoop-worker",
-                 "zookeeper",
-                 "elasticsearch",]
-    for group in groupList:
-      #Replace - with _ to differentiate groups from hostnames
-      inventory += "\n["+group.replace("-","_")+"]\n"
-      for host in hostsAndIps:
-        if group in host["name"]:
-          if subdomain is None or subdomain in host["name"]:
-            if subdomain is None:
-              inventory += host["name"]+" ansible_ssh_user="+ansibleSshUser+" ansible_ssh_private_key_file="+ansibleSshKey+"\n"
-            else:
-              inventory += host["name"].replace("."+subdomain, "")+" ansible_ssh_user="+ansibleSshUser+" ansible_ssh_private_key_file="+ansibleSshKey+"\n"
+    ans = ScribenginAnsible()
+    ans.writeAnsibleInventory(self.getScribenginHostsAndIPs(subdomain),
+                                            inventoryFileLocation, ansibleSshUser,
+                                            ansibleSshKey)
     
-    f = open(inventoryFileLocation,'w')
-    f.write(inventory)
-    f.close()
-    logging.debug("Ansible inventory contents: \n"+inventory)
   
   def getHostsString(self, subdomain=None):
     hostAndIps = self.getScribenginHostsAndIPs(subdomain)
@@ -275,11 +258,6 @@ class ScribenginDigitalOcean():
       #https://issues.apache.org/jira/browse/ZOOKEEPER-2184
       #So if zookeeper is in the hostname, omit adding the localhost info
       if "zookeeper" not in server.getHostname():
-        #toAdd = "\n127.0.0.1 localhost\n127.0.1.1 "+server.getHostname()
-        #if subdomain is not None:
-        #  toAdd += " "+server.getHostname()+"."+subdomain+"\n"
-        #else:
-        #  toAdd += "\n"
         toAdd="\n127.0.0.1 localhost\n"
         serverHostString = hostString.replace(self.hostsFileStartString, self.hostsFileStartString+toAdd)
       #print serverHostString

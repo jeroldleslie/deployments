@@ -7,11 +7,12 @@ import click, logging, multiprocessing, signal, os
 from digitalocean import Droplet
 from sys import stdout, exit
 from time import sleep
-from os.path import join, expanduser
+from os.path import join, expanduser, dirname, realpath
 
 from failure.FailureSimulator import ZookeeperFailure,KafkaFailure,DataFlowFailure
 from Cluster import Cluster
 from scribengindigitalocean.ScribenginDigitalOcean import ScribenginDigitalOcean
+from scribenginansible.ScribenginAnsible import ScribenginAnsible
 
 _debug = False
 _logfile = ''
@@ -88,7 +89,8 @@ def vmmaster(restart, start, stop,force_stop, wait_before_start, wait_before_rep
 @click.option('--deploy',   is_flag=True, help="Deploy Scribengin")
 @click.option('--aws-credential-path', default="", help="Deploy Scribengin with aws credential. (--aws-credential-path='/root/.aws')")
 @click.option('--clean',   is_flag=True, help="Clean cluster")
-def scribengin(restart, start, stop, force_stop, wait_before_start, wait_before_report, build, with_test, deploy, aws_credential_path, clean):
+@click.option('--deploy-no-kill-cluster',   is_flag=True, help="Set this flag to not kill the cluster while deploying scribengin")
+def scribengin(restart, start, stop, force_stop, wait_before_start, wait_before_report, build, with_test, deploy, aws_credential_path, clean, deploy_no_kill_cluster):
   cluster = Cluster()
   neverwinterdp_home = _neverwinterdp_home
   if neverwinterdp_home == '':
@@ -100,7 +102,7 @@ def scribengin(restart, start, stop, force_stop, wait_before_start, wait_before_
     cluster.scribenginBuild(with_test, neverwinterdp_home)
     
   if(deploy):
-    cluster.scribenginDeploy("hadoop-master", aws_credential_path, clean, neverwinterdp_home)
+    cluster.scribenginDeploy("hadoop-master", aws_credential_path, clean, neverwinterdp_home, killCluster=(not deploy_no_kill_cluster))
       
   if(restart or stop):
     logging.debug("Shutting down Scribengin")
@@ -356,6 +358,39 @@ def zookeeperfailure(failure_interval, wait_before_start, servers, min_servers, 
   _jobs.append(p)
   p.start()
 
+
+@mastercommand.command("ansible", help="commands to help with ansible")
+@click.option('--write-inventory-file',    is_flag=True,  help='')
+@click.option('--inventory-file',          default="/tmp/scribengininventoryDO",  help='')
+@click.option('--deploy-cluster',          is_flag=True, help='')
+@click.option('--deploy-scribengin',       is_flag=True, help='')
+@click.option('--deploy-tools',            is_flag=True, help='')
+@click.option('--neverwinterdp-home',      default=None, help='neverwinterdp home')
+def ansible(write_inventory_file, inventory_file, deploy_cluster,
+            deploy_scribengin, deploy_tools, neverwinterdp_home):
+  if neverwinterdp_home is None:
+    neverwinterdp_home = os.environ.get('NEVERWINTERDP_HOME')
+    
+  if neverwinterdp_home is None or neverwinterdp_home == "":
+      raise click.BadParameter("--neverwinterdp-home is needed to deploy", param_hint = "--neverwinterdp-home")
+  
+  
+  ans = ScribenginAnsible()
+  if write_inventory_file:
+    ans.writeAnsibleInventory(inventoryFileLocation=inventory_file)
+  
+  deploymentRootDir = dirname(dirname(dirname(realpath(__file__))))
+  ansibleRootDir = join(deploymentRootDir, "ansible")
+  
+  if deploy_cluster:
+    ans.deploy(join(ansibleRootDir, "scribenginCluster.yml"),inventory_file)
+  if deploy_scribengin:
+    ans.deploy(join(ansibleRootDir, "scribengin.yml"),inventory_file)
+  if deploy_tools:
+    ans.deploy(join(ansibleRootDir, "scribenginTools.yml"),inventory_file)
+  
+  
+
 @mastercommand.command("digitalocean", help="commands pertaining to digital-ocean droplets")
 @click.option('--launch',                   is_flag=True,  help='Create containers, deploy, and run ansible')
 @click.option('--create-containers',        default=None,  help='create the container using specified config')
@@ -416,7 +451,8 @@ def digitalocean(launch, create_containers, update_local_host_file, update_host_
   if destroy:
     click.echo("Destroying Scribengin droplets")
     digitalOcean.destroyAllScribenginDroplets(subdomain)
-  
+
+
   
 @mastercommand.command("digitaloceandevsetup", help="commands to help launch a developer box in digital ocean")
 @click.option('--name',     required=True,  help='Name of droplet to create or destroy')
