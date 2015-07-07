@@ -38,7 +38,7 @@ class Process(object):
         sleep(sleepTime)
         return self.sshExecute(command, user, maxRetries, retries+1, sleepTime)
       else:
-        print "Error connecting to "+self.hostname+" as user "+user
+        print "Error connecting to "+str(self.hostname)+" as user "+str(user)
         raise
     
     #print stdout
