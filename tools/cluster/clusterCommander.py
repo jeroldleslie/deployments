@@ -12,6 +12,7 @@ from os.path import join, expanduser
 from failure.FailureSimulator import ZookeeperFailure,KafkaFailure,DataFlowFailure
 from Cluster import Cluster
 from scribengindigitalocean.ScribenginDigitalOcean import ScribenginDigitalOcean
+from kibana.Kibana import Kibana
 
 _debug = False
 _logfile = ''
@@ -507,7 +508,21 @@ def digitaloceandevsetup(name, size, region, image, private_networking, create, 
     else:
        click.echo("Please respond with 'yes' or 'no'.  Returning.")
     
-
+@mastercommand.command("kibana", help="commands to help import/export kibana visualizations")
+@click.option('--import-kibana',  is_flag=True,    help='Import kibana')
+@click.option('--export-kibana',  is_flag=True,    help='Export kibana')
+@click.option('--elasticsearch-url',        default="http://elasticsearch-1:9200",  help='Elasticsear Url (with port) to connect, Ex: http://elasticsearch-1:9200')
+@click.option('--path',        default="/tmp/",  help='Path to save/read kibana json file')
+def kibana(import_kibana, export_kibana, elasticsearch_url, path):
+  print "digitalocean"
+  kibana = Kibana(elasticsearch_url, path)
+  
+  if import_kibana:
+    kibana.import_kibana()
+  
+  if export_kibana:
+    kibana.export_kibana()
+  
 @mastercommand.command("dataflowfailure",help="Failure Simulation for dataflow")
 @click.option('--role',                           default='dataflow-worker', type=click.Choice(['dataflow-worker', 'dataflow-master']), help="'dataflow-worker' will run failure simulation on dataflow-worker, 'dataflow-master' will run failure simulation on dataflow-master,")
 @click.option('--failure-interval',               default=180,  help="Time interval (in seconds) to fail server")
