@@ -1,4 +1,4 @@
-import digitalocean, logging, subprocess, yaml, os, re
+import digitalocean, logging, subprocess, yaml, os, re, socket
 from os.path import abspath, dirname, join, expanduser, realpath
 from sys import path
 from multiprocessing import Process
@@ -27,7 +27,7 @@ class ScribenginDigitalOcean():
                    "num" : 1,
                    "memory": "512mb",
                    "ssh_keys": manager.get_all_sshkeys(),
-                   "private_networking" : "true",
+                   "private_networking" : "false",
                   }
     
     self.hostsFileStartString="##SCRIBENGIN CLUSTER START##"
@@ -37,14 +37,14 @@ class ScribenginDigitalOcean():
 
 
 
-  def createAndWait(self, droplet, sleeptime=5, maxRetries=12):
+  def createAndWait(self, droplet, sleeptime=5, sshPort=22):
     logging.debug("Creating: "+droplet.name)
     print "Creating: "+droplet.name
     droplet.create()
     
     status = None
-    retries = 0
     
+    #Wait for droplet to be created
     while status != "active":
       try:
         drop = self.getDroplet(droplet.name)
@@ -52,11 +52,40 @@ class ScribenginDigitalOcean():
       except DataReadError as e:
         pass
       logging.debug(droplet.name+": "+str(status))
-      retries+=1
-      if retries > maxRetries:
-        break
       #Sleep is here to keep us from hitting the API Rate Limit
       sleep(sleeptime)
+    
+    #Wait for droplet to come up and be ready
+    while status != "completed":
+      drop = self.getDroplet(droplet.name)
+      actions = drop.get_actions()
+      for action in actions:
+        action.load()
+        # Once it shows completed, droplet is up and running
+        status = action.status
+        logging.debug(droplet.name+": "+str(status))
+        #print droplet.name+": "+status.strip()
+        if status.strip() is "completed":
+          break 
+        #Sleep is here to keep us from hitting the API Rate Limit
+        sleep(sleeptime)
+        
+    #Wait for SSH to be reachable
+    connected = False
+    ip = self.getDropletIp(droplet.name)
+    while connected is False:
+      s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+      try:
+        s.connect((ip, sshPort))
+        connected = True
+        logging.debug(droplet.name+": SSH is now running!")
+      except socket.error as e:
+        logging.debug(droplet.name+": SSH is not running.")
+        sleep(sleeptime)
+      try:
+        s.close()
+      except:
+        pass
   
   def createDropletSet(self, droplets):
     threads = []
@@ -221,22 +250,45 @@ class ScribenginDigitalOcean():
     hostAndIps = self.getScribenginHostsAndIPs(subdomain)
     hostString = self.hostsFileStartString+"\n"
     for host in hostAndIps:
-      hostString += host["ip"]+" "+host["name"]+"\n"
+      hostString += host["ip"]+" "+host["name"]
+      if subdomain is not None:
+        hostString += " "+host["name"]+"."+subdomain+"\n"
+      else:
+        hostString += "\n"
     hostString +=self.hostsFileEndString+"\n"
     return hostString
     
     
-  def updateRemoteHostsFile(self, subdomain=None, hostsFile='/etc/hosts', user="root"):
+  def updateRemoteHostsFile(self, subdomain=None, hostsFile='/etc/hosts', user="root", joinTimeout=60):
     cluster = Cluster()
     hostString = self.getHostsString(subdomain)
+    
     threads = []
     for server in cluster.servers:
-      t = Process(target=server.sshExecute, args=("echo '"+hostString+"'  > /etc/hosts",user,False,))
+      #Insert localhost info into hostString. Example:
+      ##SCRIBENGIN CLUSTER START##
+      #127.0.0.1 localhost
+      #127.0.1.1 hadoop-worker-1.test hadoop-worker-1
+      serverHostString = hostString
+      #Zookeeper requires some black magic to get working
+      #If localhost is defined, Zookeeper nodes won't connect to each other (issue with hostname resolution???)
+      #https://issues.apache.org/jira/browse/ZOOKEEPER-2184
+      #So if zookeeper is in the hostname, omit adding the localhost info
+      if "zookeeper" not in server.getHostname():
+        #toAdd = "\n127.0.0.1 localhost\n127.0.1.1 "+server.getHostname()
+        #if subdomain is not None:
+        #  toAdd += " "+server.getHostname()+"."+subdomain+"\n"
+        #else:
+        #  toAdd += "\n"
+        toAdd="\n127.0.0.1 localhost\n"
+        serverHostString = hostString.replace(self.hostsFileStartString, self.hostsFileStartString+toAdd)
+      #print serverHostString
+      t = Process(target=server.sshExecute, args=("echo '"+serverHostString+"'  > /etc/hosts",user,False,))
       t.start()
       threads.append(t)
     
     for t in threads:
-      t.join()
+      t.join(joinTimeout)
   
   
   def updateLocalHostsFile(self, subdomain=None, hostsFile='/etc/hosts'):
@@ -256,7 +308,7 @@ class ScribenginDigitalOcean():
     logging.debug("Runnging ssh-keygen -R")
     hostAndIps = self.getScribenginHostsAndIPs()
     for host in hostAndIps:
-      command = "ssh-keygen -R "+host["name"] +" 2> /dev/null"
+      command = "ssh-keygen -R "+host["name"] +" 2> /dev/null 1> /dev/null"
       os.system(command)
       
   

@@ -371,11 +371,10 @@ def zookeeperfailure(failure_interval, wait_before_start, servers, min_servers, 
 @click.option('--digitaloceantoken',        default=None,  help='digital ocean token in plain text')
 @click.option('--digitaloceantokenfile',    default='~/.digitaloceantoken', help='digital ocean token file location')
 @click.option('--subdomain',                default="dev",  help='Subdomain to name hosts with in DO - i.e. hadoop-master.dev')
-@click.option('--extra-sleep',              default=20,  help='Amount of extra time to sleep between launching DO and executing commands over SSH')
 def digitalocean(launch, create_containers, update_local_host_file, update_host_file, setup_neverwinterdp_user,
                  ansible_inventory, ansible_inventory_location, region, deploy, destroy, 
                  neverwinterdp_home, digitaloceantoken, digitaloceantokenfile,
-                 subdomain, extra_sleep):
+                 subdomain):
   
   #Make sure neverwinterdp_home is set
   if (deploy or launch) and neverwinterdp_home is None:
@@ -391,7 +390,7 @@ def digitalocean(launch, create_containers, update_local_host_file, update_host_
   
   digitalOcean = ScribenginDigitalOcean(digitalOceanToken=digitaloceantoken, digitalOceanTokenFileLocation=digitaloceantokenfile)
   
-  if create_containers or launch:
+  if create_containers is not None or launch:
     click.echo("Creating containers")
     digitalOcean.launchContainers(create_containers, region, subdomain)
   
@@ -399,8 +398,6 @@ def digitalocean(launch, create_containers, update_local_host_file, update_host_
     click.echo("Updating local hosts file")
     digitalOcean.updateLocalHostsFile(subdomain)
   if update_host_file or launch:
-    click.echo("Sleeping for "+str(extra_sleep)+" seconds")
-    sleep(extra_sleep)
     click.echo("Updating remote hosts file")
     digitalOcean.updateRemoteHostsFile(subdomain)
   
