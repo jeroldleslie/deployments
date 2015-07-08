@@ -208,6 +208,12 @@ class ServerSet(object):
   def startElasticSearch(self):
     return self.startProcess("elasticsearch")
   
+  def shutdownElasticSearch(self):
+    return self.shutdownProcess("elasticsearch")
+  
+  def killElasticSearch(self):
+    return self.killProcess("elasticsearch")
+  
   def startGrafana(self):
     return self.startProcess("grafana")
   

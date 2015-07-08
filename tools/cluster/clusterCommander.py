@@ -78,6 +78,28 @@ def vmmaster(restart, start, stop,force_stop, wait_before_start, wait_before_rep
   sleep(wait_before_report)
   #click.echo(cluster.getReport())  
 
+
+@mastercommand.command("elasticsearch", help="Elasticsearch commands")
+@click.option('--restart',           is_flag=True, help="restart Elasticsearch")
+@click.option('--start',             is_flag=True, help="start Elasticsearch")
+@click.option('--stop',              is_flag=True, help="stop Elasticsearch")
+@click.option('--force-stop',        is_flag=True, help="kill Elasticsearch")
+def elasticsearch(restart, start, stop, force_stop):
+  cluster = Cluster()
+  
+  if(restart or stop):
+    logging.debug("Shutting down Elasticsearch")
+    cluster.shutdownElasticSearch()
+  
+  if(force_stop):
+    logging.debug("Killing Elasticsearch")
+    cluster.killElasticSearch()
+    
+  if(restart or start):
+    logging.debug("Starting Elasticsearch")
+    cluster.startElasticSearch()
+    
+
 @mastercommand.command("scribengin", help="Scribengin commands")
 @click.option('--restart',           is_flag=True, help="restart Scribengin")
 @click.option('--start',             is_flag=True, help="start Scribengin")

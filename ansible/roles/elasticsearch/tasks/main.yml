@@ -57,4 +57,8 @@
   copy: src={{local_elasticsearch_release_folder}} dest=/opt/
 
 - name: Make elasticsearch.sh executable
-  file: mode=u+rxw path=/opt/elasticsearch/bin/elasticsearch.sh  
+  file: mode=u+rxw path=/opt/elasticsearch/bin/elasticsearch.sh
+  
+- name: Start elasticsearch
+  shell: /opt/elasticsearch/bin/elasticsearch.sh
+  

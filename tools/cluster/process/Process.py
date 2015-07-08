@@ -465,11 +465,14 @@ class ElasticSearchProcess(Process):
   
   
   def start(self):
-    stdout,stderr = self.sshExecute(join(self.homeDir, join("bin", "elasticsearch.sh")))
-    return stdout,stderr
+    if not self.isRunning():
+      stdout,stderr = self.sshExecute(join(self.homeDir, join("bin", "elasticsearch.sh")))
+      return stdout,stderr
+    else:
+      return None,None
     
   def shutdown(self):
-    pass
+    return self.kill()
   
   def clean(self):
     pass 

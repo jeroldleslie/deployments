@@ -35,6 +35,12 @@
   roles:
     - kafka_broker
 
+- name: Elasticsearch
+  hosts: elasticsearch
+  remote_user: neverwinterdp
+  roles:
+    - elasticsearch
+
 - name: Monitoring
   hosts: monitoring
   remote_user: neverwinterdp
@@ -43,8 +49,4 @@
     #- grafana
     - kibana
     
-- name: Elasticsearch
-  hosts: elasticsearch
-  remote_user: neverwinterdp
-  roles:
-    - elasticsearch
+
