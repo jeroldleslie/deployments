@@ -1,0 +1,16 @@
+- name: Install nodejs
+  apt: pkg={{item}} state=installed
+  sudo: yes
+  when: ansible_distribution == 'Debian' or ansible_distribution == 'Ubuntu'
+  with_items:
+    - build-essential
+    - nodejs
+    
+- name: Install  npm
+  apt: pkg=npm state=installed
+  sudo: yes
+  when: ansible_distribution == 'Debian' or ansible_distribution == 'Ubuntu'
+  #npm can throw errors if we're using https://launchpad.net/~chris-lea/+archive/ubuntu/node.js
+  #as the PPA, so just ignore them
+  ignore_errors: yes
+  

@@ -55,7 +55,7 @@ class ScribenginAnsible():
     command = "ansible-playbook "+playbook+" -i "+inventory
     if neverwinterdpHome is not None:
       command += " --extra-vars \"neverwinterdp_home_override="+neverwinterdpHome+"\""
-      
+    
     if retryLine is not None:
       command = command+" "+retryLine
     logging.debug("ansible-playbook command: "+command)
