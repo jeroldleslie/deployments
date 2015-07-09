@@ -28,7 +28,7 @@ function get_opt() {
   #Par the parameters
   for i in "$@"; do
     index=$(($index+1))
-    if [[ $i == $OPT_NAME ]] ; then
+    if [[ $i == $OPT_NAME* ]] ; then
       value="${i#*=}"
       echo "$value"
       return
@@ -334,6 +334,7 @@ function deploy(){
   ANSIBLE_FORKS=$(get_opt --ansible-forks 10 $@)
   NEVERWINTERDP_HOME_OVERRIDE=$(get_opt --neverwinterdp-home '' $@)
   
+  
   if [[ $NEVERWINTERDP_HOME_OVERRIDE == "" ]] ; then
     ansible-playbook $PLAYBOOK_FILE_LOCATION -i $INVENTORY_FILE_LOCATION -f $ANSIBLE_FORKS
   else
@@ -343,7 +344,22 @@ function deploy(){
 
 function startCluster(){
   h1 "Starting cluster"
-  ssh -o StrictHostKeyChecking=no neverwinterdp@hadoop-master "cd /opt/cluster && python clusterCommander.py cluster --start --clean status"
+  KAFKA_CONFIG=$(get_opt --kafka-config '' $@)
+  ZOOKEEPER_CONFIG=$(get_opt --zookeeper-config '' $@)
+  
+  command='ssh -o StrictHostKeyChecking=no neverwinterdp@hadoop-master "cd /opt/cluster && python clusterCommander.py cluster --start --clean status"'
+  
+  if [ ! KAFKA_CONFIG == '' ] ; then
+    command="$command --kafka-server-config $KAFKA_CONFIG"
+  fi
+  
+  if [ ! ZOOKEEPER_CONFIG == '' ] ; then
+    command="$command --zookeeper-server-config $KAFKA_CONFIG"
+  fi
+  
+  echo $command
+  
+  $command
 }
 
 function cluster(){
