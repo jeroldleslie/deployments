@@ -381,11 +381,11 @@ def ansible(write_inventory_file, inventory_file, deploy_cluster,
   ansibleRootDir = join(deploymentRootDir, "ansible")
   
   if deploy_cluster:
-    ans.deploy(join(ansibleRootDir, "scribenginCluster.yml"),inventory_file)
+    ans.deploy(join(ansibleRootDir, "scribenginCluster.yml"),inventory_file, neverwinterdp_home)
   if deploy_scribengin:
-    ans.deploy(join(ansibleRootDir, "scribengin.yml"),inventory_file)
+    ans.deploy(join(ansibleRootDir, "scribengin.yml"),inventory_file, neverwinterdp_home)
   if deploy_tools:
-    ans.deploy(join(ansibleRootDir, "scribenginTools.yml"),inventory_file)
+    ans.deploy(join(ansibleRootDir, "scribenginTools.yml"),inventory_file, neverwinterdp_home)
   
   
 
