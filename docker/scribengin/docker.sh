@@ -347,19 +347,20 @@ function startCluster(){
   KAFKA_CONFIG=$(get_opt --kafka-config '' $@)
   ZOOKEEPER_CONFIG=$(get_opt --zookeeper-config '' $@)
   
-  command='ssh -o StrictHostKeyChecking=no neverwinterdp@hadoop-master "cd /opt/cluster && python clusterCommander.py cluster --start --clean status"'
+  command='ssh -o StrictHostKeyChecking=no neverwinterdp@hadoop-master "cd /opt/cluster && python clusterCommander.py cluster --start --clean status'
   
-  if [ ! KAFKA_CONFIG == '' ] ; then
+  if [  "$KAFKA_CONFIG" != ''  ] ; then
     command="$command --kafka-server-config $KAFKA_CONFIG"
   fi
   
-  if [ ! ZOOKEEPER_CONFIG == '' ] ; then
+  if [  "$ZOOKEEPER_CONFIG" != ''  ] ; then
     command="$command --zookeeper-server-config $KAFKA_CONFIG"
   fi
   
-  echo $command
+  command="$command\""
   
-  $command
+  
+  eval $command
 }
 
 function cluster(){
