@@ -7,6 +7,7 @@
 #  Or pass in path to neverwinterdp on the command line:
 #    #> ansible-playbook playbooks/scribenginCluster.yml -i scribengininventory --extra-vars "neverwinterdp_home_override=/path/to/NeverwinterDP"
 #############################################################################################################################################################
+- include: ../../../programs/npm.yml
 
 - name: Set neverwinterdp_home to neverwinterdp_home_override if its been passed in on command line
   when: neverwinterdp_home_override is defined
@@ -61,4 +62,18 @@
   
 - name: Start elasticsearch
   shell: /opt/elasticsearch/bin/elasticsearch.sh
+
+- name: Wait elasticsearch to start
+  wait_for: port=9200 delay=10
+
+- name: move kibana data json files to container
+  sudo: yes
+  copy: src={{ playbook_dir }}/../configs/bootstrap/post-install/kibana/config/kibana.json dest=/opt/kibana.json
+
+- name: Install elasticdump
+  sudo: yes
+  shell: npm install elasticdump -g
   
+- name: Run elasticdump
+  shell: elasticdump --input=/opt/kibana.json --output=http://localhost:9200/.kibana --type=data
+    
