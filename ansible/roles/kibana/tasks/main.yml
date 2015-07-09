@@ -1,4 +1,3 @@
-- include: ../../../programs/npm.yml
 
 - name: download kibana
   get_url: url=https://download.elastic.co/kibana/kibana/kibana-4.0.2-linux-x64.tar.gz dest=/tmp/kibana.tar.gz
@@ -23,17 +22,7 @@
   sudo: yes
   lineinfile: 'dest=/opt/kibana/config/kibana.yml regexp="elasticsearch_url.*9200" line="elasticsearch_url: \"http://elasticsearch-1:9200\""'
 
-- name: move kibana data json files to container
-  sudo: yes
-  copy: src={{ playbook_dir }}/../configs/bootstrap/post-install/kibana/config/kibana.json dest=/opt/kibana/config/kibana.json
-
-- name: Install elasticdump
-  sudo: yes
-  shell: npm install elasticdump -g
-  
-- name: Run elasticdump
-  shell: elasticdump --input=/opt/kibana/config/kibana.json --output=http://elasticsearch-1:9200/.kibana --type=data
-  
 - name: Start kibana service
   sudo: yes
   service: name=kibana4 state=started enabled=yes
+
