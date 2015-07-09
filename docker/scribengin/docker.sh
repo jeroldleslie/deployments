@@ -28,7 +28,7 @@ function get_opt() {
   #Par the parameters
   for i in "$@"; do
     index=$(($index+1))
-    if [[ $i == $OPT_NAME* ]] ; then
+    if [[ $i == $OPT_NAME ]] ; then
       value="${i#*=}"
       echo "$value"
       return
