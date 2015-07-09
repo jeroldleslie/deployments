@@ -32,4 +32,4 @@ ssh -o "StrictHostKeyChecking no" neverwinterdp@hadoop-master "cd /opt/scribengi
              --dump-registry"
 
 #Get results
-scp -o stricthostkeychecking=no neverwinterdp@hadoop-master:/opt/scribengin/scribengin/Kafka_to_HDFS_IntegrationTest.xml $TEST_RESULTS_LOCATION
+scp -o stricthostkeychecking=no neverwinterdp@hadoop-master:/opt/neverwinterdp/scribengin/Kafka_to_HDFS_IntegrationTest.xml $TEST_RESULTS_LOCATION
