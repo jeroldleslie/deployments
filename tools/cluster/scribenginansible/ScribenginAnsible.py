@@ -47,7 +47,7 @@ class ScribenginAnsible():
     f = open(inventoryFileLocation,'w')
     f.write(inventory)
     f.close()
-    logging.debug("Ansible inventory contents: \n"+inventory)
+    logging.info("Ansible inventory contents: \n"+inventory)
   
   
   def deploy(self, playbook, inventory, neverwinterdpHome=None,
@@ -67,6 +67,7 @@ class ScribenginAnsible():
       retcode = p.poll() #returns None while subprocess is running
       line = p.stdout.readline()
       if(outputToStdout):
+        logging.info(line.rstrip())
         print line.rstrip()
       #Looking for "to retry, use: --limit @/Users/user/scribenginCluster.retry"
       if "to retry, use: --limit" in line :
@@ -77,6 +78,7 @@ class ScribenginAnsible():
     
     if(toRetry and retry < maxRetries):
       print "Retrying Ansible"
+      logging.info("Retrying Ansible")
       self.deploy(playbook, inventory, neverwinterdpHome, outputToStdout, retry+1, retryLine)
 
 
