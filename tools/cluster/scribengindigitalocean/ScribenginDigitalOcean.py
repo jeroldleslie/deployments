@@ -39,7 +39,7 @@ class ScribenginDigitalOcean():
 
 
   def createAndWait(self, droplet, sleeptime=5, sshPort=22):
-    logging.debug("Creating: "+droplet.name)
+    logging.info("Creating: "+droplet.name)
     print "Creating: "+droplet.name
     droplet.create()
     
@@ -104,7 +104,7 @@ class ScribenginDigitalOcean():
     if droplet is None:
       logging.debug("Droplet is none, returning")
       return
-    logging.debug("Destroying: "+droplet.name)
+    logging.info("Destroying: "+droplet.name)
     print "Destroying: "+droplet.name
     
     retry = True
@@ -113,6 +113,7 @@ class ScribenginDigitalOcean():
         droplet.destroy()
         retry = False
       except DataReadError as e:
+        logging.debug("RETRYING "+droplet.name+": "+str(e))
         print "RETRYING "+droplet.name+": "+str(e)
         sleep(5)
       
@@ -123,6 +124,7 @@ class ScribenginDigitalOcean():
         sleep(sleeptime)
     except Exception as e:
       #Once we get an exception, then the droplet is gone
+      logging.info(droplet.name+" DESTROYED")
       print droplet.name+" DESTROYED"
   
   
@@ -147,7 +149,7 @@ class ScribenginDigitalOcean():
     for machine in config:
       for key,value in self.defaultDropletConfig.items():
         machine.setdefault(key, value)
-    
+    logging.debug("DO Config: "+str(config))
     return config
   
   def launchContainers(self, configLocation, region=None, subdomain=None):
@@ -191,6 +193,7 @@ class ScribenginDigitalOcean():
     my_droplets = manager.get_all_droplets()
     for droplet in my_droplets:
       if droplet.name == dropletName:
+        logging.info(droplet.name+" : "+droplet.ip_address)
         return droplet.ip_address
   
   def getDroplet(self, dropletName):
@@ -218,6 +221,7 @@ class ScribenginDigitalOcean():
                            "name": dropletName,
                            "ip"  : droplet.ip_address,
                            })
+    logging.debug("Host and Ips: "+str(hostAndIPs))
     return hostAndIPs
   
   def writeAnsibleInventory(self, inventoryFileLocation="/tmp/scribengininventoryDO", 
@@ -239,6 +243,7 @@ class ScribenginDigitalOcean():
       else:
         hostString += "\n"
     hostString +=self.hostsFileEndString+"\n"
+    logging.debug("Hosts String: \n"+hostString)
     return hostString
     
     
@@ -260,6 +265,7 @@ class ScribenginDigitalOcean():
         toAdd="\n127.0.0.1 localhost\n"
         serverHostString = hostString.replace(self.hostsFileStartString, self.hostsFileStartString+toAdd)
       #print serverHostString
+      logging.debug("Executing on "+server.getHostname()+" : "+"echo '"+serverHostString+"'  > /etc/hosts")
       t = Process(target=server.sshExecute, args=("echo '"+serverHostString+"'  > /etc/hosts",user,False,))
       t.start()
       threads.append(t)
@@ -304,8 +310,10 @@ class ScribenginDigitalOcean():
         cp -R /root/.ssh/ /home/neverwinterdp/ && 
         chown -R neverwinterdp:neverwinterdp /home/neverwinterdp/.ssh
       '''
+    logging.info("User script: "+userScript)
     threads = []
     for server in cluster.servers:
+      logging.info("Executing user script on "+server.getHostname())
       t = Process(target=server.sshExecute, args=(userScript,user,))
       t.start()
       threads.append(t)

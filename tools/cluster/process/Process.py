@@ -4,7 +4,7 @@ from time import sleep
 from random import sample
 from tabulate import tabulate
 import paramiko, re, string, logging
-import new
+import logging
 from itertools import cycle
 #Make sure the cluster package is on the path correctly
 path.insert(0, dirname(dirname(abspath(__file__))))
@@ -38,11 +38,11 @@ class Process(object):
         sleep(sleepTime)
         return self.sshExecute(command, user, maxRetries, retries+1, sleepTime)
       else:
+        logging.error("Error connecting to "+str(self.hostname)+" as user "+str(user))
         print "Error connecting to "+str(self.hostname)+" as user "+str(user)
         raise
-    
-    #print stdout
-    #print stderr
+    logging.debug("SSH execute stdout: "+stdout)
+    logging.debug("SSH execute stderr: "+stderr)
     
     return stdout,stderr
   
@@ -60,6 +60,7 @@ class Process(object):
       "processID" : self.getRunningPid()
       }
     report.append(dictionary)
+    logging.debug("Report Dict: "+str(dictionary))
     return report
   
   def getReportDictForVMAndScribengin(self):
@@ -81,17 +82,22 @@ class Process(object):
         dictionary["ProcessIdentifier"] = pid_and_name[1]
         dictionary["processID"] = pid_and_name[0]
         report.append(dictionary)
+    logging.debug("Report Dict for VM and Scribengin: "+str(dictionary))
     return report
   
   def getReport(self):
     report = self.getReportDict()
-    return tabulate([report.values()], headers=report.keys())
+    result = tabulate([report.values()], headers=report.keys())
+    logging.debug("Get Report: "+str(result))
+    return result
     
   def report(self):
     print self.getReport()
   
   def isRunning(self):
-    return len(self.getRunningPid()) > 0
+    isRunning = len(self.getRunningPid()) > 0
+    logging.debug("isRunning: "+str(isRunning))
+    return isRunning
   
   def getRole(self):
     return self.role
@@ -132,7 +138,9 @@ class Process(object):
     return re.sub(pattern, replaceStr, line.rstrip())
   
   def printProgress(self, printStr):
-    print printStr + self.getRole() + " on " + self.hostname
+    string = printStr + self.getRole() + " on " + self.hostname
+    logging.info(string)
+    print string
     
 ############
 
@@ -346,6 +354,8 @@ class ScribenginMasterProcess(ScribenginProcess):
   def start(self):
     self.printProgress("Starting ")
     stdout,stderr = self.sshExecute(join(self.homeDir, "shell.sh")+" scribengin start")
+    logging.info("STDOUT from scribengin start: \n"+stdout)
+    logging.info("STDERR from scribengin start: \n"+stderr)
     print "STDOUT from scribengin start: \n"+stdout
     print "STDERR from scribengin start: \n"+stderr
     
@@ -378,6 +388,8 @@ class VmMasterProcess(ScribenginProcess):
   def start(self):
     self.printProgress("Starting ")
     stdout,stderr = self.sshExecute(join(self.homeDir, "shell.sh")+" vm start")
+    logging.info("STDOUT from vm start: \n"+stdout)
+    logging.info("STDERR from vm start: \n"+stderr)
     print "STDOUT from vm start: \n"+stdout
     print "STDERR from vm start: \n"+stderr
     

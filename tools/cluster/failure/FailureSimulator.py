@@ -18,7 +18,7 @@ class FailureSimulator():
   
   def getExecutionCluster(self, hostname):
     return self.cluster
-    #restart-method is not used?
+    
   def failureSimulation(self,failure_interval, wait_before_start, servers, min_servers, servers_to_fail_simultaneously, kill_method, initial_clean, config_path, junit_report, restart_method):
     """
     Run the failure loop for a given role
