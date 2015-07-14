@@ -102,7 +102,7 @@ function host_machine_update_hosts() {
   endString="##SCRIBENGIN CLUSTER END##"
   
   #Build entry to add to /etc/hosts by reading info from Docker
-  hostString="$hostString\n$startString\n"
+  hostString="$startString\n"
   for container_id in $(container_ids); do
     hostname=$(docker inspect -f '{{ .Config.Hostname }}' $container_id)
     hostString="$hostString$(docker inspect -f "{{ .NetworkSettings.IPAddress }}" $hostname)    $hostname\n"
