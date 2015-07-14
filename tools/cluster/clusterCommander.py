@@ -40,6 +40,11 @@ def mastercommand(debug, logfile, neverwinterdp_home):
   else:
     #Set logging file, overwrite file, set logging level to INFO
     logging.basicConfig(filename=_logfile, filemode="w", level=logging.INFO)
+  
+  #Quiet down the other loggers
+  logging.getLogger("urllib3").setLevel(logging.WARNING)
+  logging.getLogger("requests").setLevel(logging.WARNING)
+  logging.getLogger("digitalocean.baseapi").setLevel(logging.WARNING)
 
 @mastercommand.command(help="Get Cluster status")
 @click.option('--role',  default="",  help="Which role to check on (i.e. kafka, zookeeper, hadoop-master, hadoop-worker)")

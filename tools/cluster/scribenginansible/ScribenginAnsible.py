@@ -19,6 +19,7 @@ class ScribenginAnsible():
                           "name":server.hostname,
                           "ip": socket.gethostbyname(server.hostname)
                           })
+    logging.info("Hosts and IPs: "+str(hostsAndIps))
     return hostsAndIps
   
   
@@ -47,6 +48,7 @@ class ScribenginAnsible():
     f = open(inventoryFileLocation,'w')
     f.write(inventory)
     f.close()
+    logging.debug("Ansible inventory written to "+inventoryFileLocation)
     logging.info("Ansible inventory contents: \n"+inventory)
   
   
@@ -58,7 +60,7 @@ class ScribenginAnsible():
     
     if retryLine is not None:
       command = command+" "+retryLine
-    logging.debug("ansible-playbook command: "+command)
+    logging.info("ansible-playbook command: "+command)
     
     #Outputs stdout/stderr to stdout while command is running
     toRetry = False
@@ -66,8 +68,11 @@ class ScribenginAnsible():
     while(True):
       retcode = p.poll() #returns None while subprocess is running
       line = p.stdout.readline()
-      if(outputToStdout):
-        logging.info(line.rstrip())
+      logging.info(line.rstrip())
+      #Check to make sure we're not DEBUG
+      #If we're DEBUG, clustercommander is set to output to STDOUT as well
+      #so this avoids printing messages out twice to STDOUT
+      if(outputToStdout and logging.getLogger().getEffectiveLevel() is not logging.DEBUG):
         print line.rstrip()
       #Looking for "to retry, use: --limit @/Users/user/scribenginCluster.retry"
       if "to retry, use: --limit" in line :
