@@ -327,7 +327,7 @@ class HadoopDaemonProcess(Process):
   
   def clean(self):
     self.printProgress("Cleaning data of ")
-    return self.sshExecute("rm -rf "+ join(self.homeDir, "data") +" && rm -rf " + join(self.homeDir, "logs") +" && yes | "+ join(self.homeDir, "bin/hdfs") + " namenode -format") 
+    return self.sshExecute("rm -rf "+ join(self.homeDir, "data") +" && rm -rf " + join(self.homeDir, "logs") +" && rm -rf " + join(self.homeDir, "vm") +" && yes | "+ join(self.homeDir, "bin/hdfs") + " namenode -format") 
 
 ############
 class ScribenginProcess(Process):
