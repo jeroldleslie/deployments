@@ -332,7 +332,7 @@ function deploy(){
   
   INVENTORY_FILE_LOCATION=$(get_opt --inventory-file-location '/tmp/scribengininventory' $@)
   ANSIBLE_FORKS=$(get_opt --ansible-forks 10 $@)
-  NEVERWINTERDP_HOME_OVERRIDE=$(get_opt --neverwinterdp-home '' $@)
+  NEVERWINTERDP_HOME_OVERRIDE=$(get_opt --neverwinterdp-home $NEVERWINTERDP_HOME $@)
   
   
   if [[ $NEVERWINTERDP_HOME_OVERRIDE == "" ]] ; then
