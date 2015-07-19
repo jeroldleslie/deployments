@@ -324,6 +324,12 @@ function deploy_all(){
   deploy $PLAYBOOK_FILE_LOCATION $@
 }
 
+function deploy_kibana_charts(){
+  SCRIPT_DIR=$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )
+  PLAYBOOK_FILE_LOCATION="$(get_opt --playbook-file-location "$SCRIPT_DIR/../../ansible/kibana.yml" $@)"
+  deploy $PLAYBOOK_FILE_LOCATION $@
+}
+
 function deploy(){
   h1 "Provisioning with Ansible"
   
@@ -361,6 +367,8 @@ function startCluster(){
   
   
   eval $command
+
+  deploy_kibana_charts $@
 }
 
 function cluster(){

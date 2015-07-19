@@ -162,7 +162,7 @@ def cluster(restart, start, stop, force_stop, clean, wait_before_start, wait_bef
     cluster.killCluster()
 
   if(clean):
-    logging.debug("Cleaning Kafka")
+    logging.debug("Cleaning Cluster")
     cluster.cleanCluster()
 
   if(restart or start):

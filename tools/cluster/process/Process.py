@@ -468,13 +468,17 @@ class ElasticSearchProcess(Process):
     return "jps -l | grep -w '"+self.processIdentifier+"' | awk '{print $1 \" \" $2}'"
   #  return "ps ax | grep "+self.processIdentifier+" | awk '{print $1 \" \" $27}' | grep -i elastic"
   
+  def kill(self):
+    self.printProgress("Killing ")
+    stdout,stderr = self.sshExecute(self.getProcessCommand());
+    pid_and_name = stdout.split(" ")
+    self.sshExecute("kill -9 "+pid_and_name[0])
+
   #def getReportDict(self):
   #  pass
 
   #def getRunningPid(self):
   #  pass
-  
-  
   
   def start(self):
     if not self.isRunning():
@@ -487,7 +491,8 @@ class ElasticSearchProcess(Process):
     return self.kill()
   
   def clean(self):
-    pass 
+    self.printProgress("Cleaning data of ")
+    return self.sshExecute("rm -rf "+ join(self.homeDir, "data"));  
   
   #def kill(self):
   #  pass
@@ -534,6 +539,10 @@ class KibanaProcess(Process):
     stdout,stderr = self.sshExecute("sudo service kibana4 start")
     return stdout,stderr
   
+  def kill(self):
+    self.printProgress("Killing ")
+    self.shutdown()
+    
 class InfluxdbProcess(Process):
   def __init__(self, role, hostname):
     Process.__init__(self, role, hostname, "/usr/bin", "influxdb")

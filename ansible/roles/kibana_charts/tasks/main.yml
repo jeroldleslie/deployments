@@ -1,0 +1,17 @@
+- name: Wait elasticsearch to start
+  wait_for: port=9200 delay=10
+
+- name: move kibana data json files to container
+  sudo: yes
+  copy: src=kibana.json dest=/opt/kibana.json
+  
+- name: Run elasticdump
+  shell: elasticdump --input=/opt/kibana.json --output=http://localhost:9200/.kibana --type=data
+  register: stdout
+  run_once: true
+
+- name: Output from gradle build
+  debug: var=stdout.stdout_lines
+  run_once: true
+
+- debug: msg="Point {{ hostvars[inventory_hostname]['ansible_eth0']['ipv4']['address'] }}:5601 in your browser to view kibana charts"  
