@@ -344,6 +344,9 @@ class ServerSet(object):
   def killHadoopWorker(self):
     return self.killProcess("datanode,nodemanager")  
   
+  def killKibana(self):
+    return self.killProcess("kibana")
+  
   def killCluster(self):
     self.shutdownScribengin()
     self.shutdownVmMaster()
@@ -351,6 +354,8 @@ class ServerSet(object):
     self.killZookeeper()
     self.killHadoopWorker()
     self.killHadoopMaster()
+    self.killElasticSearch()
+    self.killKibana()
     
   def cleanKafka(self):
     return self.cleanProcess("kafka")
@@ -364,13 +369,15 @@ class ServerSet(object):
   def cleanHadoopWorker(self):
     return self.cleanProcess("datanode")
 
+  def cleanElasticsearch(self):
+    return self.cleanProcess("elasticsearch")
+  
   def cleanCluster(self):
     self.cleanKafka()
     self.cleanZookeeper()
     self.cleanHadoopWorker()
     self.cleanHadoopMaster()
-  
-  
+    self.cleanElasticsearch()
     
   def getReport(self):
     serverReport = []

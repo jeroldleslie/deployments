@@ -11,7 +11,7 @@ class Kibana(object):
   def __init__(self, elasticsearch_url, temp_path):
     self.elasticsearch_url = elasticsearch_url
     self.temp_path = join(temp_path,"kibana.json")
-    self.kibana_json_file_path=join(dirname(dirname(dirname(dirname(realpath(__file__))))), "configs/bootstrap/post-install/kibana/config/kibana.json")
+    self.kibana_json_file_path=join(dirname(dirname(dirname(dirname(realpath(__file__))))), "ansible/roles/kibana_charts/files/kibana.json")
   
   def import_kibana_from_host(self):
     command = "elasticdump --input="+self.kibana_json_file_path+" --output="+self.elasticsearch_url+"/.kibana --type=data"
