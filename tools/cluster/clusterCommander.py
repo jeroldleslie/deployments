@@ -470,12 +470,16 @@ def digitalocean(launch, create_containers, update_local_host_file, update_host_
 @click.option('--digitaloceantokenfile',    default='~/.digitaloceantoken', help='digital ocean token file location')
 @click.option('--sshKeyPath',    default='~/.ssh/id_rsa', help='path to private key')
 @click.option('--sshKeyPathPublic',    default='~/.ssh/id_rsa.pub', help='path to public key')
+@click.option('--awsCredentialFile',    default='~/.aws/credentials', help='path to AWS credentials file')
 def digitaloceandevsetup(name, size, region, image, private_networking, create, destroy, branch,
-                         digitaloceantoken, digitaloceantokenfile, sshkeypath, sshkeypathpublic):
+                         digitaloceantoken, digitaloceantokenfile, sshkeypath, sshkeypathpublic, awscredentialfile):
+  #Python can't properly interpret the ~/ directive, so fix file paths
   if "~/" in sshkeypath:
       sshkeypath = join( expanduser("~"), sshkeypath.replace("~/",""))
   if "~/" in sshkeypathpublic:
       sshkeypathpublic = join( expanduser("~"), sshkeypathpublic.replace("~/",""))
+  if "~/" in awscredentialfile:
+      awscredentialfile = join( expanduser("~"), awscredentialfile.replace("~/",""))
   
   
   digitalOcean = ScribenginDigitalOcean(digitalOceanToken=digitaloceantoken, digitalOceanTokenFileLocation=digitaloceantokenfile)
@@ -513,6 +517,16 @@ def digitaloceandevsetup(name, size, region, image, private_networking, create, 
     sshHandle.sshExecute("sudo gpasswd -a neverwinterdp docker && sudo service docker restart")
     print "Install Ansible"
     sshHandle.sshExecute("sudo apt-get install software-properties-common -y && sudo apt-add-repository ppa:ansible/ansible -y && sudo apt-get update && sudo apt-get install ansible -y")
+    
+    print "Copy AWS credentials file"
+    try:
+      with open(awscredentialfile, 'r') as f:
+        awsCreds = f.read()
+      sshHandle.sshExecute("mkdir ~/.aws && echo \""+awsCreds+"\" > ~/.aws/credentials")
+    except Exception as e:
+      print "Problem copying AWS credentials file: "+str(e)
+      
+    
     print "Check out NeverwinterDP"
     sshHandle.sshExecute("git clone https://github.com/Nventdata/NeverwinterDP/ && cd NeverwinterDP && git checkout "+branch)
     sshHandle.sshExecute(r'echo -e "NEVERWINTERDP_HOME=/home/neverwinterdp/NeverwinterDP\\n" >> ~/.bashrc')
