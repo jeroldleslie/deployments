@@ -19,12 +19,13 @@ class Cluster(ServerSet):
     re.compile('.*monitoring-\d+.*'),
   ]
   
-  def __init__(self, etcHostsPath="/etc/hosts"):
+  def __init__(self,parseEtcHostsByDefault=True, etcHostsPath="/etc/hosts"):
     """
     Initialize and immediately parse the /etc/hosts file
     """
     ServerSet.__init__(self, "cluster");
-    self.parseEtcHosts(etcHostsPath)
+    if parseEtcHostsByDefault:
+      self.parseEtcHosts(etcHostsPath)
     
       
   

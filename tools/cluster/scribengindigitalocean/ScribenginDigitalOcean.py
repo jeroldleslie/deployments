@@ -7,6 +7,7 @@ from digitalocean.Region import Region
 path.insert(0, dirname(dirname(abspath(__file__))))
 from Cluster import Cluster
 from server.Server import Server
+from server.ServerSet import ServerSet
 from process.Process import Process as ScribeProcess
 from scribenginansible.ScribenginAnsible import ScribenginAnsible
 from digitalocean.baseapi import DataReadError
@@ -301,8 +302,11 @@ class ScribenginDigitalOcean():
     if serverName is None:
       cluster = Cluster()
     else:
-      cluster = Server(serverName)
-      cluster.addProcess(ScribeProcess(serverName, self.getDropletIp(serverName), "~/", None))
+      cluster = Cluster(parseEtcHostsByDefault=False)
+      server = Server(serverName)
+      server.addProcess(ScribeProcess(serverName, self.getDropletIp(serverName), "~/", None))
+      cluster.addServer(server)
+      
     userScript='''
         useradd -m -d /home/neverwinterdp -s /bin/bash -c "neverwinterdp user" -p $(openssl passwd -1 neverwinterdp)  neverwinterdp && 
         echo "neverwinterdp ALL=(ALL) NOPASSWD: ALL" >> /etc/sudoers && 
@@ -317,6 +321,7 @@ class ScribenginDigitalOcean():
       t = Process(target=server.sshExecute, args=(userScript,user,))
       t.start()
       threads.append(t)
+    
     
     for t in threads:
       t.join()
