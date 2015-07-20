@@ -294,18 +294,8 @@ class ScribenginDigitalOcean():
       command = "ssh-keygen -R "+host["name"] +" 2> /dev/null 1> /dev/null"
       os.system(command)
       
-  
-  
   #Must be executed *AFTER* updateLocalHostsFile is called on cluster
   def setupNeverwinterdpUser(self, user="root", serverName=None):
-    if serverName is None:
-      cluster = Cluster()
-    else:
-      cluster = Cluster(parseEtcHostsByDefault=False)
-      server = Server(serverName)
-      server.addProcess(ScribeProcess(serverName, self.getDropletIp(serverName), "~/", None))
-      cluster.addServer(server)
-      
     userScript='''
         useradd -m -d /home/neverwinterdp -s /bin/bash -c "neverwinterdp user" -p $(openssl passwd -1 neverwinterdp)  neverwinterdp && 
         echo "neverwinterdp ALL=(ALL) NOPASSWD: ALL" >> /etc/sudoers && 
@@ -314,20 +304,27 @@ class ScribenginDigitalOcean():
         chown -R neverwinterdp:neverwinterdp /home/neverwinterdp/.ssh
       '''
     logging.info("User script: "+userScript)
-    threads = []
-    for server in cluster.servers:
-      logging.info("Executing user script on "+server.getHostname())
-      t = Process(target=server.sshExecute, args=(userScript,user,))
-      t.start()
-      threads.append(t)
-    
-    
-    for t in threads:
-      t.join()
+  
+    if serverName is None:
+      cluster = Cluster()
+      threads = []
+      for server in cluster.servers:
+        logging.info("Executing user script on "+server.getHostname())
+        t = Process(target=server.sshExecute, args=(userScript,user,))
+        t.start()
+        threads.append(t)
+
+      for t in threads:
+        t.join()
+
+      return cluster
+    else:
+      server = Server(serverName)
+      server.addProcess(ScribeProcess(serverName, self.getDropletIp(serverName), "~/", None))
+      server.sshExecute(userScript,user)
+      return server
+
       
-    return cluster
-
-
   def deploy(self, neverwinterdpHome, 
              playbook=join(dirname(dirname(dirname(dirname(realpath(__file__))))), "ansible/scribenginCluster.yml"), 
              inventory="/tmp/scribengininventoryDO",

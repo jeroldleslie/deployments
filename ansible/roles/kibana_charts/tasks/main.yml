@@ -14,4 +14,4 @@
   debug: var=stdout.stdout_lines
   run_once: true
 
-- debug: msg="Point {{ hostvars[inventory_hostname]['ansible_eth0']['ipv4']['address'] }}:5601 in your browser to view kibana charts"  
+- debug: msg="Point {{ hostvars[inventory_hostname]['ansible_eth0']['ipv4']['address'] }}:5601 in your browser to view kibana charts. If running on docker use host machines IP address i.e. <hostmachineip>:5601"  
