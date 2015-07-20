@@ -7,7 +7,6 @@ from digitalocean.Region import Region
 path.insert(0, dirname(dirname(abspath(__file__))))
 from Cluster import Cluster
 from server.Server import Server
-from server.ServerSet import ServerSet
 from process.Process import Process as ScribeProcess
 from scribenginansible.ScribenginAnsible import ScribenginAnsible
 from digitalocean.baseapi import DataReadError
