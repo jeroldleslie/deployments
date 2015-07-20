@@ -1,6 +1,7 @@
 import unittest, os
-#from os import path, dirname, abspath
-#path.insert(0, dirname(dirname(abspath(__file__))))
+from os.path import dirname, abspath
+from sys import path
+path.insert(0, dirname(dirname(abspath(__file__))))
 from Cluster import Cluster
 from process.Process import KafkaProcess
 
