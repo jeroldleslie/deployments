@@ -1,5 +1,9 @@
 - name: Create .aws folder
   file: path=~/.aws state=directory mode=0755
 
+- local_action: stat path=~/.aws/credentials
+  register: aws_file
+    
 - name: Copy AWS credentials file
   copy: src=~/.aws/credentials dest=~/.aws/credentials
+  when: aws_file.stat.exists
