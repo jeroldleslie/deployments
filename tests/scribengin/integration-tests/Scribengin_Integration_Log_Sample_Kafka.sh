@@ -9,5 +9,6 @@ ssh -o "StrictHostKeyChecking no" neverwinterdp@hadoop-master "cd /opt/neverwint
 
 
 ssh -o "StrictHostKeyChecking no" neverwinterdp@hadoop-master "chmod +x /opt/neverwinterdp/dataflow/log-sample/bin/*.sh"
-ssh -o "StrictHostKeyChecking no" neverwinterdp@hadoop-master "cd /opt/neverwinterdp && ./dataflow/log-sample/bin/run-kafka.sh --profile=performance  --num-of-message=10000000 --message-size=256"
+ssh -o "StrictHostKeyChecking no" neverwinterdp@hadoop-master \
+  "cd /opt/neverwinterdp && ./dataflow/log-sample/bin/run-kafka.sh --profile=performance --dedicated-executor=false --num-of-message=10000000 --message-size=256"
 
