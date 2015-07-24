@@ -348,7 +348,17 @@ function deploy(){
   fi
 }
 
+function setup_cluster_env(){
+  SCRIPT_DIR=$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )
+  PLAYBOOK_FILE_LOCATION="$(get_opt --playbook-file-location "$SCRIPT_DIR/../../ansible/cluster_env.yml" $@)"
+  deploy $PLAYBOOK_FILE_LOCATION $@
+}
+
 function startCluster(){
+  
+  h1 "Setup cluster environment"
+  setup_cluster_env $@
+
   h1 "Starting cluster"
   KAFKA_CONFIG=$(get_opt --kafka-config '' $@)
   ZOOKEEPER_CONFIG=$(get_opt --zookeeper-config '' $@)
@@ -368,6 +378,7 @@ function startCluster(){
   
   eval $command
 
+  h1 "Deploy kibana charts"
   deploy_kibana_charts $@
 }
 

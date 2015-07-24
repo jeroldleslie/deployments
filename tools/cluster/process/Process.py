@@ -296,8 +296,8 @@ class ZookeeperProcess(Process):
   
   def clean(self):
     self.printProgress("Cleaning data of ")
-    return self.sshExecute("rm -rf "+join(self.homeDir, "data")+ " && rm -rf "+join(self.homeDir, "logs")+" && rm -rf "+ join(self.homeDir, "zookeeper.out"))
-
+    return self.sshExecute("cd "+join(self.homeDir, "data")+ " && ls | grep -v 'myid' | xargs rm -rf && rm -rf "+join(self.homeDir, "logs")+" && rm -rf "+ join(self.homeDir, "zookeeper.out"))
+ 
 ############
 
 class HadoopDaemonProcess(Process):
@@ -367,7 +367,7 @@ class ScribenginMasterProcess(ScribenginProcess):
     pass 
   
   def kill(self):
-    return self.shutdown()
+    return self.sshExecute("pkill -9 java")
 
 ############
 class VmMasterProcess(ScribenginProcess):
@@ -401,7 +401,7 @@ class VmMasterProcess(ScribenginProcess):
     pass 
   
   def kill(self):
-    return self.shutdown()
+    return self.sshExecute("pkill -9 java")
 
 ############
 class DataflowMasterProcess(ScribenginProcess):

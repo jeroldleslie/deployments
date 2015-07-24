@@ -1,0 +1,10 @@
+
+- name: Add masters and slaves file
+  template: src={{ item }}.j2 dest={{ hadoop_home }}/etc/hadoop/{{ item }}
+  sudo: yes
+  with_items:
+    - slaves
+    - masters
+
+- name: Move configuration files to container
+  copy: src=config/ dest={{ hadoop_home }}/etc/hadoop/
