@@ -1,0 +1,19 @@
+
+- name: Add configurations file
+  template: src={{ item }}.j2 dest={{ kafka_home_dir }}config/{{ item }}
+  sudo: yes
+  with_items:
+    - server.properties
+    - consumer.properties
+    - producer.properties
+    
+- name: Add kafka-server-start.sh file
+  template: src={{ item }}.j2 dest={{ kafka_home_dir }}bin/{{ item }}
+  sudo: yes
+  with_items:
+    - kafka-server-start.sh
+
+- name: Make kafka-server-start.sh executable
+  file: mode=u+rxw path={{ kafka_home_dir }}bin/{{ item }}
+  with_items:
+    - kafka-server-start.sh

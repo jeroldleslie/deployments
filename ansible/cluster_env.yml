@@ -1,0 +1,18 @@
+---
+- name: Hadoop cluster environment
+  hosts: hadoop_master:hadoop_worker
+  remote_user: neverwinterdp
+  roles:
+    - hadoop_env
+    
+- name: Kafka cluster environment
+  hosts: kafka
+  remote_user: neverwinterdp
+  roles:
+    - kafka_env
+ 
+- name: Zookeeper cluster environment
+  hosts: zookeeper
+  remote_user: neverwinterdp
+  roles:
+    - zookeeper_env

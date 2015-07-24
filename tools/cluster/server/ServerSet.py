@@ -134,7 +134,7 @@ class ServerSet(object):
   def startProcess(self, processNames, setupClusterEnv = True):
     for processName in processNames.split(","):
       for server in self.servers :
-        server.startProcess(processName, self.paramDict, setupClusterEnv)
+        server.startProcess(processName, self.paramDict, False)
     
   def cleanProcess(self, processNames):
     for processName in processNames.split(","):
