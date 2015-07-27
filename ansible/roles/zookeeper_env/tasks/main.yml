@@ -15,3 +15,6 @@
   template: src={{ item }}.j2 dest={{ zookeeper_home_dir }}/conf/{{ item }}
   with_items:
     - zoo.cfg
+    
+- name: Move configuration files to container
+  copy: src=conf/ dest={{ zookeeper_home_dir }}/conf/

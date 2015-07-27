@@ -1,3 +1,0 @@
-#TODO Remove this, configure kafka correctly
-- name: move kakfa configuration files to container
-  copy: src={{ playbook_dir }}/../configs/bootstrap/post-install/kafka/config/ dest=/opt/kafka/config/

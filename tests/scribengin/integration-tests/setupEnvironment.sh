@@ -13,9 +13,6 @@ function usage(){
   echo "           --start    - Start the cluster with clusterCommander"
   echo "           --restart  - Restart the cluster with clusterCommander"
   echo "           --deploy   - Build then deploy scribengin with clusterCommander"
-  echo "           --kafka-config-file        - Kafka config file to use when restarting cluster"
-  echo "           --zookeeper-config-file    - Zookeeper config filt to use when restarting cluster"
-  
 }
 
 function has_opt() {
@@ -54,8 +51,6 @@ ROOT=$( dirname $( dirname $( dirname $( cd "$( dirname "${BASH_SOURCE[0]}" )" &
 
 NEVERWINTER_HOME=$(get_opt --neverwinterdp-home $NEVERWINTERDP_HOME $@)
 TEST_RESULTS_LOCATION=$(get_opt --test-results-location './testresults/' $@)
-KAFKA_CONFIG_FILE=$(get_opt --kafka-config-file $ROOT/configs/bootstrap/post-install/kafka/config/server.properties $@)
-ZOOKEEPER_CONFIG_FILE=$(get_opt --zookeeper-config-file $ROOT/configs/bootstrap/post-install/zookeeper/conf/zoo.cfg $@)
 CLEAN=$(has_opt --clean $@)
 START=$(has_opt --start $@)
 STOP=$(has_opt --stop $@)
@@ -114,7 +109,7 @@ if [ $CLEAN == "true" ] ; then
   $clusterCommander cluster --clean
 fi
 if [ $START == "true" ] ; then
-  $clusterCommander cluster --kafka-server-config $KAFKA_CONFIG_FILE --zookeeper-server-config $ZOOKEEPER_CONFIG_FILE --start
+  $clusterCommander cluster --start
   #Give everything time to come up
   sleep 5
 fi

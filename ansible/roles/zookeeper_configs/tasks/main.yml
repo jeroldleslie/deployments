@@ -1,3 +1,0 @@
-#TODO Remove this, configure zk correctly
-- name: move zk configuration files to container
-  copy: src={{ playbook_dir }}/../configs/bootstrap/post-install/zookeeper/conf/ dest=/opt/zookeeper/conf/

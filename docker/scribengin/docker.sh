@@ -349,32 +349,19 @@ function deploy(){
 }
 
 function setup_cluster_env(){
+  h1 "Setup cluster environment"
   SCRIPT_DIR=$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )
   PLAYBOOK_FILE_LOCATION="$(get_opt --playbook-file-location "$SCRIPT_DIR/../../ansible/cluster_env.yml" $@)"
   deploy $PLAYBOOK_FILE_LOCATION $@
 }
 
 function startCluster(){
-  
-  h1 "Setup cluster environment"
-  setup_cluster_env $@
 
   h1 "Starting cluster"
-  KAFKA_CONFIG=$(get_opt --kafka-config '' $@)
-  ZOOKEEPER_CONFIG=$(get_opt --zookeeper-config '' $@)
   
-  command='ssh -o StrictHostKeyChecking=no neverwinterdp@hadoop-master "cd /opt/cluster && python clusterCommander.py cluster --start --clean status'
-  
-  if [  "$KAFKA_CONFIG" != ''  ] ; then
-    command="$command --kafka-server-config $KAFKA_CONFIG"
-  fi
-  
-  if [  "$ZOOKEEPER_CONFIG" != ''  ] ; then
-    command="$command --zookeeper-server-config $KAFKA_CONFIG"
-  fi
+  command='ssh -o StrictHostKeyChecking=no neverwinterdp@hadoop-master "cd /opt/cluster && python clusterCommander.py cluster --clean --start status'
   
   command="$command\""
-  
   
   eval $command
 
@@ -419,6 +406,10 @@ function cluster(){
   
   if [ $ANSIBLE_INVENTORY == "true" ] || [ $LAUNCH == "true" ] ; then
     ansible_inventory $@
+  fi
+  
+  if [ $RUN_CONTAINERS == "true" ] || [ $LAUNCH == "true" ] ; then
+    setup_cluster_env $@ 
   fi
   
   if [ $DEPLOY == "true" ] ; then
