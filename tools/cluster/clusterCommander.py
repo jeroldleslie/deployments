@@ -142,10 +142,8 @@ def scribengin(restart, start, stop, force_stop, wait_before_start):
 @click.option('--clean',               is_flag=True, help="Clean old cluster data")
 @click.option('--wait-before-start',   default=0,    help="Time to wait before restarting cluster (seconds)")
 @click.option('--wait-before-kill',    default=0,    help="Time to wait before force killing cluster (seconds)")
-@click.option('--kafka-server-config', default='/opt/kafka/config/default.properties', help='Kafka server configuration template path, default is /opt/kafka/config/default.properties', type=click.Path(exists=False))
-@click.option('--zookeeper-server-config',  default='/opt/zookeeper/conf/zoo_sample.cfg', help='Zookeeper configuration template path, default is /opt/zookeeper/conf/zoo_sample.cfg', type=click.Path(exists=False))
 @click.option('--execute',                           help='execute given command on all nodes')
-def cluster(restart, start, stop, force_stop, clean, wait_before_start, wait_before_kill, kafka_server_config, zookeeper_server_config, execute):
+def cluster(restart, start, stop, force_stop, clean, wait_before_start, wait_before_kill, execute):
   cluster = Cluster()
     
   if(execute is not None):
@@ -167,16 +165,11 @@ def cluster(restart, start, stop, force_stop, clean, wait_before_start, wait_bef
 
   if(restart or start):
     logging.debug("Waiting for "+str(wait_before_start)+" seconds")
-    if not os.path.exists(kafka_server_config):
-      raise click.BadParameter("Path \"" + kafka_server_config + "\" does not exist.", param_hint = "--kafka-server-config")
-    
-    if not os.path.exists(zookeeper_server_config):
-      raise click.BadParameter("Path \"" + zookeeper_server_config + "\" does not exist.", param_hint = "--zookeeper-server-config")
   
     sleep(wait_before_start)
     logging.debug("Starting Cluster")
-    cluster.paramDict["server_config"] = kafka_server_config
-    cluster.paramDict["zoo_cfg"] = zookeeper_server_config
+    #cluster.paramDict["server_config"] = kafka_server_config
+    #cluster.paramDict["zoo_cfg"] = zookeeper_server_config
     cluster.startCluster()
     
   #click.echo(cluster.getReport())  
@@ -190,9 +183,8 @@ def cluster(restart, start, stop, force_stop, clean, wait_before_start, wait_bef
 @click.option('--brokers',           default="",   help="Which kafka brokers to effect (command separated list)")
 @click.option('--wait-before-start', default=0,    help="Time to wait before restarting kafka server (seconds)")
 @click.option('--wait-before-kill',  default=0,    help="Time to wait before force killing Kafka process (seconds)")
-@click.option('--server-config',     default='/opt/kafka/config/default.properties', help='Kafka server configuration template path, default is /opt/kafka/config/default.properties', type=click.Path(exists=True))
 #idle-servers comes after clean
-def kafka(restart, start, stop, force_stop, clean, brokers, wait_before_start, wait_before_kill, server_config):
+def kafka(restart, start, stop, force_stop, clean, brokers, wait_before_start, wait_before_kill):
   cluster = Cluster()
   logging.debug("Just a test message.")
   
@@ -218,7 +210,6 @@ def kafka(restart, start, stop, force_stop, clean, brokers, wait_before_start, w
     logging.debug("Waiting for "+str(wait_before_start)+" seconds")
     sleep(wait_before_start)
     logging.debug("Starting Kafka")
-    cluster.paramDict["server_config"] = server_config
     cluster.startKafka()
   #click.echo(cluster.getReport())
 
@@ -231,8 +222,7 @@ def kafka(restart, start, stop, force_stop, clean, brokers, wait_before_start, w
 @click.option('--zk-servers',        is_flag=True, help="Which ZK nodes to effect (command separated list)")
 @click.option('--wait-before-start', default=0,     help="Time to wait before starting ZK server (seconds)")
 @click.option('--wait-before-kill',  default=0,     help="Time to wait before force killing ZK process (seconds)")
-@click.option('--zoo-cfg',           default='/opt/zookeeper/conf/zoo_sample.cfg', help='Zookeeper configuration template path, default is /opt/zookeeper/conf/zoo_sample.cfg', type=click.Path(exists=True))
-def zookeeper(restart, start, stop, force_stop, clean, zk_servers, wait_before_start, wait_before_kill, zoo_cfg):
+def zookeeper(restart, start, stop, force_stop, clean, zk_servers, wait_before_start, wait_before_kill):
   cluster = Cluster()
   if(restart or stop):
     logging.debug("Shutting down Zookeeper")
@@ -252,7 +242,6 @@ def zookeeper(restart, start, stop, force_stop, clean, zk_servers, wait_before_s
     logging.debug("Waiting for "+str(wait_before_start)+" seconds")
     sleep(wait_before_start)
     logging.debug("Starting Zookeeper")
-    cluster.paramDict["zoo_cfg"] = zoo_cfg
     cluster.startZookeeper()
   #click.echo(cluster.getReport())
 

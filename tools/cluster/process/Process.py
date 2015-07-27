@@ -149,18 +149,7 @@ class KafkaProcess(Process):
     Process.__init__(self, role, hostname, "/opt/kafka", "Kafka")
    
   def setupClusterEnv(self, paramDict = {}):
-    zkServer = paramDict["zkList"]
-    zkConnect = ":2181,".join(zkServer) + ":2181"
-    brokerID = int(re.search(r'\d+', self.hostname).group())
-    
-    fileStr = ""
-    for line in open(paramDict["server_config"]).readlines():
-      if re.match(re.compile("broker.id=.*"), line):
-        line = re.sub("broker.id=.*", "broker.id="+`brokerID`, line.rstrip()) + "\n"
-      if re.match(re.compile("zookeeper.connect=.*"), line):
-        line = re.sub("zookeeper.connect=.*", "zookeeper.connect="+zkConnect, line.rstrip()) + "\n"
-      fileStr = fileStr + line
-    return self.sshExecute("echo \"" + fileStr + "\" > " + join(self.homeDir, "config/server.properties"))
+    pass
      
   def reassignReplicas(self, zkServer, new_brokers):
     logging.debug("Reassigning replicas started "+ str(new_brokers))
@@ -263,28 +252,7 @@ class ZookeeperProcess(Process):
     Process.__init__(self, role, hostname, "/opt/zookeeper", 'QuorumPeerMain')
     
   def setupClusterEnv(self, paramDict = {}):
-    myid_path = ""
-    fileStr = ""
-    hostID = int(re.search(r'\d+', self.hostname).group())
-    
-    if self.role == "spare-zookeeper":
-      hostID = hostID + len(paramDict["zkList"])
-      
-    for line in open(paramDict["zoo_cfg"]).readlines():
-      if re.match(re.compile("dataDir=.*"), line):
-        myid_path = line.split("=")[1].replace("\n", "")
-      fileStr = fileStr + line
-    self.sshExecute("mkdir -p "+ myid_path +" && echo '" + `hostID` + "' > " + join(myid_path, "myid"))
-    
-    allZkServers = paramDict["zkList"]
-    
-    for zk in allZkServers:
-      zkID = int(re.search(r'\d+', zk).group())
-      if re.match('.*spare-zookeeper.*', zk):
-        zkID = zkID + len(paramDict["zkList"])
-      line = "server."+ `zkID` + "=" + zk + ":2888:3888\n"
-      fileStr = fileStr + line
-    return self.sshExecute("echo '" + fileStr + "' > " + join(self.homeDir, "conf/zoo.cfg"))
+    pass
     
   def start(self):
     self.printProgress("Starting ")
@@ -306,17 +274,8 @@ class HadoopDaemonProcess(Process):
     self.hadoopDaemonScriptPath = hadoopDaemonScriptPath
   
   def setupClusterEnv(self, paramDict = {}):
-    slaveStr = ""
-    for hWorkers in paramDict["hadoopWorkers"]:
-      slaveStr = slaveStr + hWorkers + "\n"
-    slavesOut = self.sshExecute("echo \"" + slaveStr + "\" > " + join(self.homeDir, "etc/hadoop/slaves"))
+    pass
     
-    masterStr = ""
-    for hWorkers in paramDict["hadoopMasters"]:
-      masterStr = masterStr + hWorkers + "\n"
-    mastersOut = self.sshExecute("echo \"" + masterStr + "\" > " + join(self.homeDir, "etc/hadoop/masters"))
-    return slavesOut + mastersOut
-  
   def start(self):
     self.printProgress("Starting ")
     return self.sshExecute(join(self.homeDir, self.hadoopDaemonScriptPath) + " start " + self.getRole())

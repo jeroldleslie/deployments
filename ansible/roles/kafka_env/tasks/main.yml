@@ -17,3 +17,6 @@
   file: mode=u+rxw path={{ kafka_home_dir }}bin/{{ item }}
   with_items:
     - kafka-server-start.sh
+    
+- name: Move configuration files to container
+  copy: src=config/ dest={{ kafka_home_dir }}/config/
