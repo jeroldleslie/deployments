@@ -358,21 +358,10 @@ function setup_cluster_env(){
 function startCluster(){
 
   h1 "Starting cluster"
-  KAFKA_CONFIG=$(get_opt --kafka-config '' $@)
-  ZOOKEEPER_CONFIG=$(get_opt --zookeeper-config '' $@)
   
   command='ssh -o StrictHostKeyChecking=no neverwinterdp@hadoop-master "cd /opt/cluster && python clusterCommander.py cluster --clean --start status'
   
-  if [  "$KAFKA_CONFIG" != ''  ] ; then
-    command="$command --kafka-server-config $KAFKA_CONFIG"
-  fi
-  
-  if [  "$ZOOKEEPER_CONFIG" != ''  ] ; then
-    command="$command --zookeeper-server-config $KAFKA_CONFIG"
-  fi
-  
   command="$command\""
-  
   
   eval $command
 
