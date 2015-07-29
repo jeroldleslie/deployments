@@ -12,5 +12,5 @@ ssh -o "StrictHostKeyChecking no" neverwinterdp@hadoop-master "chmod +x /opt/nev
 
 
 RUN_OPTS= "--profile=performance --storage=kafka --dedicated-executor=false --num-of-message=1000000 --message-size=512"
-ssh -o "StrictHostKeyChecking no" neverwinterdp@hadoop-master  "cd /opt/neverwinterdp &&  time ./dataflow/log-sample/bin/run-kafka.sh $RUN_OPTS"
+ssh -o "StrictHostKeyChecking no" neverwinterdp@hadoop-master  "cd /opt/neverwinterdp &&  time ./dataflow/log-sample/bin/run.sh $RUN_OPTS"
 
