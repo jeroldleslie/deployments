@@ -41,8 +41,8 @@ class Process(object):
         logging.error("Error connecting to "+str(self.hostname)+" as user "+str(user))
         print "Error connecting to "+str(self.hostname)+" as user "+str(user)
         raise
-    logging.debug("SSH execute stdout: "+stdout)
-    logging.debug("SSH execute stderr: "+stderr)
+    #logging.debug("SSH execute stdout: "+stdout)
+    #logging.debug("SSH execute stderr: "+stderr)
     
     return stdout,stderr
   
@@ -150,7 +150,15 @@ class KafkaProcess(Process):
    
   def setupClusterEnv(self, paramDict = {}):
     pass
-     
+  
+  def findBetween(self, s, first, last ):
+    try:
+      start = s.index( first ) + len( first )
+      end = s.index( last, start )
+      return s[start:end]
+    except ValueError:
+      return ""
+         
   def reassignReplicas(self, zkServer, new_brokers):
     logging.debug("Reassigning replicas started "+ str(new_brokers))
     zk_connect = ":2181,".join(zkServer) + ":2181"
@@ -159,9 +167,12 @@ class KafkaProcess(Process):
     retry = True
     while retry:
       describePath = join(self.homeDir, "bin/kafka-topics.sh --describe --zookeeper "+zk_connect)
+      logging.debug("***********************Before reassigning replicas********************")
       stdout,stderr = self.sshExecute(describePath)
       logging.debug("STDOUT from executing "+describePath+": \n"+stdout)
       logging.debug("STDERR from executing "+describePath+": \n"+stderr)
+      
+      
       if not stderr:
         retry = False
         new_brokers = new_brokers.split(",")
@@ -171,6 +182,7 @@ class KafkaProcess(Process):
         if len(topics_json_list) > 0:
           expand_json_path = join(self.homeDir, "expand-cluster-reassignment.json")
           stdout,stderr = self.sshExecute("echo \"" + topics_to_move_json + "\" > " + expand_json_path)
+          logging.debug("Topics to move JSON file: \n"+topics_to_move_json)
           logging.debug("STDOUT from executing "+expand_json_path+": \n"+stdout)
           logging.debug("STDERR from executing "+expand_json_path+": \n"+stderr)
           
@@ -202,10 +214,15 @@ class KafkaProcess(Process):
     
             sleep(2)
           logging.debug("Reassignment Successfull....");
-          
+      logging.debug("***********************After reassigning replicas********************")
+      stdout,stderr = self.sshExecute(describePath)
+      logging.debug("STDOUT from executing "+describePath+": \n"+stdout)
+      logging.debug("STDERR from executing "+describePath+": \n"+stderr)
+  
+             
   def generateReassignmentJson(self, stdout,topics_json_list,new_brokers):
     #generating json
-    topics_json_list=[]
+    #topics_json_list=[]
     new_brokers = map(str, new_brokers)
     itert = cycle(new_brokers)
     topics_to_move_json = "{\\\"version\\\":1,\\\"partitions\\\":["
@@ -214,7 +231,8 @@ class KafkaProcess(Process):
         if re.match('.*Topic:.*', line):
           line = string.replace(line, "\t", " ")
           line = line + " end"
-          topic= re.search("(?<=\Topic:\s)(\w+)", line).group()
+          #topic= re.search("(?<=\Topic:\s)(\w+)", line).group()
+          topic = self.findBetween(line,"Topic:", "Partition:").strip()
           partition=re.search("(?<=\Partition:\s)(\w+)", line).group()
           replicas_list = re.compile(r'Replicas:\s*(.*?)\s*Isr:', re.DOTALL).findall(line)[0].split(",")
           if len(set(new_brokers).intersection(replicas_list))>0:

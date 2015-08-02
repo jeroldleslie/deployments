@@ -359,7 +359,9 @@ function startCluster(){
 
   h1 "Starting cluster"
   
-  command='ssh -o StrictHostKeyChecking=no neverwinterdp@hadoop-master "cd /opt/cluster && python clusterCommander.py cluster --clean --start status'
+  IDLE_KAFKA_SERVER=$(get_opt --idle-kafka-brokers 0 $@)
+  
+  command='ssh -o StrictHostKeyChecking=no neverwinterdp@hadoop-master "cd /opt/cluster && python clusterCommander.py cluster --clean --start --idle-kafka-brokers $IDLE_KAFKA_SERVER status'
   
   command="$command\""
   
@@ -468,6 +470,10 @@ function printUsage() {
   echo "         --force-stop-cluster  : Force stops cluster services"
   echo "         --neverwinterdp-home  : /Path/To/Neverwinterdp"
   echo "         --launch              : Cleans docker image and containers, Builds image and container, and starts"
+  echo "         --kafka-server        : Number of kafka containers to start"
+  echo "         --zk-server           : Number of zookeeper containers to start"
+  echo "         --hadoop-worker       : Number of hadoop worker containers to start"
+  echo "         --idle-kafka-brokers  : Number of ideal kafka containers initially"
   #echo "         --deploy-kibana       : Deploy kibana visualizations and dashboards"
   echo "    Examples:"
   echo "        ./docker.sh cluster [options]"
