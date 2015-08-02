@@ -389,7 +389,6 @@ def ansible(write_inventory_file, inventory_file, deploy_cluster,
 @click.option('--update-local-host-file',   is_flag=True,  help='clean the container')
 @click.option('--update-host-file',         is_flag=True,  help='clean the container')
 @click.option('--setup-neverwinterdp-user', is_flag=True,  help='Sets up the neverwinterdp user')
-@click.option('--setup-cluster-env',        is_flag=True,  help='Sets up the cluster environment')
 @click.option('--ansible-inventory',        is_flag=True,  help='Creates ansible inventory file')
 @click.option('--ansible-inventory-location', default="/tmp/scribengininventoryDO",  help='Where to save ansible inventory file')
 @click.option('--region',                    default="lon1",  type=click.Choice(['lon1','sgp1','nyc1','nyc2','nyc3','sfo1']), help='Region to spawn droplet in')
@@ -399,7 +398,7 @@ def ansible(write_inventory_file, inventory_file, deploy_cluster,
 @click.option('--digitaloceantoken',        default=None,  help='digital ocean token in plain text')
 @click.option('--digitaloceantokenfile',    default='~/.digitaloceantoken', help='digital ocean token file location')
 @click.option('--subdomain',                default="dev",  help='Subdomain to name hosts with in DO - i.e. hadoop-master.dev')
-def digitalocean(launch, create_containers, update_local_host_file, update_host_file, setup_neverwinterdp_user, setup_cluster_env, 
+def digitalocean(launch, create_containers, update_local_host_file, update_host_file, setup_neverwinterdp_user,
                  ansible_inventory, ansible_inventory_location, region, deploy, destroy, 
                  neverwinterdp_home, digitaloceantoken, digitaloceantokenfile,
                  subdomain):
@@ -437,10 +436,6 @@ def digitalocean(launch, create_containers, update_local_host_file, update_host_
     click.echo("Writing ansible inventory file")
     digitalOcean.writeAnsibleInventory(inventoryFileLocation=ansible_inventory_location, subdomain=subdomain)
   
-  if setup_cluster_env or launch:
-    click.echo("Running ansible to setup cluster environment")
-    digitalOcean.setupClusterEnv()
-    
   if deploy or launch:
     click.echo("Running ansible")
     digitalOcean.deploy(neverwinterdp_home)

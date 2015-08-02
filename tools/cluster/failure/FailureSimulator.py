@@ -12,13 +12,6 @@ class FailureSimulator():
     self.roleName = role
     self.mainCluster = Cluster()
     self.cluster = None
-    
-  ''' 
-  def getRoleName(self, hostname):
-    return self.roleName
-  def getExecutionCluster(self, hostname):
-    return self.cluster
-  '''
         
   def failureSimulation(self,failure_interval, wait_before_start, servers, min_servers, servers_to_fail_simultaneously, kill_method, initial_clean, junit_report, restart_method):
     """
@@ -35,14 +28,6 @@ class FailureSimulator():
     
     testCases = []
     testNum = 0
-    ''' 
-    Set config path
-    
-    if self.roleName == "kafka":
-      self.mainCluster.paramDict["server_config"] = config_path
-    elif self.roleName == "zookeeper":
-      self.mainCluster.paramDict["zoo_cfg"] = config_path
-    '''
         
     serverArray = []
     if(servers == ""):
