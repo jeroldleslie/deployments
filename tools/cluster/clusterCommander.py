@@ -143,7 +143,8 @@ def scribengin(restart, start, stop, force_stop, wait_before_start):
 @click.option('--wait-before-start',   default=0,    help="Time to wait before restarting cluster (seconds)")
 @click.option('--wait-before-kill',    default=0,    help="Time to wait before force killing cluster (seconds)")
 @click.option('--execute',                           help='execute given command on all nodes')
-def cluster(restart, start, stop, force_stop, clean, wait_before_start, wait_before_kill, execute):
+@click.option('--idle-kafka-brokers',  default=0,    help="Number of idle kafka brokers initially")
+def cluster(restart, start, stop, force_stop, clean, wait_before_start, wait_before_kill, execute, idle_kafka_brokers):
   cluster = Cluster()
     
   if(execute is not None):
@@ -170,7 +171,7 @@ def cluster(restart, start, stop, force_stop, clean, wait_before_start, wait_bef
     logging.debug("Starting Cluster")
     #cluster.paramDict["server_config"] = kafka_server_config
     #cluster.paramDict["zoo_cfg"] = zookeeper_server_config
-    cluster.startCluster()
+    cluster.startCluster(idleKafkaBrokers=idle_kafka_brokers)
     
   #click.echo(cluster.getReport())  
   
@@ -183,8 +184,9 @@ def cluster(restart, start, stop, force_stop, clean, wait_before_start, wait_bef
 @click.option('--brokers',           default="",   help="Which kafka brokers to effect (command separated list)")
 @click.option('--wait-before-start', default=0,    help="Time to wait before restarting kafka server (seconds)")
 @click.option('--wait-before-kill',  default=0,    help="Time to wait before force killing Kafka process (seconds)")
+@click.option('--idle-kafka-brokers',  default=0,    help="Number of idle kafka brokers initially")
 #idle-servers comes after clean
-def kafka(restart, start, stop, force_stop, clean, brokers, wait_before_start, wait_before_kill):
+def kafka(restart, start, stop, force_stop, clean, brokers, wait_before_start, wait_before_kill, idle_kafka_brokers):
   cluster = Cluster()
   logging.debug("Just a test message.")
   
@@ -210,7 +212,7 @@ def kafka(restart, start, stop, force_stop, clean, brokers, wait_before_start, w
     logging.debug("Waiting for "+str(wait_before_start)+" seconds")
     sleep(wait_before_start)
     logging.debug("Starting Kafka")
-    cluster.startKafka()
+    cluster.startKafka(idleKafkaBrokers=idle_kafka_brokers)
   #click.echo(cluster.getReport())
 
 @mastercommand.command("zookeeper",help="Zookeeper commands")
@@ -311,11 +313,10 @@ def hadoop(restart, start, stop, force_stop, clean, hadoop_nodes, wait_before_st
 @click.option('--servers-to-fail-simultaneously', default=1,    help="Number of servers to kill simultaneously")
 @click.option('--kill-method',                    default='kill', type=click.Choice(['shutdown', 'kill', "random"]), help="Server kill method. Shutdown is clean, kill uses kill -9, random switches randomly")
 @click.option('--initial-clean',                  is_flag=True, help="If enabled, will run a clean operation before starting the failure simulation")
-@click.option('--server-config',                  default='/opt/kafka/config/default.properties', help='Kafka server configuration template path, default is /opt/kafka/config/default.properties', type=click.Path(exists=True))
 @click.option('--junit-report',                   default="",   help="If set, will write the junit-report to the specified file")
 @click.option('--restart-method',                 default='random', type=click.Choice(["flipflop", "random"]), help="Server restart method. 'flipflop' - it starts spare node if normal node killed and vise versa, 'random' - it starts any random node when failure occurs")
 #use-spare before junit report
-def kafkafailure(failure_interval, wait_before_start, servers, min_servers, servers_to_fail_simultaneously, kill_method, initial_clean, server_config, junit_report, restart_method):
+def kafkafailure(failure_interval, wait_before_start, servers, min_servers, servers_to_fail_simultaneously, kill_method, initial_clean, junit_report, restart_method):
   global _jobs
   
   kf = KafkaFailure()
@@ -323,7 +324,7 @@ def kafkafailure(failure_interval, wait_before_start, servers, min_servers, serv
   p = multiprocessing.Process(name="KafkaFailure",
                               target=kf.failureSimulation, 
                               args=(failure_interval, wait_before_start, servers, min_servers, 
-                                    servers_to_fail_simultaneously, kill_method, initial_clean, server_config, junit_report, restart_method))
+                                    servers_to_fail_simultaneously, kill_method, initial_clean, junit_report, restart_method))
   _jobs.append(p)
   p.start()
   
@@ -336,17 +337,16 @@ def kafkafailure(failure_interval, wait_before_start, servers, min_servers, serv
 @click.option('--servers-to-fail-simultaneously', default=1,    help="Number of servers to kill simultaneously")
 @click.option('--kill-method',                    default='kill', type=click.Choice(['shutdown', 'kill', "random"]), help="Server kill method. Shutdown is clean, kill uses kill -9, random switches randomly")
 @click.option('--initial-clean',                  is_flag=True, help="If enabled, will run a clean operation before starting the failure simulation")
-@click.option('--zoo-cfg',                        default='/opt/zookeeper/conf/zoo_sample.cfg', help='Zookeeper configuration template path, default is /opt/zookeeper/conf/zoo_sample.cfg', type=click.Path(exists=True))
 @click.option('--junit-report',                   default="",    help="If set, will write the junit-report to the specified file")
 @click.option('--restart-method',                 default='random', type=click.Choice(["random"]), help="Server restart method. 'random' - it starts any random node when failure occurs")
-def zookeeperfailure(failure_interval, wait_before_start, servers, min_servers, servers_to_fail_simultaneously, kill_method, initial_clean, zoo_cfg, junit_report, restart_method):
+def zookeeperfailure(failure_interval, wait_before_start, servers, min_servers, servers_to_fail_simultaneously, kill_method, initial_clean, junit_report, restart_method):
   global _jobs
   
   zf = ZookeeperFailure()
   p = multiprocessing.Process(name="ZookeeperFailure",
                               target=zf.failureSimulation, 
                               args=(failure_interval, wait_before_start, servers, min_servers, 
-                                    servers_to_fail_simultaneously, kill_method, initial_clean, zoo_cfg, junit_report, restart_method))
+                                    servers_to_fail_simultaneously, kill_method, initial_clean, junit_report, restart_method))
   _jobs.append(p)
   p.start()
 
@@ -389,6 +389,7 @@ def ansible(write_inventory_file, inventory_file, deploy_cluster,
 @click.option('--update-local-host-file',   is_flag=True,  help='clean the container')
 @click.option('--update-host-file',         is_flag=True,  help='clean the container')
 @click.option('--setup-neverwinterdp-user', is_flag=True,  help='Sets up the neverwinterdp user')
+@click.option('--setup-cluster-env',        is_flag=True,  help='Sets up the cluster environment')
 @click.option('--ansible-inventory',        is_flag=True,  help='Creates ansible inventory file')
 @click.option('--ansible-inventory-location', default="/tmp/scribengininventoryDO",  help='Where to save ansible inventory file')
 @click.option('--region',                    default="lon1",  type=click.Choice(['lon1','sgp1','nyc1','nyc2','nyc3','sfo1']), help='Region to spawn droplet in')
@@ -398,7 +399,7 @@ def ansible(write_inventory_file, inventory_file, deploy_cluster,
 @click.option('--digitaloceantoken',        default=None,  help='digital ocean token in plain text')
 @click.option('--digitaloceantokenfile',    default='~/.digitaloceantoken', help='digital ocean token file location')
 @click.option('--subdomain',                default="dev",  help='Subdomain to name hosts with in DO - i.e. hadoop-master.dev')
-def digitalocean(launch, create_containers, update_local_host_file, update_host_file, setup_neverwinterdp_user,
+def digitalocean(launch, create_containers, update_local_host_file, update_host_file, setup_neverwinterdp_user, setup_cluster_env, 
                  ansible_inventory, ansible_inventory_location, region, deploy, destroy, 
                  neverwinterdp_home, digitaloceantoken, digitaloceantokenfile,
                  subdomain):
@@ -436,6 +437,10 @@ def digitalocean(launch, create_containers, update_local_host_file, update_host_
     click.echo("Writing ansible inventory file")
     digitalOcean.writeAnsibleInventory(inventoryFileLocation=ansible_inventory_location, subdomain=subdomain)
   
+  if setup_cluster_env or launch:
+    click.echo("Running ansible to setup cluster environment")
+    digitalOcean.setupClusterEnv()
+    
   if deploy or launch:
     click.echo("Running ansible")
     digitalOcean.deploy(neverwinterdp_home)

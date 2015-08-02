@@ -131,10 +131,17 @@ class ServerSet(object):
       if server.getHostname() == hostname:
         server.killProcess(processName)
   
-  def startProcess(self, processNames, setupClusterEnv = True):
+  def startProcess(self, processNames, setupClusterEnv = True, idleKafkaBrokers=0):
     for processName in processNames.split(","):
       for server in self.servers :
-        server.startProcess(processName, self.paramDict, False)
+        if server.getRole() == "kafka":
+          if idleKafkaBrokers == 0:
+            server.startProcess(processName, self.paramDict, False)
+          else:
+            print "Skipping " +processName+" on "+ server.getHostname()
+            idleKafkaBrokers -= 1
+        else:
+          server.startProcess(processName, self.paramDict, False)
     
   def cleanProcess(self, processNames):
     for processName in processNames.split(","):
@@ -225,8 +232,8 @@ class ServerSet(object):
   def startZookeeper(self):
     return self.startProcess("zookeeper")
   
-  def startKafka(self):
-    return self.startProcess("kafka")
+  def startKafka(self, idleKafkaBrokers=0):
+    return self.startProcess("kafka",idleKafkaBrokers=idleKafkaBrokers)
   
   def cleanHadoopDataAtFirst(self):
     serverSet = self.getServersByRole("hadoop-worker")
@@ -255,10 +262,10 @@ class ServerSet(object):
   def startHadoopWorker(self):
     return self.startProcess("datanode,nodemanager")
   
-  def startCluster(self):
+  def startCluster(self,idleKafkaBrokers=0):
     self.startElasticSearch()
     self.startZookeeper()
-    self.startKafka()
+    self.startKafka(idleKafkaBrokers)
     self.cleanHadoopDataAtFirst()
     self.startHadoopMaster()
     self.startHadoopWorker()

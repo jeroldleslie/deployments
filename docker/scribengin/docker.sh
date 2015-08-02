@@ -359,7 +359,9 @@ function startCluster(){
 
   h1 "Starting cluster"
   
-  command='ssh -o StrictHostKeyChecking=no neverwinterdp@hadoop-master "cd /opt/cluster && python clusterCommander.py cluster --clean --start status'
+  IDLE_KAFKA_SERVER=$(get_opt --idle-kafka-brokers 0 $@)
+  
+  command='ssh -o StrictHostKeyChecking=no neverwinterdp@hadoop-master "cd /opt/cluster && python clusterCommander.py cluster --clean --start --idle-kafka-brokers $IDLE_KAFKA_SERVER status'
   
   command="$command\""
   
