@@ -1,3 +1,5 @@
+- name: Move configuration files to container
+  copy: src=config/ dest={{ hadoop_home }}/etc/hadoop/
 
 - name: Add masters and slaves file
   template: src={{ item }}.j2 dest={{ hadoop_home }}/etc/hadoop/{{ item }}
@@ -5,6 +7,9 @@
   with_items:
     - slaves
     - masters
+    - hadoop-env.sh
+    - yarn-env.sh
+    - core-site.xml
+    - hdfs-site.xml
+    - yarn-site.xml
 
-- name: Move configuration files to container
-  copy: src=config/ dest={{ hadoop_home }}/etc/hadoop/

@@ -75,4 +75,4 @@ class Cluster(ServerSet):
     self.paramDict["genericServers"] = genericServers
     self.paramDict["all"] = kafkaServers + zkList + hadoopWorkers + hadoopMasters + elasticsearchServers
 
-    
+    self.createAnsibleInventory()

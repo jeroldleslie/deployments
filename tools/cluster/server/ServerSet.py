@@ -1,8 +1,11 @@
 from tabulate import tabulate
 from multiprocessing import Pool
-import os, sys, re
-from os.path import join, expanduser
+import os, sys, re, yaml
+from os.path import expanduser, join, abspath, dirname, realpath
 from multiprocessing.pool import ThreadPool
+import ansible.inventory
+from scribenginansible.AnsibleRunner import AnsibleRunner
+from pydoc import Doc
 
 #This function is outside the ServerSet class
 #because otherwise it wouldn't be pickleable 
@@ -87,7 +90,15 @@ class ServerSet(object):
     self.servers = []
     self.paramDict = {}
     self.numProcessesForStatus = numProcessesForStatus
+    self.inventory = ansible.inventory.Inventory()
     
+    deploymentRootDir = dirname(dirname(dirname(dirname(realpath(__file__)))))
+    self.ansibleRootDir = join(deploymentRootDir, "ansible")
+    
+    self.ansibleRunner = AnsibleRunner()
+    self.configurations = None
+    self.setProfile('default')
+        
   def clear(self):
     self.servers = []
   
@@ -96,6 +107,13 @@ class ServerSet(object):
     print message 
     print "***********************************************************************"  
   
+  def setProfile(self, profile_type):
+    deploymentRootDir = dirname(dirname(dirname(dirname(realpath(__file__)))))
+    self.configsPath = join(deploymentRootDir, "profile", profile_type, "main.yml")
+    self.configurations = None
+    with open(self.configsPath, 'r') as f:
+      self.configurations = yaml.load(f)
+      
   def addServer(self, server):
     self.servers.append(server)
   
@@ -191,6 +209,11 @@ class ServerSet(object):
     roles = role.split(",")
     serverSet = ServerSet("subset")
     serverSet.paramDict = self.paramDict
+    
+    serverSet.inventory=self.inventory
+    serverSet.ansibleRunner=self.ansibleRunner
+    serverSet.configurations=self.configurations 
+    
     for server in self.servers :
       if(server.getRole() in roles) :
         serverSet.addServer(server)
@@ -230,9 +253,11 @@ class ServerSet(object):
     self.startProcess("influxdb")
   
   def startZookeeper(self):
+    self.ansibleRunner.runPlaybook(self.inventory, join(self.ansibleRootDir, "zookeeper_env.yml"),self.configurations["zookeeper"]["software"])
     return self.startProcess("zookeeper")
   
   def startKafka(self, idleKafkaBrokers=0):
+    self.ansibleRunner.runPlaybook(self.inventory, join(self.ansibleRootDir, "kafka_env.yml"),self.configurations["kafka"]["software"])
     return self.startProcess("kafka",idleKafkaBrokers=idleKafkaBrokers)
   
   def cleanHadoopDataAtFirst(self):
@@ -262,13 +287,17 @@ class ServerSet(object):
   def startHadoopWorker(self):
     return self.startProcess("datanode,nodemanager")
   
+  def startHadoop(self):
+    self.ansibleRunner.runPlaybook(self.inventory, join(self.ansibleRootDir, "hadoop_env.yml"),self.configurations["hadoop-master"]["software"])
+    self.startHadoopMaster()
+    self.startHadoopWorker()
+    
   def startCluster(self,idleKafkaBrokers=0):
     self.startElasticSearch()
     self.startZookeeper()
     self.startKafka(idleKafkaBrokers)
     self.cleanHadoopDataAtFirst()
-    self.startHadoopMaster()
-    self.startHadoopWorker()
+    self.startHadoop()
     self.startVmMaster()
     self.startScribengin()
     self.startGeneric()
@@ -309,7 +338,7 @@ class ServerSet(object):
   
   def shutdownHadoopWorker(self):
     return self.shutdownProcess("datanode,nodemanager")
-  
+    
   def shutdownCluster(self):
     self.killScribengin()
     self.killVmMaster()
@@ -407,7 +436,24 @@ class ServerSet(object):
 
   def report(self) :
     print self.getReport()
-
+  
+  def addAnsibleHostsAndGroup(self, servers, ansible_ssh_user, ansible_ssh_private_key_file, group_name ):
+    ansible_group = ansible.inventory.group.Group(name = group_name)
+    for hostname in servers:
+      host = ansible.inventory.host.Host(name = hostname)
+      host.set_variable( 'ansible_ssh_user', 'neverwinterdp')
+      host.set_variable( 'ansible_ssh_private_key_file', '~/.ssh/id_rsa')
+      ansible_group.add_host(host)
+    self.inventory.add_group(ansible_group)
+  
+  def createAnsibleInventory(self, ansible_ssh_user='neverwinterdp', ansible_ssh_private_key_file='~/.ssh/id_rsa'):
+    self.addAnsibleHostsAndGroup(self.paramDict.get("kafkaServers"),ansible_ssh_user,ansible_ssh_private_key_file,'kafka');
+    self.addAnsibleHostsAndGroup(self.paramDict.get("zkList"),ansible_ssh_user,ansible_ssh_private_key_file,'zookeeper');
+    self.addAnsibleHostsAndGroup(self.paramDict.get("hadoopWorkers"),ansible_ssh_user,ansible_ssh_private_key_file,'hadoop_worker');
+    self.addAnsibleHostsAndGroup(self.paramDict.get("hadoopMasters"),ansible_ssh_user,ansible_ssh_private_key_file,'hadoop_master');
+    self.addAnsibleHostsAndGroup(self.paramDict.get("elasticsearchServers"),ansible_ssh_user,ansible_ssh_private_key_file,'elasticsearch');
+    self.addAnsibleHostsAndGroup(self.paramDict.get("genericServers"),ansible_ssh_user,ansible_ssh_private_key_file,'monitoring');
+        
   def we_are_frozen(self):
       # All of the modules are built-in to the interpreter, e.g., by py2exe
       return hasattr(sys, "frozen")

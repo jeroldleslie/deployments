@@ -1,0 +1,6 @@
+---
+- name: Kafka cluster environment
+  hosts: kafka
+  remote_user: neverwinterdp
+  roles:
+    - kafka_env

@@ -1,0 +1,6 @@
+---
+- name: Zookeeper cluster environment
+  hosts: zookeeper
+  remote_user: neverwinterdp
+  roles:
+    - zookeeper_env

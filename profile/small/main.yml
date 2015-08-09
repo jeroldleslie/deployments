@@ -1,0 +1,41 @@
+kafka:
+  hardware:
+    memory: 2gb
+    num: 3
+  software:
+    KAFKA_HEAP_SIZE: 4096
+
+zookeeper:
+  hardware:
+    memory: 2gb
+    num: 3
+  software:
+    maxClientCnxns: 60
+
+hadoop-master:
+  hardware:
+    memory: 2gb
+    num: 1
+  software:
+    HADOOP_HEAPSIZE: 4096
+    HADOOP_NAMENODE_INIT_HEAPSIZE: 4096
+    YARN_RESOURCEMANAGER_HEAPSIZE: 4096
+    YARN_NODEMANAGER_HEAPSIZE: 4096
+
+hadoop-worker:
+  hardware:
+    memory: 2gb
+    num: 3
+  software:
+  
+elasticsearch:  
+  hardware:
+    memory: 2gb
+    num: 1
+  software:
+
+monitoring:
+  hardware:
+    memory: 2gb
+    num: 1
+  software:
