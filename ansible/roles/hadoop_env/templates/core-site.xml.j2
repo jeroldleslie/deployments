@@ -4,16 +4,16 @@
 <configuration>
   <property>
     <name>hadoop.tmp.dir</name>
-    <value>/opt/hadoop/data</value>
+    <value>{{hadoop_tmp_dir}}</value>
   </property>
 
   <property>
     <name>fs.default.name</name>
-    <value>hdfs://hadoop-master:9000</value>
+    <value>{{fs_default_name}}</value>
   </property>
   
   <property>
     <name>hadoop.http.staticuser.user</name>
-    <value>neverwinterdp</value>
+    <value>{{hadoop_http_staticuser_user}}</value>
   </property>
 </configuration>

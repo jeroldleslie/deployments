@@ -20,7 +20,7 @@
 zookeeper.connect={% for host in groups['zookeeper'] %}{{ host }}:{{ zookeeper_clientport }},{% endfor %}
 
 # timeout in ms for connecting to zookeeper
-zookeeper.connection.timeout.ms={{ zookeeper_connection_timeout_ms }}
+zookeeper.connection.timeout.ms={{ consumer_zookeeper_connection_timeout_ms }}
 
 #consumer group id
 group.id={{ group_id }}

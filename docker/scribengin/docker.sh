@@ -360,12 +360,12 @@ function startCluster(){
   h1 "Starting cluster"
   
   IDLE_KAFKA_SERVER=$(get_opt --idle-kafka-brokers 0 $@)
+  SCRIPT_DIR=$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )
+  #command='ssh -o StrictHostKeyChecking=no neverwinterdp@hadoop-master "cd /opt/cluster && python clusterCommander.py cluster --clean --start --idle-kafka-brokers $IDLE_KAFKA_SERVER status'
+  #command="$command\""
   
-  command='ssh -o StrictHostKeyChecking=no neverwinterdp@hadoop-master "cd /opt/cluster && python clusterCommander.py cluster --clean --start --idle-kafka-brokers $IDLE_KAFKA_SERVER status'
-  
-  command="$command\""
-  
-  eval $command
+  #eval $command
+  $SCRIPT_DIR/../../tools/cluster/clusterCommander.py cluster --clean --start --idle-kafka-brokers $IDLE_KAFKA_SERVER status
 
   h1 "Deploy kibana charts"
   deploy_kibana_charts $@
@@ -408,10 +408,6 @@ function cluster(){
   
   if [ $ANSIBLE_INVENTORY == "true" ] || [ $LAUNCH == "true" ] ; then
     ansible_inventory $@
-  fi
-  
-  if [ $RUN_CONTAINERS == "true" ] || [ $LAUNCH == "true" ] ; then
-    setup_cluster_env $@ 
   fi
   
   if [ $DEPLOY == "true" ] ; then

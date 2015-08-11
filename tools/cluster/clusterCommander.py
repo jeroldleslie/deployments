@@ -144,9 +144,10 @@ def scribengin(restart, start, stop, force_stop, wait_before_start):
 @click.option('--wait-before-kill',    default=0,    help="Time to wait before force killing cluster (seconds)")
 @click.option('--execute',                           help='execute given command on all nodes')
 @click.option('--idle-kafka-brokers',  default=0,    help="Number of idle kafka brokers initially")
-def cluster(restart, start, stop, force_stop, clean, wait_before_start, wait_before_kill, execute, idle_kafka_brokers):
+@click.option('--profile-type',     default='default',  help="Cluster profile type, you can create and specify your own profile on neverwinterdp-deployments-home/profile, have default as an example")
+def cluster(restart, start, stop, force_stop, clean, wait_before_start, wait_before_kill, execute, idle_kafka_brokers, profile_type):
   cluster = Cluster()
-    
+  cluster.setProfile(profile_type)
   if(execute is not None):
     cluster.sshExecute(execute)
     
@@ -185,9 +186,10 @@ def cluster(restart, start, stop, force_stop, clean, wait_before_start, wait_bef
 @click.option('--wait-before-start', default=0,    help="Time to wait before restarting kafka server (seconds)")
 @click.option('--wait-before-kill',  default=0,    help="Time to wait before force killing Kafka process (seconds)")
 @click.option('--idle-kafka-brokers',  default=0,    help="Number of idle kafka brokers initially")
-#idle-servers comes after clean
-def kafka(restart, start, stop, force_stop, clean, brokers, wait_before_start, wait_before_kill, idle_kafka_brokers):
+@click.option('--profile-type',     default='default',  help="Kafka profile type, you can create and specify your own profile on neverwinterdp-deployments-home/profile, have default as an example")
+def kafka(restart, start, stop, force_stop, clean, brokers, wait_before_start, wait_before_kill, idle_kafka_brokers, profile_type):
   cluster = Cluster()
+  cluster.setProfile(profile_type)
   logging.debug("Just a test message.")
   
   if len(brokers) > 0 :
@@ -224,8 +226,10 @@ def kafka(restart, start, stop, force_stop, clean, brokers, wait_before_start, w
 @click.option('--zk-servers',        is_flag=True, help="Which ZK nodes to effect (command separated list)")
 @click.option('--wait-before-start', default=0,     help="Time to wait before starting ZK server (seconds)")
 @click.option('--wait-before-kill',  default=0,     help="Time to wait before force killing ZK process (seconds)")
-def zookeeper(restart, start, stop, force_stop, clean, zk_servers, wait_before_start, wait_before_kill):
+@click.option('--profile-type',     default='default',  help="Zookeeper profile type, you can create and specify your own profile on neverwinterdp-deployments-home/profile, have default as an example")
+def zookeeper(restart, start, stop, force_stop, clean, zk_servers, wait_before_start, wait_before_kill, profile_type):
   cluster = Cluster()
+  cluster.setProfile(profile_type)
   if(restart or stop):
     logging.debug("Shutting down Zookeeper")
     cluster.shutdownZookeeper()
@@ -260,10 +264,12 @@ def zookeeper(restart, start, stop, force_stop, clean, zk_servers, wait_before_s
 @click.option('--grep-app-log',      is_flag=True,   help="Prints app log from hadoop cluster, or it can be restricted for specified hadoop nodes using --servers option")
 @click.option('--grep-app-stdout',   is_flag=True,   help="Prints stdout log from hadoop cluster, or it can be restricted for specified hadoop nodes using --servers option")
 @click.option('--grep-app-stderr',   is_flag=True,   help="Prints stderr log from hadoop cluster, or it can be restricted for specified hadoop nodes using --servers option")
-def hadoop(restart, start, stop, force_stop, clean, hadoop_nodes, wait_before_start, wait_before_kill,servers,grep_app_log,grep_app_stdout,grep_app_stderr):
+@click.option('--profile-type',      default='default',  help="Hadoop profile type, you can create and specify your own profile on neverwinterdp-deployments-home/profile, have default as an example")
+def hadoop(restart, start, stop, force_stop, clean, hadoop_nodes, wait_before_start, wait_before_kill,servers,grep_app_log,grep_app_stdout,grep_app_stderr,profile_type):
   cluster = Cluster()
   
   cluster = cluster.getServersByRole("hadoop-master,hadoop-worker");
+  cluster.setProfile(profile_type)
   
   if len(servers) > 0 :
     serverList = servers.split(",")
@@ -300,8 +306,7 @@ def hadoop(restart, start, stop, force_stop, clean, hadoop_nodes, wait_before_st
     sleep(wait_before_start)
     logging.debug("Starting Hadoop")
     cluster.cleanHadoopDataAtFirst()
-    cluster.startHadoopMaster()
-    cluster.startHadoopWorker()
+    cluster.startHadoop()
   
   #click.echo(cluster.getReport())
 
@@ -360,6 +365,8 @@ def zookeeperfailure(failure_interval, wait_before_start, servers, min_servers, 
 @click.option('--neverwinterdp-home',      default=None, help='neverwinterdp home')
 def ansible(write_inventory_file, inventory_file, deploy_cluster,
             deploy_scribengin, deploy_tools, neverwinterdp_home):
+  cluster = Cluster()
+  
   if neverwinterdp_home is None:
     neverwinterdp_home = os.environ.get('NEVERWINTERDP_HOME')
     
@@ -369,7 +376,7 @@ def ansible(write_inventory_file, inventory_file, deploy_cluster,
   
   ans = ScribenginAnsible()
   if write_inventory_file:
-    ans.writeAnsibleInventory(inventoryFileLocation=inventory_file)
+    ans.writeAnsibleInventory(hostsAndIps=cluster.getHostsAndIpsFromCluster(),inventoryFileLocation=inventory_file)
   
   deploymentRootDir = dirname(dirname(dirname(realpath(__file__))))
   ansibleRootDir = join(deploymentRootDir, "ansible")

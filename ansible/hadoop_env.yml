@@ -1,0 +1,6 @@
+---
+- name: Hadoop cluster environment
+  hosts: hadoop_master:hadoop_worker
+  remote_user: neverwinterdp
+  roles:
+    - hadoop_env

@@ -2,26 +2,10 @@ import logging, subprocess
 from os.path import abspath, dirname, join, expanduser, realpath
 from sys import path
 path.insert(0, dirname(dirname(abspath(__file__))))
-from Cluster import Cluster
-
-
 
 class ScribenginAnsible():
   def __init__(self):
     pass
-  
-  def getHostsAndIpsFromCluster(self):
-    import socket
-    hostsAndIps = []
-    c = Cluster()
-    for server in c.servers:
-      hostsAndIps.append({
-                          "name":server.hostname,
-                          "ip": socket.gethostbyname(server.hostname)
-                          })
-    logging.info("Hosts and IPs: "+str(hostsAndIps))
-    return hostsAndIps
-  
   
   ##hostsAndIps is expected to be an array of dictionaries with format -
   #[ {"name": host1, "ip":"1.2.3.4"}, {"name": host2, "ip":"1.2.3.5"}, ....  ]
@@ -34,10 +18,6 @@ class ScribenginAnsible():
                  "hadoop-worker",
                  "zookeeper",
                  "elasticsearch",]
-    
-    if hostsAndIps is None:
-      hostsAndIps = self.getHostsAndIpsFromCluster()
-    
     for group in groupList:
       #Replace - with _ to differentiate groups from hostnames
       inventory += "\n["+group.replace("-","_")+"]\n"
@@ -51,12 +31,20 @@ class ScribenginAnsible():
     logging.debug("Ansible inventory written to "+inventoryFileLocation)
     logging.info("Ansible inventory contents: \n"+inventory)
   
+  def get_extra_vars_string(self,extra_vars={}):
+    result = ""
+    for k in extra_vars:
+      result +=  str(k)+"="+str(extra_vars[k]) +" "
+    return result
   
   def deploy(self, playbook, inventory, neverwinterdpHome=None,
-             outputToStdout=True, retry=0, retryLine=None, maxRetries=5):
+             outputToStdout=True, retry=0, retryLine=None, maxRetries=5, extra_vars={}):
+    
     command = "ansible-playbook "+playbook+" -i "+inventory
     if neverwinterdpHome is not None:
-      command += " --extra-vars \"neverwinterdp_home_override="+neverwinterdpHome+"\""
+      extra_vars["neverwinterdp_home_override"]=neverwinterdpHome
+    
+    command += " --extra-vars \""+self.get_extra_vars_string(extra_vars)+"\""
     
     if retryLine is not None:
       command = command+" "+retryLine
