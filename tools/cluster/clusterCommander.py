@@ -365,6 +365,8 @@ def zookeeperfailure(failure_interval, wait_before_start, servers, min_servers, 
 @click.option('--neverwinterdp-home',      default=None, help='neverwinterdp home')
 def ansible(write_inventory_file, inventory_file, deploy_cluster,
             deploy_scribengin, deploy_tools, neverwinterdp_home):
+  cluster = Cluster()
+  
   if neverwinterdp_home is None:
     neverwinterdp_home = os.environ.get('NEVERWINTERDP_HOME')
     
@@ -374,7 +376,7 @@ def ansible(write_inventory_file, inventory_file, deploy_cluster,
   
   ans = ScribenginAnsible()
   if write_inventory_file:
-    ans.writeAnsibleInventory(inventoryFileLocation=inventory_file)
+    ans.writeAnsibleInventory(hostsAndIps=cluster.getHostsAndIpsFromCluster(),inventoryFileLocation=inventory_file)
   
   deploymentRootDir = dirname(dirname(dirname(realpath(__file__))))
   ansibleRootDir = join(deploymentRootDir, "ansible")
