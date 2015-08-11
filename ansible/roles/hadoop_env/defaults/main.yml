@@ -7,3 +7,4 @@ fs_default_name: hdfs://hadoop-master:9000
 hadoop_http_staticuser_user: neverwinterdp
 dfs_replication: 3
 yarn_resourcemanager_hostname: hadoop-master
+yarn_nodemanager_hostname: 0.0.0.0

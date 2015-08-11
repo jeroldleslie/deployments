@@ -1,3 +1,4 @@
+ZOOKEEPER_HEAP_SIZE: 2048
 zookeeper_home_dir: /opt/zookeeper
 
 tickTime: 2000
