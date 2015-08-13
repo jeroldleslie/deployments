@@ -114,6 +114,10 @@ class Process(object):
   def getRunningPid(self):
     command = "ps ax | grep -w '"+self.processIdentifier+"' | grep java | grep -v grep | awk '{print $1}'"
     stdout,stderr = self.sshExecute(command)
+    
+    logging.debug("STDOUT from executing "+command+": \n"+stdout)
+    logging.debug("STDERR from executing "+command+": \n"+stderr)
+      
     return stdout.strip().replace("\n",",")
   
   def isDataDirExists(self):
@@ -459,6 +463,7 @@ class ElasticSearchProcess(Process):
   
   def start(self):
     if not self.isRunning():
+      self.printProgress("Starting ")
       stdout,stderr = self.sshExecute(join(self.homeDir, join("bin", "elasticsearch.sh")))
       return stdout,stderr
     else:
@@ -501,19 +506,25 @@ class KibanaProcess(Process):
   
   def getProcessCommand(self):
     return "ps ax | grep -w 'kibana' | awk '{print $1 \" \" $5}' | grep kibana | sed -e 's@/opt/kibana/bin/../node/bin/node@/opt/kibana/bin/kibana@'"
+    #return "ps ax | grep -w 'kibana' | awk '{print $1 \" \" $6}' | grep kibana | sed -e 's@./../src/bin/kibana.js@kibana@'"
   
   def setupClusterEnv(self, paramDict = {}):
     pass
   
   def shutdown(self):
-    stdout,stderr = self.sshExecute("sudo service kibana4 stop")
+    stdout,stderr = self.sshExecute("sudo /etc/init.d/kibana4 stop")
     return stdout,stderr
   
   def clean(self):
     pass 
   
   def start(self):
-    stdout,stderr = self.sshExecute("sudo service kibana4 start")
+    self.printProgress("Starting ")
+    stdout,stderr = self.sshExecute("sudo /etc/init.d/kibana4 start")
+    logging.info("STDOUT from scribengin start: \n"+stdout)
+    logging.info("STDERR from scribengin start: \n"+stderr)
+    print "STDOUT from scribengin start: \n"+stdout
+    print "STDERR from scribengin start: \n"+stderr
     return stdout,stderr
   
   def kill(self):
@@ -531,7 +542,7 @@ class InfluxdbProcess(Process):
     pass
   
   def shutdown(self):
-    stdout,stderr = self.sshExecute("sudo /etc/init.d/influxdb start")
+    stdout,stderr = self.sshExecute("sudo /etc/init.d/influxdb stop")
     return stdout,stderr
   
   def clean(self):

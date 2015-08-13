@@ -126,8 +126,9 @@ function host_machine_update_hosts() {
 
 
 function clean_image() {
+  OS_TYPE=$(get_opt --os-type 'ubuntu' $@)
   h1 "Clean the images"
-  images=( $(docker images -a | grep -i scribengin |  awk '{print $1 ":" $2}') )
+  images=( $(docker images -a | grep -i $OS_TYPE-scribengin |  awk '{print $1 ":" $2}') )
   for image in "${images[@]}" ; do
     docker rmi -f $image
   done
@@ -136,15 +137,20 @@ function clean_image() {
 function build_images() {
   h1 "Building Images"
   
+  OS_TYPE=$(get_opt --os-type 'ubuntu' $@)
+  
   #Direcotry this script is in
   DOCKERSCRIBEDIR=$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )
+  DOCKERSCRIBEDIR=$DOCKERSCRIBEDIR/dockerfile/$OS_TYPE
   mkdir $DOCKERSCRIBEDIR/tmp
   
   cp ~/.ssh/id_rsa      $DOCKERSCRIBEDIR/tmp/id_rsa
   cp ~/.ssh/id_rsa.pub  $DOCKERSCRIBEDIR/tmp/id_rsa.pub
   cp ~/.ssh/id_rsa.pub $DOCKERSCRIBEDIR/tmp/authorized_keys
   
-  docker build -t ubuntu:scribengin $BIN_DIR
+  mkdir $DOCKERSCRIBEDIR/tmp
+  cp ~/.ssh/id_rsa.pub $DOCKERSCRIBEDIR/tmp/authorized_keys
+  docker build -t $OS_TYPE:scribengin $DOCKERSCRIBEDIR
   
   rm -rf $DOCKERSCRIBEDIR/tmp
   
@@ -161,31 +167,34 @@ function clean_containers() {
 }
 
 function launch_intermediate_containers() {
+  OS_TYPE=$(get_opt --os-type 'ubuntu' $@)
+  
   h1 "Launching intermediate containers for final image configuration"
   
   #Launch 1 of each kind of container
   h1 "Launch intermediate hadoop-master container"
-  docker run -d -p 22 -p 50070 -p 9000 -p 8030 -p 8032 -p 8088 --privileged -h hadoop-master --name hadoop-master  ubuntu:scribengin
+  docker run -d -p 22 -p 50070 -p 9000 -p 8030 -p 8032 -p 8088 --privileged -h hadoop-master --name hadoop-master  $OS_TYPE:scribengin
   
   h1 "Launch intermediate hadoop-worker container"
-  docker run -d -p 22 --privileged -h hadoop-worker --name hadoop-worker ubuntu:scribengin
+  docker run -d -p 22 --privileged -h hadoop-worker --name hadoop-worker $OS_TYPE:scribengin
   
   h1 "Launch intermediate zookeeper container"
-  docker run -d -p 22 -p 2181 --privileged -h zookeeper --name zookeeper  ubuntu:scribengin
+  docker run -d -p 22 -p 2181 --privileged -h zookeeper --name zookeeper  $OS_TYPE:scribengin
 
   h1 "Launch intermediate kafka container"
-  docker run -d -p 22 -p 9092 --privileged -h kafka --name kafka  ubuntu:scribengin
+  docker run -d -p 22 -p 9092 --privileged -h kafka --name kafka  $OS_TYPE:scribengin
   
   h1 "Launch intermediate elasticsearch container"
-  docker run -d -p 22 -p 9300 --privileged -h elasticsearch --name elasticsearch  ubuntu:scribengin
+  docker run -d -p 22 -p 9300 --privileged -h elasticsearch --name elasticsearch  $OS_TYPE:scribengin
   
   h1 "Launch intermediate monitoring container"
-  docker run -d -p 22 -p 3000 -p 5601:5601 --privileged -h monitoring --name monitoring ubuntu:scribengin
+  docker run -d -p 22 -p 3000 -p 5601:5601 --privileged -h monitoring --name monitoring $OS_TYPE:scribengin
   
   #Get those intermediate containers set up with ansible
   host_machine_update_hosts
   #container_update_hosts $@
   ansible_inventory $@ 
+  
   deploy_all $@
   
   #Create base images for each container
@@ -196,13 +205,15 @@ function launch_intermediate_containers() {
     #image_name=`echo ${containers[i+1]} | sed -e 's/[0-9]*$//g' -e 's/-$//'`
     image_name=${containers[i+1]}
     h1 "Creating base image for $image_name"
-    docker commit $container_ID scribengin:$image_name
+    docker commit $container_ID $OS_TYPE-scribengin:$image_name
   done
-  
+
   clean_containers $@
 }
 
 function launch_containers() {
+  OS_TYPE=$(get_opt --os-type 'ubuntu' $@)
+  
   h1 "Launching Containers"
   #Checks to make sure images exist
   #If they don't exist, then create them
@@ -221,13 +232,13 @@ function launch_containers() {
   NUM_MONITORING=$(get_opt --monitoring-server 1 $@)
   
   h1 "Launch hadoop-master containers"
-  docker run -d -p 22 -p 50070:50070 -p 9000:9000 -p 8030:8030 -p 8032:8032 -p 8088:8088 --privileged -h hadoop-master --name hadoop-master  scribengin:hadoop-master
+  docker run -d -p 22 -p 50070:50070 -p 9000:9000 -p 8030:8030 -p 8032:8032 -p 8088:8088 --privileged -h hadoop-master --name hadoop-master  $OS_TYPE-scribengin:hadoop-master
   
   h1 "Launch hadoop-worker containers"
   for (( i=1; i<="$NUM_HADOOP_WORKER"; i++ ))
   do
     NAME="hadoop-worker-"$i
-    docker run -d -p 22 --privileged -h "$NAME" --name "$NAME" scribengin:hadoop-worker
+    docker run -d -p 22 --privileged -h "$NAME" --name "$NAME" $OS_TYPE-scribengin:hadoop-worker
   done
 
   h1 "Launch zookeeper containers"
@@ -235,14 +246,14 @@ function launch_containers() {
   do
     NAME="zookeeper-"$i
     PORT_NUM=`expr 2181 - 1 + $i`
-    docker run -d -p 22 -p $PORT_NUM:2181 --privileged -h "$NAME" --name "$NAME"  scribengin:zookeeper
+    docker run -d -p 22 -p $PORT_NUM:2181 --privileged -h "$NAME" --name "$NAME"  $OS_TYPE-scribengin:zookeeper
   done  
 
   h1 "Launch kafka containers"
   for (( i=1; i<="$NUM_KAFKA_BROKER"; i++ ))
   do
     NAME="kafka-"$i
-    docker run -d -p 22 -p 9092 --privileged -h "$NAME" --name "$NAME"  scribengin:kafka
+    docker run -d -p 22 -p 9092 --privileged -h "$NAME" --name "$NAME"  $OS_TYPE-scribengin:kafka
   done
 
   h1 "Launch elasticsearch containers"
@@ -251,14 +262,14 @@ function launch_containers() {
     NAME="elasticsearch-"$i
     EXPOSE_PORT_9300=`expr 9300 - 1 + $i`
     EXPOSE_PORT_9200=`expr 9200 - 1 + $i`
-    docker run -d -p 22 -p $EXPOSE_PORT_9300:9300 -p $EXPOSE_PORT_9200:9200 --privileged -h "$NAME" --name "$NAME"  scribengin:elasticsearch
+    docker run -d -p 22 -p $EXPOSE_PORT_9300:9300 -p $EXPOSE_PORT_9200:9200 --privileged -h "$NAME" --name "$NAME"  $OS_TYPE-scribengin:elasticsearch
   done
   
   h1 "Launch monitoring containers"
   for (( i=1; i<="$NUM_MONITORING"; i++ ))
   do
     NAME="monitoring-"$i
-    docker run -d -p 22 -p 3000:3000 -p 5601:5601 --privileged -h "$NAME" --name "$NAME"  scribengin:monitoring
+    docker run -d -p 22 -p 3000:3000 -p 5601:5601 --privileged -h "$NAME" --name "$NAME"  $OS_TYPE-scribengin:monitoring
   done
   
   docker ps
@@ -367,8 +378,8 @@ function startCluster(){
   #eval $command
   $SCRIPT_DIR/../../tools/cluster/clusterCommander.py cluster --clean --start --idle-kafka-brokers $IDLE_KAFKA_SERVER status
 
-  h1 "Deploy kibana charts"
-  deploy_kibana_charts $@
+  #h1 "Deploy kibana charts"
+  #deploy_kibana_charts $@
 }
 
 function cluster(){
@@ -469,6 +480,7 @@ function printUsage() {
   echo "         --kafka-server        : Number of kafka containers to start"
   echo "         --zk-server           : Number of zookeeper containers to start"
   echo "         --hadoop-worker       : Number of hadoop worker containers to start"
+  echo "         --os-type             : Operating System distribution type [ubuntu,centos], default is ubuntu"
   echo "         --idle-kafka-brokers  : Number of ideal kafka containers initially"
   #echo "         --deploy-kibana       : Deploy kibana visualizations and dashboards"
   echo "    Examples:"

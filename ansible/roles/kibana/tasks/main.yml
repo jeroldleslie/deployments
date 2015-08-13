@@ -1,15 +1,20 @@
 
-- name: download kibana
-  get_url: url=https://download.elastic.co/kibana/kibana/kibana-4.0.2-linux-x64.tar.gz dest=/tmp/kibana.tar.gz
+- name: download kibana url = {{kibana_url}}
+  get_url: url={{kibana_url}} dest=/tmp/kibana.tar.gz
 
-- name: download kibana service script
+- name: Copy kibana4
   sudo: yes
-  get_url: url=https://gist.githubusercontent.com/thisismitch/8b15ac909aed214ad04a/raw/bce61d85643c2dcdfbc2728c55a41dab444dca20/kibana4 dest=/etc/init.d/kibana4 mode=0755
-  
-- name: initialize kibana4 service
+  copy: src=kibana4 dest=/etc/init.d/kibana4
+
+- name: Make kibana4 executable
+  sudo: yes
+  file: mode=u+rxw path=/etc/init.d/kibana4
+
+- name: initialize kibana4 service (Ubuntu)
   command: update-rc.d kibana4 defaults 96 9
   sudo: yes
-
+  when: ansible_distribution == 'Debian' or ansible_distribution == 'Ubuntu'
+  
 - name: creating /opt/kibana directory
   sudo: yes
   file: path=/opt/kibana state=directory mode=0755
@@ -22,7 +27,7 @@
   sudo: yes
   lineinfile: 'dest=/opt/kibana/config/kibana.yml regexp="elasticsearch_url.*9200" line="elasticsearch_url: \"http://elasticsearch-1:9200\""'
 
-- name: Start kibana service
-  sudo: yes
-  service: name=kibana4 state=started enabled=yes
+#- name: Start kibana service
+#  sudo: yes
+#  service: name=kibana4 state=started enabled=yes
 

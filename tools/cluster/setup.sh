@@ -6,13 +6,14 @@ if [ -n "$(which apt-get)" ] ; then
 fi
 
 if [ -n "$(which yum)" ] ; then
-  sudo yum install epel-release
+  sudo yum -y install epel-release
   sudo yum groupinstall "Development tools" -y
-  sudo yum install python-devel nodejs npm -y
+  sudo yum install python-devel nodejs npm wget -y
+  sudo yum install -y libffi-devel
 fi
 
 #Setup easy_install
-wget https://bootstrap.pypa.io/ez_setup.py -O - | sudo python
+sudo wget https://bootstrap.pypa.io/ez_setup.py -O - | sudo python
 
 #Install required modules
 sudo easy_install --upgrade nose==1.3.4 tabulate paramiko junit-xml click requests pip

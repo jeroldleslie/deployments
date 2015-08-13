@@ -14,15 +14,12 @@
   set_fact:
     neverwinterdp_home: "{{neverwinterdp_home_override}}"
 
-
 - name: Check to make sure environment variables are sane
   fail: msg="Variable '{{ item }}' is not defined" 
   when: ({{item}} is undefined) or ({{item}} is none) or ({{item}}|trim == '') 
   run_once: true
   with_items: 
     - neverwinterdp_home
-
-
 
 - name: Get neverwinterdp_home path info locally
   local_action: stat path={{neverwinterdp_home}}
@@ -34,9 +31,9 @@
   when: not(check_path.stat.exists)
   run_once: true
 
-#- name: Echo local NEVERWINTERDP_HOME
-#  debug: msg="This is NeverwinterDP Home on the local machine {{neverwinterdp_home}}"
-#  run_once: true
+- name: Echo local NEVERWINTERDP_HOME
+  debug: msg="This is NeverwinterDP Home on the local machine {{neverwinterdp_home}}"
+  run_once: true
 
 - name: Echo local_scribengin_release_folder
   debug: msg="This is Scribengin Release Directory on the local machine {{local_scribengin_release_root_folder}}"
@@ -52,7 +49,7 @@
   run_once: true
 
 - name: Release Scribengin locally
-  local_action: shell cd {{local_scribengin_release_root_folder}} && gradle clean build release -x test
+  local_action: shell cd {{neverwinterdp_home}}/release && gradle clean build release -x test
   register: stdout
   run_once: true
   
@@ -69,8 +66,8 @@
   command: rm -rf {{remote_scribengin_home}}
   when: neverwinterdp_home_status.stat.exists
 
-- name: Copy local files from {{local_scribengin_release_folder}} to remote hosts {{remote_scribengin_home}}
-  synchronize: src={{local_scribengin_release_folder}} dest={{remote_scribengin_home}}
+- name: Copy local files from {{neverwinterdp_home}}/release/build/release/neverwinterdp/ to remote hosts {{remote_scribengin_home}}
+  synchronize: src={{neverwinterdp_home}}/release/build/release/neverwinterdp/ dest={{remote_scribengin_home}}
   
 - name: Make shell.sh executable
   file: mode=u+rxw path={{remote_scribengin_home}}/scribengin/bin/shell.sh
