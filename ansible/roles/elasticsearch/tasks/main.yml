@@ -37,7 +37,7 @@
 #  run_once: true
 
 - name: Building Elasticsearch locally
-  local_action: shell cd {{local_elasticsearch_folder}} && gradle clean build install -x test
+  local_action: shell cd {{neverwinterdp_home}}//module/elasticsearch/ && gradle clean build install -x test
   register: stdout
   run_once: true
 
@@ -46,7 +46,7 @@
   run_once: true
 
 - name: Release Elasticsearch locally
-  local_action: shell cd {{local_elasticsearch_folder}} && gradle clean build release -x test
+  local_action: shell cd {{neverwinterdp_home}}//module/elasticsearch/ && gradle clean build release -x test
   register: stdout
   run_once: true
   
@@ -54,8 +54,8 @@
   debug: var=stdout.stdout_lines
   run_once: true
 
-- name: Copy local files from {{local_elasticsearch_release_folder}} to remote hosts /opt/
-  copy: src={{local_elasticsearch_release_folder}} dest=/opt/
+- name: Copy local files from {{neverwinterdp_home}}/module/elasticsearch/build/release/ to remote hosts /opt/
+  copy: src={{neverwinterdp_home}}/module/elasticsearch/build/release/ dest=/opt/
 
 - name: Make elasticsearch.sh executable
   file: mode=u+rxw path=/opt/elasticsearch/bin/elasticsearch.sh

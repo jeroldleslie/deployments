@@ -362,9 +362,10 @@ def zookeeperfailure(failure_interval, wait_before_start, servers, min_servers, 
 @click.option('--deploy-cluster',          is_flag=True, help='')
 @click.option('--deploy-scribengin',       is_flag=True, help='')
 @click.option('--deploy-tools',            is_flag=True, help='')
+@click.option('--deploy-kibana-chart',     is_flag=True, help='')
 @click.option('--neverwinterdp-home',      default=None, help='neverwinterdp home')
 def ansible(write_inventory_file, inventory_file, deploy_cluster,
-            deploy_scribengin, deploy_tools, neverwinterdp_home):
+            deploy_scribengin, deploy_tools, deploy_kibana_chart, neverwinterdp_home):
   cluster = Cluster()
   
   if neverwinterdp_home is None:
@@ -387,9 +388,13 @@ def ansible(write_inventory_file, inventory_file, deploy_cluster,
     ans.deploy(join(ansibleRootDir, "scribengin.yml"),inventory_file, neverwinterdp_home)
   if deploy_tools:
     ans.deploy(join(ansibleRootDir, "scribenginTools.yml"),inventory_file, neverwinterdp_home)
-  
-  
-
+  if deploy_kibana_chart:
+    monitorServers = cluster.getServersByRole("elasticsearch")
+    if monitorServers.servers[0].getProcess("elasticsearch").isRunning():
+      ans.deploy(join(ansibleRootDir, "kibana.yml"),inventory_file, neverwinterdp_home)
+    else:
+      print "Please start elasticsearch before deploying kibana charts"
+      
 @mastercommand.command("digitalocean", help="commands pertaining to digital-ocean droplets")
 @click.option('--launch',                   is_flag=True,  help='Create containers, deploy, and run ansible')
 @click.option('--create-containers',        default=None,  help='create the container using specified config')

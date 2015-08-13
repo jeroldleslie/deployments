@@ -237,7 +237,8 @@ class ServerSet(object):
       return self.startProcessOnHost("scribengin", hadoopMasterServers.servers[0].getHostname())
   
   def startElasticSearch(self):
-    return self.startProcess("elasticsearch")
+    self.startProcess("elasticsearch")
+    self.scribenginAnsible.deploy(join(self.ansibleRootDir, "kibana.yml"),self.inventoryFileLocation)
   
   def shutdownElasticSearch(self):
     return self.shutdownProcess("elasticsearch")
