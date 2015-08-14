@@ -219,7 +219,7 @@ function launch_containers() {
   #If they don't exist, then create them
   scribeImageLine=$(docker images | grep scribengin)
   if [ "$scribeImageLine" == "" ] ; then
-    clean_image
+    clean_image $@
     build_images $@
   fi
   
@@ -399,11 +399,11 @@ function cluster(){
   
   
   if [ $CLEAN_CONTAINERS == "true" ] || [ $LAUNCH == "true" ] ; then
-    clean_containers
+    clean_containers $@
   fi
   
   if [ $CLEAN_IMAGE == "true" ] || [ $LAUNCH == "true" ]  ; then
-    clean_image
+    clean_image $@
   fi
   
   if [ $BUILD_IMAGE == "true" ] || [ $LAUNCH == "true" ] ; then
