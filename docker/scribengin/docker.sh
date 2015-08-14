@@ -126,7 +126,7 @@ function host_machine_update_hosts() {
 
 
 function clean_image() {
-  OS_TYPE=$(get_opt --os-type 'ubuntu' $@)
+  OS_TYPE=$(get_opt --os-type 'centos' $@)
   h1 "Clean the images"
   images=( $(docker images -a | grep -i $OS_TYPE-scribengin |  awk '{print $1 ":" $2}') )
   for image in "${images[@]}" ; do
@@ -137,7 +137,7 @@ function clean_image() {
 function build_images() {
   h1 "Building Images"
   
-  OS_TYPE=$(get_opt --os-type 'ubuntu' $@)
+  OS_TYPE=$(get_opt --os-type 'centos' $@)
   
   #Direcotry this script is in
   DOCKERSCRIBEDIR=$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )
@@ -167,7 +167,7 @@ function clean_containers() {
 }
 
 function launch_intermediate_containers() {
-  OS_TYPE=$(get_opt --os-type 'ubuntu' $@)
+  OS_TYPE=$(get_opt --os-type 'centos' $@)
   
   h1 "Launching intermediate containers for final image configuration"
   
@@ -212,7 +212,7 @@ function launch_intermediate_containers() {
 }
 
 function launch_containers() {
-  OS_TYPE=$(get_opt --os-type 'ubuntu' $@)
+  OS_TYPE=$(get_opt --os-type 'centos' $@)
   
   h1 "Launching Containers"
   #Checks to make sure images exist
