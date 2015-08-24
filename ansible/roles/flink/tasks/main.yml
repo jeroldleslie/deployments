@@ -1,0 +1,35 @@
+## Creating home dir
+- name: Check if home dir is created
+  stat: path={{ flink_home_dir }}
+  register: created
+
+- name: Create flink home directory if it has not been created yet
+  file: path={{ flink_home_dir }} state=directory mode=755 group={{ flink_group }} owner={{ flink_user }}
+  when: created.stat.exists == false
+  sudo: yes
+
+## Downloading flink
+- name: Check if flink is already downloaded
+  stat: path={{ flink_home_dir }}/{{ flink_tgz }}
+  register: downloaded
+
+- name: Downloading flink tgz
+  get_url: url={{ flink_tgz_url }} dest={{ flink_home_dir }}
+  when: downloaded.stat.exists == false
+  
+  
+  ## Untar + unzip
+
+- name: Check if the tgz is already unarchived
+  stat: path={{ flink_home_dir }}/bin
+  register: unarchived
+
+- name: Unarchive tgz
+  unarchive: src={{ flink_home_dir }}/{{ flink_tgz  }} dest={{ flink_home_dir }} copy=no
+  sudo: yes
+  when: unarchived.stat.exists == false
+
+- name: Rename flinkdir to use short path
+  shell: mv {{ flink_home_dir }}/{{ flink_dir }}/* {{ flink_home_dir }}/.
+  sudo: yes
+  when: unarchived.stat.exists == false

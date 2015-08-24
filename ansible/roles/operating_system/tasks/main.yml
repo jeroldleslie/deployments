@@ -1,0 +1,10 @@
+---
+#:TODO:
+#- include: data_volume.yml mount_point='/data'
+- include: firewall.yml
+- include: epel.yml
+#- include: selinux.yml
+- include: disable_ipv6.yml
+- include: install_net_tools.yml
+- include: install_vim.yml
+- include: install_bind_utils.yml

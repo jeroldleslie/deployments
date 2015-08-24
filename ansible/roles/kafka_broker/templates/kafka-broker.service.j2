@@ -1,0 +1,14 @@
+#/lib/systemd/system/kafka-broker.service
+[Unit]
+Description=Kafka Broker Service
+DefaultDependencies=no
+After=local-fs.target systemd-tmpfiles-setup.service
+Conflicts=shutdown.target
+Before=sysinit.target shutdown.target
+RefuseManualStop=yes
+
+[Service]
+ExecStart=/opt/kafka/bin/kafka-server-start.sh /opt/kafka/config/server.properties
+
+[Install]
+WantedBy=multi-user.target

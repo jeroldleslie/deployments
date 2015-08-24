@@ -1,0 +1,25 @@
+--- 
+
+- name: Installs and configures Storm Zookeeper
+  hosts: storm-zookeeper-group
+  remote_user: neverwinterdp
+  roles:
+    - storm_zookeeper
+
+- name: Installs and configures Storm Nimbus
+  hosts: storm-nimbus-group
+  remote_user: neverwinterdp
+  roles:
+    - storm_nimbus
+
+- name: Installs and configures Storm Supervisor
+  hosts: storm-supervisor-group
+  remote_user: neverwinterdp
+  roles:
+    - storm_supervisor
+
+- name: Installs and configures Flink
+  hosts: flink
+  remote_user: neverwinterdp
+  roles:
+    - flink

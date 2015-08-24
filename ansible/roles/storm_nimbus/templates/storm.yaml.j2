@@ -1,10 +1,62 @@
-storm.zookeeper.servers: 
-{% for host in groups['tier3-storm-zookeeper'] %}
- - '{{ host }}'
-{% endfor %}
+java.library.path: "/usr/local/lib:/opt/local/lib:/usr/lib"
 
-nimbus.host: 
-{% for host in groups['tier3-storm-nimbus'] %}
-'{{ host }}'
+storm.local.dir: "storm-local"
+storm.zookeeper.servers:
+{% for host in groups['storm-zookeeper-group'] %}
+  - {{ host }}
 {% endfor %}
+storm.zookeeper.port: 2181
+storm.zookeeper.root: "/storm"
+storm.zookeeper.session.timeout: 20000
+storm.zookeeper.connection.timeout: 15000
+storm.zookeeper.retry.times: 5
+storm.zookeeper.retry.interval: 1000
+storm.zookeeper.retry.intervalceiling.millis: 30000
+storm.zookeeper.auth.user: null
+storm.zookeeper.auth.password: null
+storm.cluster.mode: "distributed" # can be distributed or local
+storm.local.mode.zmq: false
+storm.thrift.transport: "backtype.storm.security.auth.SimpleTransportPlugin"
+storm.principal.tolocal: "backtype.storm.security.auth.DefaultPrincipalToLocal"
+storm.group.mapping.service: "backtype.storm.security.auth.ShellBasedGroupsMapping"
+storm.messaging.transport: "backtype.storm.messaging.netty.Context"
+storm.nimbus.retry.times: 5
+storm.nimbus.retry.interval.millis: 2000
+storm.nimbus.retry.intervalceiling.millis: 60000
+storm.auth.simple-white-list.users: []
+storm.auth.simple-acl.users: []
+storm.auth.simple-acl.users.commands: []
+storm.auth.simple-acl.admins: []
+storm.meta.serialization.delegate: "backtype.storm.serialization.GzipThriftSerializationDelegate"
+
+### nimbus.* configs are for the master
+nimbus.host: {% for host in groups['storm-nimbus-group'] %}{{ host }}
+{% endfor %}
+nimbus.thrift.port: 6627
+nimbus.thrift.threads: 64
+nimbus.thrift.max_buffer_size: 1048576
+nimbus.childopts: "-Xmx1024m"
+nimbus.task.timeout.secs: 30
+nimbus.supervisor.timeout.secs: 60
+nimbus.monitor.freq.secs: 10
+nimbus.cleanup.inbox.freq.secs: 600
+nimbus.inbox.jar.expiration.secs: 3600
+nimbus.task.launch.secs: 120
+nimbus.reassign: true
+nimbus.file.copy.expiration.secs: 600
+nimbus.topology.validator: "backtype.storm.nimbus.DefaultTopologyValidator"
+nimbus.credential.renewers.freq.secs: 600
+
+### ui.* configs are for the master
+ui.host: {% for host in groups['storm-nimbus-group'] %}{{ host }}
+{% endfor %}
+ui.port: 8080
+ui.childopts: "-Xmx768m"
+ui.actions.enabled: true
+ui.filter: null
+ui.filter.params: null
+ui.users: null
+ui.header.buffer.bytes: 4096
+ui.http.creds.plugin: backtype.storm.security.auth.DefaultHttpCredentialsPlugin
+
 

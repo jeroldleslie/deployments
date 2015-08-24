@@ -1,3 +1,4 @@
 ---
 dependencies:
+  - { role: operating_system }
   - { role: java }

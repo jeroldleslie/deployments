@@ -1,0 +1,3 @@
+- name: Installs VIM
+  yum: name='vim' state=present
+  sudo: yes

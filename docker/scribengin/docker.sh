@@ -223,6 +223,7 @@ function launch_containers() {
     build_images $@
   fi
   
+  DISABLE_HADOOPMASTER=$(has_opt "--disable-hadoopmaster" $@ )
   NUM_KAFKA_BROKER=$(get_opt --kafka-server '3' $@)
   NUM_ZOOKEEPER_SERVER=$(get_opt --zk-server 1 $@)
   NUM_HADOOP_WORKER=$(get_opt --hadoop-worker 3 $@)
@@ -231,8 +232,11 @@ function launch_containers() {
   
   NUM_MONITORING=$(get_opt --monitoring-server 1 $@)
   
-  h1 "Launch hadoop-master containers"
-  docker run -d -p 22 -p 50070:50070 -p 9000:9000 -p 8030:8030 -p 8032:8032 -p 8088:8088 --privileged -h hadoop-master --name hadoop-master  $OS_TYPE-scribengin:hadoop-master
+  if [ $DISABLE_HADOOPMASTER == "false" ] ; then
+    h1 "Launch hadoop-master containers"
+    docker run -d -p 22 -p 50070:50070 -p 9000:9000 -p 8030:8030 -p 8032:8032 -p 8088:8088 --privileged -h hadoop-master --name hadoop-master  $OS_TYPE-scribengin:hadoop-master
+  fi
+  
   
   h1 "Launch hadoop-worker containers"
   for (( i=1; i<="$NUM_HADOOP_WORKER"; i++ ))

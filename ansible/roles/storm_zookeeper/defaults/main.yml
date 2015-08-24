@@ -1,12 +1,12 @@
-zookeeper_user: centos
-zookeeper_group: centos
+zookeeper_user: neverwinterdp
+zookeeper_group: neverwinterdp
 
-zookeeper_home_dir: /opt/kafka/
-zookeeper_data_dir: /data/zookeeper/
+zookeeper_home_dir: /opt/storm-zookeeper/
+zookeeper_data_dir: /data/storm-zookeeper/
 
-kafka_tgz_url: 'https://s3-us-west-2.amazonaws.com/nvent-repo/tgz/kafka/0.8.2.1/kafka_2.10-0.8.2.1.tgz'
-kafka_tgz: kafka_2.10-0.8.2.1.tgz
-kafka_dir: kafka_2.10-0.8.2.1
+zookeeper_tgz_url: 'https://s3-us-west-2.amazonaws.com/nvent-repo/tgz/zookeeper/3.4.6/zookeeper-3.4.6.tgz'
+zookeeper_tgz: 'zookeeper-3.4.6.tgz'
+zookeeper_dir: 'zookeeper-3.4.6'
 
 zookeeper_client_port: 2181
 zookeeper_leader_port: 2888

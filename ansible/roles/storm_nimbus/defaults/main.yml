@@ -1,23 +1,9 @@
-storm_user: centos
-storm_group: centos
+storm_user: neverwinterdp
+storm_group: neverwinterdp
 
-storm_home_dir: /opt/storm/
-storm_data_dir: /data/storm-logs/
+storm_home_dir: /opt/storm
 
-storm_tgz_url: 'https://s3-us-west-2.amazonaws.com/nvent-repo/tgz/storm/0.9.4/apache-storm-0.9.4.tgz'
-storm_tgz: apache-storm-0.9.4.tgz
-storm_dir: apache-storm-0.9.4
+storm_tgz_url: 'https://s3-us-west-2.amazonaws.com/nvent-repo/tgz/storm/0.9.3/apache-storm-0.9.3.tar.gz'
+storm_tgz: apache-storm-0.9.3.tar.gz
+storm_dir: apache-storm-0.9.3
 
-zookeepker_connect: '192.168.99.131:2181'
-
-#nimbus_thrift_port: 6627
-#ui_port: 8744
-#nimbus_task_timeout_secs: 30   
-#nimbus_supervisor_timeout_secs: 60
-#nimbus_monitor_freq_secs: 10
-#nimbus_cleanup_inbox_freq_secs: 600     
-#nimbus_inbox_jar_expiration_secs: 3600
-#nimbus_task_launch_secs: 120
-#nimbus_reassign: true
-#nimbus_file_copy_expiration_secs: 600
-#default_replication_factor: 3

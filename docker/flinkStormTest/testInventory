@@ -1,0 +1,15 @@
+
+
+[storm-nimbus-group]
+storm-nimbus ansible_ssh_user=neverwinterdp ansible_ssh_private_key_file=~/.ssh/id_rsa nimbus_id=0
+
+[storm-supervisor-group]
+storm-supervisor-1 ansible_ssh_user=neverwinterdp ansible_ssh_private_key_file=~/.ssh/id_rsa supervisor_id=0
+storm-supervisor-2 ansible_ssh_user=neverwinterdp ansible_ssh_private_key_file=~/.ssh/id_rsa supervisor_id=1
+storm-supervisor-3 ansible_ssh_user=neverwinterdp ansible_ssh_private_key_file=~/.ssh/id_rsa supervisor_id=2
+
+[storm-zookeeper-group]
+storm-zookeeper ansible_ssh_user=neverwinterdp ansible_ssh_private_key_file=~/.ssh/id_rsa zoo_id=0
+
+[flink]
+hadoop-master ansible_ssh_user=neverwinterdp ansible_ssh_private_key_file=~/.ssh/id_rsa

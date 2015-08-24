@@ -7,7 +7,6 @@
 
 FROM centos:centos7
 MAINTAINER Nventdata 
-
 RUN echo "Expose SSH port"
 EXPOSE 22 2181 9092 50070 8088 9000 9300
 
@@ -48,6 +47,7 @@ RUN chown -R neverwinterdp:neverwinterdp /home/neverwinterdp/.ssh
 RUN chmod 700 /home/neverwinterdp/.ssh
 ADD tmp/authorized_keys /home/neverwinterdp/.ssh/authorized_keys
 RUN chmod 644 /home/neverwinterdp/.ssh/authorized_keys
+
 
 
 

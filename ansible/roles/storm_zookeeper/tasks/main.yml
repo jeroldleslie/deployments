@@ -11,8 +11,6 @@
   file: path={{ zookeeper_data_dir }} state=directory mode=755 group={{ zookeeper_group }} owner={{ zookeeper_user }}
   sudo: yes
 
-# safety first, fun will follow
-
 ## Creating home dir
 
 - name: Check if home dir is created
@@ -24,14 +22,14 @@
   when: created.stat.exists == false
   sudo: yes
 
-## Downloading Kafka
+## Downloading Zookeeper
 
-- name: Check if Kafka is already downloaded
-  stat: path={{ zookeeper_home_dir }}/{{ kafka_tgz  }}
+- name: Check if Zookeeper is already downloaded
+  stat: path={{ zookeeper_home_dir }}/{{ zookeeper_tgz  }}
   register: downloaded
 
-- name: Downloading Kafka tgz
-  get_url: url={{ kafka_tgz_url  }} dest={{ zookeeper_home_dir }}
+- name: Downloading Zookeeper tgz
+  get_url: url={{ zookeeper_tgz_url  }} dest={{ zookeeper_home_dir }}
   when: downloaded.stat.exists == false
 
 ## Untar + unzip
@@ -41,12 +39,12 @@
   register: unarchived
 
 - name: Unarchive tgz
-  unarchive: src={{ zookeeper_home_dir }}/{{ kafka_tgz  }} dest={{ zookeeper_home_dir }} copy=no
+  unarchive: src={{ zookeeper_home_dir }}/{{ zookeeper_tgz  }} dest={{ zookeeper_home_dir }} copy=no
   sudo: yes
   when: unarchived.stat.exists == false
 
-- name: Rename Kafka dir to use short path
-  shell: mv {{ zookeeper_home_dir }}/{{ kafka_dir }}/* {{ zookeeper_home_dir }}/.
+- name: Rename Storm Zookeeper dir to use short path
+  shell: mv {{ zookeeper_home_dir }}/{{ zookeeper_dir }}/* {{ zookeeper_home_dir }}/.
   sudo: yes
   when: unarchived.stat.exists == false
 
@@ -60,7 +58,27 @@
 ## Adding Zookeeper configuration
 
 - name: Rendering a zookeeper.properties
-  template: src={{ item }}.j2 dest={{ zookeeper_home_dir }}/config/{{ item }}
+  template: src={{ item }}.j2 dest={{ zookeeper_home_dir }}/conf/{{ item }}
   sudo: yes
   with_items:
-    - zookeeper.properties
+    - zoo.cfg
+
+# Adding Storm Zookeeper Service to systemd - /lib/systemd/system/storm-zookeeper.service
+- name: Rendering storm-zookeeper.service
+  template: src={{ item }}.j2 dest=/lib/systemd/system/{{ item }}
+  sudo: yes
+  with_items:
+    - storm-zookeeper.service
+
+# Setting up ownership
+- name: Setting Ownership
+  file: path={{ zookeeper_home_dir }} owner={{ zookeeper_user }} group={{ zookeeper_group }} state='directory' recurse='yes'
+  sudo: true
+
+# Storm Zookeeper must be running all times
+- name: Storm Zookeeper Service
+  service: name=storm-zookeeper state=started enabled=yes
+  #shell: systemctl enable storm-zookeeper
+  sudo: true
+  ignore_errors: yes
+

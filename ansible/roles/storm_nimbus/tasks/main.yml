@@ -7,11 +7,6 @@
   group: name={{ storm_group }} state=present
   sudo: yes
 
-- name: Create storm data directory
-  file: path={{ storm_data_dir }} state=directory mode=755 group={{ storm_group }} owner={{ storm_user }}
-  sudo: yes
-
-
 ## Creating home dir
 
 - name: Check if home dir is created
@@ -49,20 +44,44 @@
   sudo: yes
   when: unarchived.stat.exists == false
 
-
 ## Adding storm configuration
 
-- name: updating storm.yaml
+- name: Adding storm.yaml
   template: src={{ item }}.j2 dest={{ storm_home_dir }}/conf/{{ item }}
   sudo: yes
   with_items:
     - storm.yaml
 
-## Start Nimbus
-#- name: Launch Storm Nimbus
-#  shell: /opt/{{ storm_dir }}/bin/storm nimbus
+# Setting up ownership
+- name: Setting Ownership
+  file: path={{ storm_home_dir }} owner={{ storm_user }} group={{ storm_group }} state='directory' recurse='yes'
+  sudo: true
 
-## Start UI
-#- name: Launch Nimbus UI
-#  shell: /opt/{{ storm_dir }}/bin/storm ui
+# Adding Storm Nimbus Service to systemd - /lib/systemd/system/storm-nimbus.service
+- name: Rendering storm-nimbus.service
+  template: src={{ item }}.j2 dest=/lib/systemd/system/{{ item }}
+  sudo: yes
+  with_items:
+    - storm-nimbus.service
+
+# Storm Nimbus must be running all times
+- name: Storm Nimbus Service
+  #service: name=storm-nimbus state=started enabled=yes
+  shell: systemctl enable storm-nimbus
+  sudo: true
+  ignore_errors: yes
+
+# Adding Storm Nimbus Service to systemd - /lib/systemd/system/storm-ui.service
+- name: Rendering storm-ui.service
+  template: src={{ item }}.j2 dest=/lib/systemd/system/{{ item }}
+  sudo: yes
+  with_items:
+    - storm-ui.service
+
+# Storm UI must be running all times
+- name: Storm UI Service
+  service: name=storm-ui state=started enabled=yes
+  #shell: systemctl enable storm-ui
+  sudo: true
+  ignore_errors: yes
 

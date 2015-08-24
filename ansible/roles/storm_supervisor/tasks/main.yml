@@ -7,11 +7,6 @@
   group: name={{ storm_group }} state=present
   sudo: yes
 
-- name: Create storm data directory
-  file: path={{ storm_data_dir }} state=directory mode=755 group={{ storm_group }} owner={{ storm_user }}
-  sudo: yes
-
-
 ## Creating home dir
 
 - name: Check if home dir is created
@@ -49,16 +44,30 @@
   sudo: yes
   when: unarchived.stat.exists == false
 
-
 ## Adding storm configuration
 
-- name: updating storm.yaml
+- name: Adding storm.yaml
   template: src={{ item }}.j2 dest={{ storm_home_dir }}/conf/{{ item }}
   sudo: yes
   with_items:
     - storm.yaml
 
+# Setting up ownership
+- name: Setting Ownership
+  file: path={{ storm_home_dir }} owner={{ storm_user }} group={{ storm_group }} state='directory' recurse='yes'
+  sudo: true
 
-## Start Supervisor
-#- name: Launch Storm Supervisor
-#  shell: /opt/{{ storm_dir }}/bin/storm supervisor
+# Adding Storm Supervisor Service to systemd - /lib/systemd/system/storm-supervisor.service
+- name: Rendering storm-supervisor.service
+  template: src={{ item }}.j2 dest=/lib/systemd/system/{{ item }}
+  sudo: yes
+  with_items:
+    - storm-supervisor.service
+
+# Storm Supervisor must be running all times
+- name: Storm supervisor Service
+  service: name=storm-supervisor state=started enabled=yes
+  #shell: systemctl enable storm-supervisor
+  sudo: true
+  ignore_errors: yes
+

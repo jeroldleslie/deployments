@@ -1,0 +1,14 @@
+#/lib/systemd/system/storm-supervisor.service
+[Unit]
+Description=Storm Supervisor Service
+DefaultDependencies=no
+After=local-fs.target systemd-tmpfiles-setup.service
+Conflicts=shutdown.target
+Before=sysinit.target shutdown.target
+RefuseManualStop=no
+
+[Service]
+ExecStart=/opt/storm/bin/storm supervisor
+
+[Install]
+WantedBy=multi-user.target

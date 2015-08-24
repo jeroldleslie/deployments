@@ -1,0 +1,4 @@
+block_device: '/dev/loop0'
+data_dir: '/data'
+owner: 'centos'
+group: 'centos'

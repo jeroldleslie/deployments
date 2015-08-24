@@ -1,0 +1,14 @@
+#/lib/systemd/system/storm-nimbus.service
+[Unit]
+Description=Storm Nimbus Service
+DefaultDependencies=no
+After=local-fs.target systemd-tmpfiles-setup.service
+Conflicts=shutdown.target
+Before=sysinit.target shutdown.target
+RefuseManualStop=no
+
+[Service]
+ExecStart=/opt/storm/bin/storm nimbus
+
+[Install]
+WantedBy=multi-user.target
