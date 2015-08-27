@@ -1,0 +1,2 @@
+[flink]
+hadoop-master ansible_ssh_user=neverwinterdp ansible_ssh_private_key_file=~/.ssh/id_rsa

@@ -1,0 +1,7 @@
+--- 
+
+- name: Installs and configures Flink
+  hosts: flink
+  remote_user: neverwinterdp
+  roles:
+    - flink

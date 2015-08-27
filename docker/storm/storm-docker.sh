@@ -96,25 +96,36 @@ function host_machine_update_hosts() {
 
 
 h1 "Launch first part of cluster"
-../scribengin/docker.sh cluster --run-containers --ansible-inventory --start  --monitoring-server=0 --elasticsearch-server=0
-h1 "Kill Scribengin and VMmaster"
-../../tools/cluster/clusterCommander.py scribengin --force-stop
-../../tools/cluster/clusterCommander.py vmmaster --force-stop
+../scribengin/docker.sh cluster --clean-containers --run-containers --ansible-inventory --monitoring-server=0 --elasticsearch-server=0
 
 h1 "Launch storm cluster"
-docker run  -ti -v /sys/fs/cgroup:/sys/fs/cgroup -d -p 22 --privileged=true -h storm-zookeeper --name storm-zookeeper centos:scribengin 
-docker run  -ti -v /sys/fs/cgroup:/sys/fs/cgroup -d -p 22 --privileged=true -h storm-nimbus --name storm-nimbus centos:scribengin
+docker run  -ti -v /sys/fs/cgroup:/sys/fs/cgroup -d -p 22 --privileged=true -h storm-zookeeper    --name storm-zookeeper centos:scribengin 
+docker run  -ti -v /sys/fs/cgroup:/sys/fs/cgroup -d -p 22 --privileged=true -h storm-nimbus       --name storm-nimbus centos:scribengin
 docker run  -ti -v /sys/fs/cgroup:/sys/fs/cgroup -d -p 22 --privileged=true -h storm-supervisor-1 --name storm-supervisor-1 centos:scribengin
 docker run  -ti -v /sys/fs/cgroup:/sys/fs/cgroup -d -p 22 --privileged=true -h storm-supervisor-2 --name storm-supervisor-2 centos:scribengin
 docker run  -ti -v /sys/fs/cgroup:/sys/fs/cgroup -d -p 22 --privileged=true -h storm-supervisor-3 --name storm-supervisor-3 centos:scribengin
 
+
 container_update_hosts
 host_machine_update_hosts
 
-ansible-playbook ../../ansible/flinkStormTestplaybook.yml -i ./testInventory
+ansible-playbook ../../ansible/storm-playbook.yml -i ./storm.inventory
+
+h1 "Launch Zookeeper"
+../../tools/cluster/clusterCommander.py zookeeper --start
+
+h1 "Launch Kafka"
+../../tools/cluster/clusterCommander.py kafka --start
+
+h1 "Launch Hadoop"
+#../../tools/cluster/clusterCommander.py hadoop --start
+
+
+h1 "Cluster status"
+../../tools/cluster/clusterCommander.py status
 
 h1 "Start services"
-ssh -o "StrictHostKeyChecking no" neverwinterdp@storm-zookeeper /opt/storm-zookeeper/bin/zkServer.sh start-foreground &
+ssh -o "StrictHostKeyChecking no" neverwinterdp@storm-zookeeper /opt/storm-zookeeper/bin/zkServer.sh start &
 ssh -o "StrictHostKeyChecking no" neverwinterdp@storm-nimbus /opt/storm/bin/storm nimbus &
 ssh -o "StrictHostKeyChecking no" neverwinterdp@storm-nimbus /opt/storm/bin/storm ui &
 ssh -o "StrictHostKeyChecking no" neverwinterdp@storm-supervisor-1 /opt/storm/bin/storm supervisor &
