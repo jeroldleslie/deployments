@@ -95,7 +95,6 @@ class ServerSet(object):
     
     self.scribenginAnsible = ScribenginAnsible()
     self.configurations = None
-    self.setProfile('default')
     
     self.inventoryFileLocation = "/tmp/scribengininventory"
     
@@ -109,8 +108,8 @@ class ServerSet(object):
     print "***********************************************************************"  
   
   def setProfile(self, profile_type):
-    deploymentRootDir = dirname(dirname(dirname(dirname(realpath(__file__)))))
-    profilePath = join(deploymentRootDir, "profile", profile_type, "main.yml")
+    profilePath = join(self.module_path(),"..", "profile", profile_type, "main.yml")
+    
     if os.path.isfile(profilePath):
       with open(profilePath, 'r') as f:
         self.configurations = yaml.load(f)

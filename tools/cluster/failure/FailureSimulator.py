@@ -13,7 +13,7 @@ class FailureSimulator():
     self.mainCluster = Cluster()
     self.cluster = None
         
-  def failureSimulation(self,failure_interval, wait_before_start, servers, min_servers, servers_to_fail_simultaneously, kill_method, initial_clean, junit_report, restart_method):
+  def failureSimulation(self,failure_interval, wait_before_start, servers, min_servers, servers_to_fail_simultaneously, kill_method, initial_clean, junit_report, restart_method, profile_type):
     """
     Run the failure loop for a given role
     """
@@ -65,6 +65,8 @@ class FailureSimulator():
       else:
         idleServers.append(hostname)
     
+    
+    self.cluster.setProfile(profile_type)
     
     while True:
       logging.debug("**************************Killing Process**************************")
