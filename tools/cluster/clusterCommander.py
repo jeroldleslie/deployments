@@ -320,8 +320,9 @@ def hadoop(restart, start, stop, force_stop, clean, hadoop_nodes, wait_before_st
 @click.option('--initial-clean',                  is_flag=True, help="If enabled, will run a clean operation before starting the failure simulation")
 @click.option('--junit-report',                   default="",   help="If set, will write the junit-report to the specified file")
 @click.option('--restart-method',                 default='random', type=click.Choice(["flipflop", "random"]), help="Server restart method. 'flipflop' - it starts spare node if normal node killed and vise versa, 'random' - it starts any random node when failure occurs")
+@click.option('--profile-type',      default='default',  help="Kafka profile type, you can create and specify your own profile on neverwinterdp-deployments-home/profile, have default as an example")
 #use-spare before junit report
-def kafkafailure(failure_interval, wait_before_start, servers, min_servers, servers_to_fail_simultaneously, kill_method, initial_clean, junit_report, restart_method):
+def kafkafailure(failure_interval, wait_before_start, servers, min_servers, servers_to_fail_simultaneously, kill_method, initial_clean, junit_report, restart_method, profile_type):
   global _jobs
   
   kf = KafkaFailure()
@@ -329,7 +330,7 @@ def kafkafailure(failure_interval, wait_before_start, servers, min_servers, serv
   p = multiprocessing.Process(name="KafkaFailure",
                               target=kf.failureSimulation, 
                               args=(failure_interval, wait_before_start, servers, min_servers, 
-                                    servers_to_fail_simultaneously, kill_method, initial_clean, junit_report, restart_method))
+                                    servers_to_fail_simultaneously, kill_method, initial_clean, junit_report, restart_method, profile_type))
   _jobs.append(p)
   p.start()
   
