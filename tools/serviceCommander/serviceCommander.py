@@ -3,7 +3,6 @@
 exec python $0 ${1+"$@"}
 """
 
-
 import click,logging
 from sys import stdout
 
@@ -13,10 +12,6 @@ from sys import path
 #Make sure the commons package is on the path correctly
 path.insert(0, dirname(dirname(abspath(__file__))))
 from commons.ansibleRunner.ansibleRunner import ansibleRunner
-
-
-_debug = False
-_logfile = ''
 
 
 playbookMapping= {
@@ -41,20 +36,16 @@ playbookMapping= {
 @click.option('--clean',  '-f',      is_flag=True, help="clean services")
 @click.option('--ansible-root-dir',   default=dirname(dirname(dirname(abspath(__file__))))+"/ansible", help="Root directory for Ansible")
 def mastercommand(debug, logfile, services, subset, inventory_file, max_retries, restart, start, stop, force_stop, clean, ansible_root_dir):
-  global _debug, _logfile, _neverwinterdp_home
-  _debug = debug
-  _logfile = logfile
-  
-  if _debug:
+  if debug:
       #Set logging file, overwrite file, set logging level to DEBUG
-      logging.basicConfig(filename=_logfile, filemode="w", level=logging.DEBUG)
+      logging.basicConfig(filename=logfile, filemode="w", level=logging.DEBUG)
       logging.getLogger().addHandler(logging.StreamHandler(stdout))
       click.echo('Debug mode is %s' % ('on' if debug else 'off'))
   else:
     #Set logging file, overwrite file, set logging level to INFO
-    logging.basicConfig(filename=_logfile, filemode="w", level=logging.INFO)
+    logging.basicConfig(filename=logfile, filemode="w", level=logging.INFO)
   
-    
+  
   playbooksToRun=[]
   if stop or restart:
     playbooksToRun.append(playbookMapping["stop"])
@@ -79,6 +70,5 @@ def mastercommand(debug, logfile, services, subset, inventory_file, max_retries,
    
 
 if __name__ == '__main__':
-  #Parse commands and run
   mastercommand()
   
