@@ -8,11 +8,12 @@ function usage(){
   echo "           --neverwinterdp-home      - Where NeverwinterDP is locally"
   echo "           --test-results-location   - Where to store test results (default is ./testresults)"
   echo "     Flags that can be set: "
-  echo "           --clean    - Clean the cluster with clusterCommander"
-  echo "           --stop     - Stop the cluster with clusterCommander"
-  echo "           --start    - Start the cluster with clusterCommander"
-  echo "           --restart  - Restart the cluster with clusterCommander"
-  echo "           --deploy   - Build then deploy scribengin with clusterCommander"
+  echo "           --clean         - Clean the cluster with clusterCommander"
+  echo "           --stop          - Stop the cluster with clusterCommander"
+  echo "           --start         - Start the cluster with clusterCommander"
+  echo "           --restart       - Restart the cluster with clusterCommander"
+  echo "           --deploy        - Build then deploy scribengin with clusterCommander"
+  echo "           --profile-type  - Profile type (default/performance)"
 }
 
 function has_opt() {
@@ -57,7 +58,7 @@ STOP=$(has_opt --stop $@)
 RESTART=$(has_opt --restart $@)
 DEPLOY=$(has_opt --deploy $@)
 HELP=$(has_opt --help $@)
-
+PROFILE_TYPE=$(get_opt --profile-type 'default' $@)
 
 if [ $HELP == "true" ] ; then
   usage
@@ -109,7 +110,7 @@ if [ $CLEAN == "true" ] ; then
   $clusterCommander cluster --clean
 fi
 if [ $START == "true" ] ; then
-  $clusterCommander cluster --start
+  $clusterCommander cluster --start --profile-type=$PROFILE_TYPE
   #Give everything time to come up
   sleep 5
 fi
