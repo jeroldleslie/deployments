@@ -4,7 +4,7 @@ kafka:
     num: 3
   software:
     jvm:
-      KAFKA_HEAP_SIZE: 4096
+      KAFKA_HEAP_SIZE: 1024
 
 zookeeper:
   hardware:
@@ -12,7 +12,7 @@ zookeeper:
     num: 1
   software:
     jvm:
-      ZOOKEEPER_HEAP_SIZE: 4096
+      ZOOKEEPER_HEAP_SIZE: 1024
       
 hadoop-master:
   hardware:
@@ -20,10 +20,11 @@ hadoop-master:
     num: 1
   software:
     jvm:
-      HADOOP_HEAPSIZE: 4096
-      HADOOP_NAMENODE_INIT_HEAPSIZE: 4096
-      YARN_RESOURCEMANAGER_HEAPSIZE: 4096
-      YARN_NODEMANAGER_HEAPSIZE: 4096
+      NAMENODE_HEAPSIZE: 4024
+      SECONDARYNAMENODE_HEAPSIZE: 4024
+      DATANODE_HEAPSIZE: 4024
+      YARN_RESOURCEMANAGER_HEAPSIZE: 4024
+      YARN_NODEMANAGER_HEAPSIZE: 4024
 
 hadoop-worker:
   hardware:
