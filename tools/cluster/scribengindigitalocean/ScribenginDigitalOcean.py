@@ -36,7 +36,29 @@ class ScribenginDigitalOcean():
     
     logging.debug("Token: "+self.token)
 
-
+  def waitToCompleteAction(self, droplet, sleeptime=5):
+    status = None
+    #Wait for droplet complete its action
+    while status != "completed":
+      drop = self.getDroplet(droplet.name)
+      actions = drop.get_actions()
+      for action in actions:
+        action.load()
+        # Once it shows completed, droplet is up and running
+        status = action.status
+        logging.debug(droplet.name+": "+str(status))
+        #print droplet.name+": "+status.strip()
+        if status.strip() is "completed":
+          break 
+        #Sleep is here to keep us from hitting the API Rate Limit
+        sleep(sleeptime)
+        
+  def rebootAndWait(self, droplet, sleeptime=5):
+    logging.info("Rebooting: "+droplet.name)
+    print "Rebooting: "+droplet.name
+    droplet.reboot()
+    self.waitToCompleteAction(droplet, sleeptime)
+    status = None
 
   def createAndWait(self, droplet, sleeptime=5, sshPort=22):
     logging.info("Creating: "+droplet.name)
@@ -56,20 +78,7 @@ class ScribenginDigitalOcean():
       #Sleep is here to keep us from hitting the API Rate Limit
       sleep(sleeptime)
     
-    #Wait for droplet to come up and be ready
-    while status != "completed":
-      drop = self.getDroplet(droplet.name)
-      actions = drop.get_actions()
-      for action in actions:
-        action.load()
-        # Once it shows completed, droplet is up and running
-        status = action.status
-        logging.debug(droplet.name+": "+str(status))
-        #print droplet.name+": "+status.strip()
-        if status.strip() is "completed":
-          break 
-        #Sleep is here to keep us from hitting the API Rate Limit
-        sleep(sleeptime)
+    self.waitToCompleteAction(droplet, sleeptime)
         
     #Wait for SSH to be reachable
     connected = False
@@ -97,7 +106,6 @@ class ScribenginDigitalOcean():
     
     for t in threads:
       t.join()
-    
     
   
   def destroyDropletAndWait(self, droplet, sleeptime=5, maxRetries=60):
@@ -128,20 +136,25 @@ class ScribenginDigitalOcean():
       print droplet.name+" DESTROYED"
   
   
-  def destroyAllScribenginDroplets(self, subdomain=None):
+  def doActionOnAllScribenginDroplets(self, targetAction, subdomain=None):
     threads = []
     manager = digitalocean.Manager(token=self.token)
     my_droplets = manager.get_all_droplets()
     for droplet in my_droplets:
       if any(regex.match(droplet.name) for regex in Cluster.serverRegexes):
         if subdomain is None or subdomain in droplet.name: 
-          logging.debug("Destroying: "+droplet.name)
-          t = Process(target=self.destroyDropletAndWait, args=(droplet,))
+          t = Process(target=targetAction, args=(droplet,))
           t.start()
           threads.append(t)
     for t in threads:
       t.join()
+      
+  def destroyAllScribenginDroplets(self, subdomain=None):
+    self.doActionOnAllScribenginDroplets(self.destroyDropletAndWait, subdomain)
   
+  def rebootAllScribenginDroplets(self, subdomain=None):
+    self.doActionOnAllScribenginDroplets(self.rebootAndWait, subdomain)
+      
   def loadMachineConfig(self, configLocation):
     config = yaml.load(open(configLocation, "r"))
     

@@ -3,14 +3,14 @@
   role: kafka
 
 - memory: 2gb
-  num: 2
+  num: 1
   role: zookeeper
 
-- memory: 2gb
+- memory: 4gb
   num: 3
   role: hadoop-worker
 
-- memory: 2gb
+- memory: 4gb
   num: 1
   role: hadoop-master
 

@@ -407,12 +407,13 @@ def ansible(write_inventory_file, inventory_file, deploy_cluster,
 @click.option('--region',                    default="lon1",  type=click.Choice(['lon1','sgp1','nyc1','nyc2','nyc3','sfo1']), help='Region to spawn droplet in')
 @click.option('--deploy',                   is_flag=True,  help='Run ansible')
 @click.option('--destroy',                  is_flag=True,  help='destroys all scribengin containers')
+@click.option('--reboot',                  is_flag=True,  help='reboots all scribengin containers')
 @click.option('--neverwinterdp-home',       default=None, help='neverwinterdp home')
 @click.option('--digitaloceantoken',        default=None,  help='digital ocean token in plain text')
 @click.option('--digitaloceantokenfile',    default='~/.digitaloceantoken', help='digital ocean token file location')
 @click.option('--subdomain',                default="dev",  help='Subdomain to name hosts with in DO - i.e. hadoop-master.dev')
 def digitalocean(launch, create_containers, update_local_host_file, update_host_file, setup_neverwinterdp_user,
-                 ansible_inventory, ansible_inventory_location, region, deploy, destroy, 
+                 ansible_inventory, ansible_inventory_location, region, deploy, destroy, reboot,
                  neverwinterdp_home, digitaloceantoken, digitaloceantokenfile,
                  subdomain):
   
@@ -453,10 +454,13 @@ def digitalocean(launch, create_containers, update_local_host_file, update_host_
     click.echo("Running ansible")
     digitalOcean.deploy(neverwinterdp_home)
   
+  if reboot:
+    click.echo("Rebooting Scribengin droplets")
+    digitalOcean.rebootAllScribenginDroplets(subdomain)
+  
   if destroy:
     click.echo("Destroying Scribengin droplets")
     digitalOcean.destroyAllScribenginDroplets(subdomain)
-
 
   
 @mastercommand.command("digitaloceandevsetup", help="commands to help launch a developer box in digital ocean")
