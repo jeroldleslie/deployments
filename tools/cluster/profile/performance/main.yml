@@ -1,35 +1,35 @@
 kafka:
   hardware:
-    memory: 16gb
-    num: 3
+    memory: 2gb
+    num: 6
   software:
     jvm:
-      KAFKA_HEAP_SIZE: 1024
+      KAFKA_HEAP_SIZE: 1536
 
 zookeeper:
   hardware:
-    memory: 8gb
+    memory: 2gb
     num: 1
   software:
     jvm:
-      ZOOKEEPER_HEAP_SIZE: 1024
+      ZOOKEEPER_HEAP_SIZE: 1536
       
 hadoop-master:
   hardware:
-    memory: 16gb
+    memory: 4gb
     num: 1
   software:
     jvm:
-      NAMENODE_HEAPSIZE: 4024
-      SECONDARYNAMENODE_HEAPSIZE: 4024
-      DATANODE_HEAPSIZE: 4024
-      YARN_RESOURCEMANAGER_HEAPSIZE: 4024
-      YARN_NODEMANAGER_HEAPSIZE: 4024
+      NAMENODE_HEAPSIZE: 1024
+      SECONDARYNAMENODE_HEAPSIZE: 1024
+      DATANODE_HEAPSIZE: 1024
+      YARN_RESOURCEMANAGER_HEAPSIZE: 1024
+      YARN_NODEMANAGER_HEAPSIZE: 1024
 
 hadoop-worker:
   hardware:
-    memory: 16gb
-    num: 3
+    memory: 8gb
+    num: 6
   software:
   
 elasticsearch:  
