@@ -45,16 +45,19 @@ for f in $HADOOP_HOME/contrib/capacity-scheduler/*.jar; do
 done
 
 # The maximum amount of heap to use, in MB. Default is 1000.
-export HADOOP_HEAPSIZE={{HADOOP_HEAPSIZE}}
-export HADOOP_NAMENODE_INIT_HEAPSIZE="{{HADOOP_NAMENODE_INIT_HEAPSIZE}}" 
+#export HADOOP_HEAPSIZE=1000
+#export HADOOP_NAMENODE_INIT_HEAPSIZE=1000
 
 # Extra Java runtime options.  Empty by default.
 export HADOOP_OPTS="$HADOOP_OPTS -Djava.net.preferIPv4Stack=true"
 
+HADOOP_NAMENODE_OPTS="-Xmx{{NAMENODE_HEAPSIZE}}m"
+HADOOP_SECONDARYNAMENODE_OPTS="-Xmx{{SECONDARYNAMENODE_HEAPSIZE}}m"
+HADOOP_DATANODE_OPTS="-Xmx{{DATANODE_HEAPSIZE}}m"
+
 # Command specific options appended to HADOOP_OPTS when specified
 export HADOOP_NAMENODE_OPTS="-Dhadoop.security.logger=${HADOOP_SECURITY_LOGGER:-INFO,RFAS} -Dhdfs.audit.logger=${HDFS_AUDIT_LOGGER:-INFO,NullAppender} $HADOOP_NAMENODE_OPTS"
 export HADOOP_DATANODE_OPTS="-Dhadoop.security.logger=ERROR,RFAS $HADOOP_DATANODE_OPTS"
-
 export HADOOP_SECONDARYNAMENODE_OPTS="-Dhadoop.security.logger=${HADOOP_SECURITY_LOGGER:-INFO,RFAS} -Dhdfs.audit.logger=${HDFS_AUDIT_LOGGER:-INFO,NullAppender} $HADOOP_SECONDARYNAMENODE_OPTS"
 
 export HADOOP_NFS3_OPTS="$HADOOP_NFS3_OPTS"
@@ -82,3 +85,5 @@ export HADOOP_SECURE_DN_PID_DIR=${HADOOP_PID_DIR}
 
 # A string representing this instance of hadoop. $USER by default.
 export HADOOP_IDENT_STRING=$USER
+
+

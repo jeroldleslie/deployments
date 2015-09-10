@@ -12,4 +12,9 @@
     - core-site.xml
     - hdfs-site.xml
     - yarn-site.xml
-
+    
+- name: Add hdfs
+  template: src={{ item }}.j2 dest={{ hadoop_home }}/bin/{{ item }}
+  sudo: yes
+  with_items:
+    - hdfs
