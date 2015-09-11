@@ -1,6 +1,6 @@
 ---
 
-- name: Common Requirements
+- name: Ganglia
   hosts: all
   remote_user: neverwinterdp
   roles:
