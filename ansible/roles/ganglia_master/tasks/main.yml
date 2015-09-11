@@ -8,18 +8,27 @@
     - ganglia-gmond
     - ganglia-web
   
-- name: Add ganglia config 
-  template: src={{ item }}.j2 dest=/etc/ganglia/{{ item }}
+#- name: Add ganglia config 
+#  template: src={{ item }}.j2 dest=/etc/ganglia/{{ item }}
+#  sudo: yes
+#  with_items:
+#    - gmond.conf
+
+- name: Configure gmond (cluster name)
   sudo: yes
-  with_items:
-    - gmond.conf
+  replace: dest=/etc/ganglia/gmond.conf regexp='cluster\s{\s*name\s*=\s*\"\unspecified\"' replace='cluster {\n  name = "{{ cluster }}"'
+
+- name: Configure gmond (ganglia master url)
+  sudo: yes
+  replace: dest=/etc/ganglia/gmond.conf regexp='udp_send_channel\s{\s*' replace='udp_send_channel {\n  host = {{ ganglia_url }}\n'
+
+
 
 - name: Configure httpd
   sudo: yes
-  #lineinfile: dest=/etc/httpd/conf/httpd.conf line="<location /ganglia>\n  Order deny,allow\n  Allow from all\n</location>\n"
   lineinfile: dest=/etc/httpd/conf/httpd.conf line="<Directory \"/usr/share/ganglia\">\n    Options Indexes FollowSymLinks\n    AllowOverride None\n    Require all granted\n</Directory>\n"
   
-- name: Remove ganglia.conf that doesn't work
+- name: Add alias to httpd ganglia.conf 
   sudo: yes
   shell: echo "Alias /ganglia /usr/share/ganglia" > /etc/httpd/conf.d/ganglia.conf 
 
@@ -31,21 +40,20 @@
     - gmond
     - gmetad
     - httpd
-  ignore_errors: yes
-  register: service_start_result
+  when: ansible_virtualization_type != 'docker'
   
 
-- name: Start gmond
+- name: Start gmond manually
   shell: "/usr/sbin/gmond"
   sudo: yes
-  when: service_start_result.failed == True
+  when: ansible_virtualization_type == 'docker'
   
-- name: Start gmetad
+- name: Start gmetad manually
   shell: "/usr/sbin/gmetad"
   sudo: yes
-  when: service_start_result.failed == True
+  when: ansible_virtualization_type == 'docker'
   
-- name: Start httpd
+- name: Start httpd manually
   shell: "/usr/sbin/httpd"
   sudo: yes
-  when: service_start_result.failed == True
+  when: ansible_virtualization_type == 'docker'

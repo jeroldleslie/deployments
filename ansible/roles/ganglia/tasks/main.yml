@@ -9,21 +9,34 @@
   sudo: yes
   when: ansible_distribution == 'CentOS' or ansible_distribution == 'Red Hat Enterprise Linux'
   
-- name: Add ganglia client config 
-  template: src={{ item }}.j2 dest=/etc/ganglia/{{ item }}
+#- name: Add ganglia client config 
+#  template: src={{ item }}.j2 dest=/etc/ganglia/{{ item }}
+#  sudo: yes
+#  with_items:
+#    - gmond.conf
+
+- name: Configure gmond (cluster name)
   sudo: yes
-  with_items:
-    - gmond.conf
+  replace: dest=/etc/ganglia/gmond.conf regexp='cluster\s*{\s*name\s*=\s*\"\unspecified\"' replace='cluster {\n  name = "{{ cluster }}"'
+
+- name: Configure gmond (ganglia master url)
+  sudo: yes
+  replace: dest=/etc/ganglia/gmond.conf regexp='udp_send_channel\s*{\s*"' replace='udp_send_channel {\n  host = {{ ganglia_url }}\n'
+
 
 - name: Restart ganglia client service (Ubuntu)
   #command: /etc/init.d/ganglia-monitor restart
   service: name=ganglia-monitor state=restarted
   sudo: yes
-  when: ansible_distribution == 'Debian' or ansible_distribution == 'Ubuntu'  
-  ignore_errors: yes
+  when: ansible_distribution == 'Debian' or ansible_distribution == 'Ubuntu'
   
 - name: Restart ganglia client service (CentOS)
   service: name=gmond state=restarted
   sudo: yes
   when: ansible_distribution == 'CentOS' or ansible_distribution == 'Red Hat Enterprise Linux'
-  ignore_errors: yes
+  when: ansible_virtualization_type != 'docker'
+
+- name: Start gmond manually
+  shell: "/usr/sbin/gmond"
+  sudo: yes
+  when: ansible_virtualization_type == 'docker'

@@ -18,7 +18,7 @@ globals {
  * of a <CLUSTER> tag.  If you do not specify a cluster tag, then all <HOSTS> will 
  * NOT be wrapped inside of a <CLUSTER> tag. */ 
 cluster { 
-  name = "unspecified" 
+  name = "{{ cluster }}" 
   owner = "unspecified" 
   latlong = "unspecified" 
   url = "unspecified" 
@@ -45,7 +45,7 @@ udp_recv_channel {
 } 
 
 udp_send_channel {
-  host = ganglia.do.demandcube.com  #THIS IS IMPORTANT - this is the hostname of the ganglia master
+  host = {{ ganglia_url }}
   port = 8649
   ttl = 1
 }
