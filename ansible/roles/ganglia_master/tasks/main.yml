@@ -1,0 +1,46 @@
+- name: Install Ganglia
+  sudo: yes
+  yum: name={{ item }} state=installed
+  with_items:
+    - ganglia
+    - ganglia-gmetad
+    - ganglia-gmond
+    - ganglia-web
+  
+- name: Add ganglia config 
+  template: src={{ item }}.j2 dest=/etc/ganglia/{{ item }}
+  sudo: yes
+  with_items:
+    - gmond.conf
+
+- name: Configure httpd
+  sudo: yes
+  lineinfile: dest=/etc/httpd/conf/httpd.conf line="<location /ganglia>\n  Order deny,allow\n  Allow from all\n</location>\n"
+
+  
+- name: Start ganglia master services (CentOS)
+  service: name={{ item }} state=restarted
+  sudo: yes
+  when: ansible_distribution == 'CentOS' or ansible_distribution == 'Red Hat Enterprise Linux'
+  with_items:
+    - gmond
+    - gmetad
+    - httpd
+  ignore_errors: yes
+  register: service_start_result
+  
+
+- name: Start gmond
+  shell: "/usr/sbin/gmond"
+  sudo: yes
+  when: service_start_result.failed == True
+  
+- name: Start gmetad
+  shell: "/usr/sbin/gmetad"
+  sudo: yes
+  when: service_start_result.failed == True
+  
+- name: Start httpd
+  shell: "/usr/sbin/httpd"
+  sudo: yes
+  when: service_start_result.failed == True
