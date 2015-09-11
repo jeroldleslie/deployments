@@ -2,6 +2,7 @@
   sudo: yes
   yum: name={{ item }} state=installed
   with_items:
+    - epel-release
     - ganglia
     - ganglia-gmetad
     - ganglia-gmond
@@ -15,9 +16,13 @@
 
 - name: Configure httpd
   sudo: yes
-  lineinfile: dest=/etc/httpd/conf/httpd.conf line="<location /ganglia>\n  Order deny,allow\n  Allow from all\n</location>\n"
-
+  #lineinfile: dest=/etc/httpd/conf/httpd.conf line="<location /ganglia>\n  Order deny,allow\n  Allow from all\n</location>\n"
+  lineinfile: dest=/etc/httpd/conf/httpd.conf line="<Directory \"/usr/share/ganglia\">\n    Options Indexes FollowSymLinks\n    AllowOverride None\n    Require all granted\n</Directory>\n"
   
+- name: Remove ganglia.conf that doesn't work
+  sudo: yes
+  shell: echo "Alias /ganglia /usr/share/ganglia" > /etc/httpd/conf.d/ganglia.conf 
+
 - name: Start ganglia master services (CentOS)
   service: name={{ item }} state=restarted
   sudo: yes
