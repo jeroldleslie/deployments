@@ -11,6 +11,7 @@ ssh -o "StrictHostKeyChecking no" neverwinterdp@hadoop-master "cd /opt/neverwint
 ssh -o "StrictHostKeyChecking no" neverwinterdp@hadoop-master "chmod +x /opt/neverwinterdp/dataflow/log-sample/bin/*.sh"
 
 
-RUN_OPTS="--profile=performance --storage=kafka --dedicated-executor=false --num-of-message=10000000 --message-size=512"
+RUN_OPTS="--storage=hdfs --dedicated-executor=false --num-of-message=10000000 --message-size=512"
+KILL_WORKER_OPTS="--kill-worker-random=true --kill-worker-max=25"
 
-ssh -o "StrictHostKeyChecking no" neverwinterdp@hadoop-master  "cd /opt/neverwinterdp &&  time ./dataflow/log-sample/bin/run-dataflow-chain.sh $RUN_OPTS"
+ssh -o "StrictHostKeyChecking no" neverwinterdp@hadoop-master  "cd /opt/neverwinterdp &&  time ./dataflow/log-sample/bin/run-dataflow-chain.sh $RUN_OPTS $KILL_WORKER_OPTS"
