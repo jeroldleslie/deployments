@@ -5,6 +5,8 @@ kafka:
   software:
     jvm:
       KAFKA_HEAP_SIZE: 1536
+    server-properties:
+      num_partitions: 10
 
 zookeeper:
   hardware:
@@ -25,6 +27,7 @@ hadoop-master:
       DATANODE_HEAPSIZE: 1024
       YARN_RESOURCEMANAGER_HEAPSIZE: 1024
       YARN_NODEMANAGER_HEAPSIZE: 1024
+
 hadoop-worker:
   hardware:
     memory: 4gb

@@ -4,7 +4,7 @@ kafka:
     num: 3
   software:
     jvm:
-      KAFKA_HEAP_SIZE: 1024
+      KAFKA_HEAP_SIZE: 1536
     server-properties:
       zookeeper_clientport: 2181 
       port: 9092
@@ -35,7 +35,7 @@ zookeeper:
     num: 1
   software:
     jvm:
-      ZOOKEEPER_HEAP_SIZE: 2048
+      ZOOKEEPER_HEAP_SIZE: 1536
     zoo-cfg:
       tickTime: 2000
       initLimit: 10

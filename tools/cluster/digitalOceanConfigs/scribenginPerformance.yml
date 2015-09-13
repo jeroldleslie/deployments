@@ -10,7 +10,7 @@
   num: 1
   role: hadoop-master
 
-- memory: 8gb
+- memory: 4gb
   num: 6
   role: hadoop-worker
 
