@@ -27,6 +27,12 @@ hadoop-master:
       DATANODE_HEAPSIZE: 1024
       YARN_RESOURCEMANAGER_HEAPSIZE: 1024
       YARN_NODEMANAGER_HEAPSIZE: 1024
+    yarn-site:
+      yarn_resourcemanager_scheduler_class: org.apache.hadoop.yarn.server.resourcemanager.scheduler.capacity.CapacityScheduler
+      yarn_nodemanager_resource_cpu_vcores: 8
+      yarn_scheduler_minimum_allocation_mb: 1024
+    capacity-scheduler:
+      yarn_scheduler_capacity_resource_calculator: org.apache.hadoop.yarn.util.resource.DefaultResourceCalculator
 
 hadoop-worker:
   hardware:
