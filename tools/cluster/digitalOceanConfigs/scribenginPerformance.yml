@@ -1,8 +1,8 @@
-- memory: 4gb
+- memory: 2gb
   num: 6
   role: kafka
 
-- memory: 4gb
+- memory: 2gb
   num: 1
   role: zookeeper
 
