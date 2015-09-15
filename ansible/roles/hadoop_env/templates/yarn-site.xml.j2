@@ -26,6 +26,13 @@
   </property>
 
   <property>
+    <name>yarn.nodemanager.vmem-check-enabled</name>
+    <value>{{yarn_nodemanager_vmem_check_enabled}}</value>
+    <description>Whether virtual memory limits will be enforced for containers.</description>
+  </property>
+
+
+  <property>
     <name>yarn.resourcemanager.scheduler.class</name>
     <value>{{yarn_resourcemanager_scheduler_class}}</value>
   </property>
@@ -33,6 +40,16 @@
   <property>
     <name>yarn.scheduler.minimum-allocation-mb</name>
     <value>{{yarn_scheduler_minimum_allocation_mb}}</value>
+  </property>
+
+  <property>
+    <name>yarn.scheduler.minimum-allocation-vcores</name>
+    <value>{{yarn_scheduler_minimum_allocation_vcores}}</value>
+  </property>
+
+  <property>
+    <name>yarn.scheduler.maximum-allocation-vcores</name>
+    <value>{{yarn_scheduler_maximum_allocation_vcores}}</value>
   </property>
 
 </configuration>

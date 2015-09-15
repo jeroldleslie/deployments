@@ -30,8 +30,10 @@ hadoop-master:
     yarn-site:
       yarn_nodemanager_resource_cpu_vcores: 3
       yarn_nodemanager_resource_memory_mb:  2048
-      yarn_nodemanager_vmem_pmem_ratio:     2
+      yarn_nodemanager_vmem_pmem_ratio:     2.1
       yarn_scheduler_minimum_allocation_mb: 512
+      yarn_scheduler_minimum_allocation_vcores: 1
+      yarn_scheduler_maximum_allocation_vcores: 1
     capacity-scheduler:
       yarn_scheduler_capacity_resource_calculator: org.apache.hadoop.yarn.util.resource.DominantResourceCalculator
       
