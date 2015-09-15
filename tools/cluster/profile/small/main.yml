@@ -39,7 +39,7 @@ hadoop-master:
       yarn_scheduler_minimum_allocation_vcores: 1
       yarn_scheduler_maximum_allocation_vcores: 1
     capacity-scheduler:
-      yarn_scheduler_capacity_resource_calculator: org.apache.hadoop.yarn.util.resource.DefaultResourceCalculator
+      yarn_scheduler_capacity_resource_calculator: org.apache.hadoop.yarn.util.resource.DominantResourceCalculator
 
 hadoop-worker:
   hardware:
