@@ -6,7 +6,7 @@ kafka:
     jvm:
       KAFKA_HEAP_SIZE: 1536
     server-properties:
-      num_partitions: 16
+      num_partitions: 8
 
 zookeeper:
   hardware:
@@ -28,9 +28,10 @@ hadoop-master:
       YARN_RESOURCEMANAGER_HEAPSIZE: 1024
       YARN_NODEMANAGER_HEAPSIZE: 1024
     yarn-site:
-      yarn_resourcemanager_scheduler_class: org.apache.hadoop.yarn.server.resourcemanager.scheduler.capacity.CapacityScheduler
-      yarn_nodemanager_resource_cpu_vcores: 8
-      yarn_scheduler_minimum_allocation_mb: 1024
+      yarn_nodemanager_resource_cpu_vcores: 3
+      yarn_nodemanager_resource_memory_mb:  2048
+      yarn_nodemanager_vmem_pmem_ratio:     2
+      yarn_scheduler_minimum_allocation_mb: 512
     capacity-scheduler:
       yarn_scheduler_capacity_resource_calculator: org.apache.hadoop.yarn.util.resource.DominantResourceCalculator
       
