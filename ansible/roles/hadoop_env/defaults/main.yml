@@ -9,3 +9,7 @@ hadoop_http_staticuser_user: neverwinterdp
 dfs_replication: 3
 yarn_resourcemanager_hostname: hadoop-master
 yarn_nodemanager_hostname: 0.0.0.0
+yarn_resourcemanager_scheduler_class: org.apache.hadoop.yarn.server.resourcemanager.scheduler.capacity.CapacityScheduler
+yarn_scheduler_capacity_resource_calculator: org.apache.hadoop.yarn.util.resource.DefaultResourceCalculator
+yarn_nodemanager_resource_cpu_vcores: 8
+yarn_scheduler_minimum_allocation_mb: 512
