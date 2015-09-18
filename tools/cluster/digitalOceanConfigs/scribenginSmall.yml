@@ -7,12 +7,12 @@
   role: zookeeper
 
 - memory: 4gb
-  num: 3
-  role: hadoop-worker
-
-- memory: 4gb
   num: 1
   role: hadoop-master
+
+- memory: 4gb
+  num: 3
+  role: hadoop-worker
 
 - memory: 2gb
   num: 1
