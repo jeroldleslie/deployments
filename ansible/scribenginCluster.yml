@@ -40,5 +40,14 @@
     #- influxdb
     #- grafana
     - kibana
-    
+    #- ganglia_master
+
+
+#- name: Ganglia
+#  #Exclude monitoring machine 
+#  hosts: all:!monitoring
+#  remote_user: neverwinterdp
+#  roles:
+#    - ganglia
+
 

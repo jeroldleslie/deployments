@@ -4,16 +4,25 @@
   sudo: yes
   when: ansible_distribution == 'Debian' or ansible_distribution == 'Ubuntu'  
 
-- name: install ganglia client (CentOS)
+- name: Install ganglia client (CentOS)
   yum: name='ganglia-gmond' state=installed
   sudo: yes
   when: ansible_distribution == 'CentOS' or ansible_distribution == 'Red Hat Enterprise Linux'
-  
-#- name: Add ganglia client config 
-#  template: src={{ item }}.j2 dest=/etc/ganglia/{{ item }}
-#  sudo: yes
-#  with_items:
-#    - gmond.conf
+
+- name: Make sure crond is installed (CentOS)
+  yum: name='cronie' state=installed
+  sudo: yes
+  when: ansible_distribution == 'CentOS' or ansible_distribution == 'Red Hat Enterprise Linux'
+
+- name: Check if crond is running (Docker)
+  shell: ps -ax | grep crond | grep -v grep | wc -l
+  register: crond_running
+  when: ansible_virtualization_type == 'docker'
+
+- name: Make sure crond is started (Docker)
+  shell: crond
+  sudo: yes
+  when: crond_running.stdout == "0" and ansible_virtualization_type == 'docker'
 
 - name: Configure gmond (cluster name)
   sudo: yes
@@ -40,3 +49,35 @@
   shell: "/usr/sbin/gmond"
   sudo: yes
   when: ansible_virtualization_type == 'docker'
+
+- name: Create ganglia home for custom scripts
+  file: path={{ganglia_home}} state=directory mode=0755
+
+- name: Move ganglia plugins to ganglia_home
+  copy: src=../plugins/ dest={{ganglia_home}} mode=0755
+
+- name: Get current crontab 
+  shell: crontab -l
+  register: crontab_out
+  sudo: yes
+  ignore_errors: yes
+
+- name: Write current crontab to temp file
+  shell: "printf \"\n{{crontab_out.stdout}}\" > /tmp/cron "
+  sudo: yes
+
+- name: Get disk partitions
+  shell: cat /proc/partitions | awk '{print $4}' | grep -E "(vda|sda)"
+  register: disk_partitions
+
+- name: Add all cronjobs to temp file (non-Docker)
+  shell: "echo \"* * * * * $(which perl) {{ganglia_home}}/diskio.pl {{ item }}\" >> /tmp/cron"
+  sudo: yes
+  with_items:
+    - "{{ disk_partitions.stdout_lines }}"
+
+
+- name: Write cronjob
+  shell: crontab /tmp/cron
+  sudo: yes
+
