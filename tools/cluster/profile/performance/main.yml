@@ -30,8 +30,9 @@ hadoop-master:
     yarn-site:
       yarn_nodemanager_resource_cpu_vcores: 3
       yarn_nodemanager_resource_memory_mb:  3072
-      yarn_nodemanager_vmem_pmem_ratio:     2
-      yarn_scheduler_minimum_allocation_mb: 512
+      yarn_nodemanager_vmem_pmem_ratio:  1
+      yarn_nodemanager_vmem_check_enabled: false
+      yarn_scheduler_minimum_allocation_mb: 1024
       yarn_scheduler_minimum_allocation_vcores: 1
       yarn_scheduler_maximum_allocation_vcores: 1
     capacity-scheduler:
