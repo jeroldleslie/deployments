@@ -26,7 +26,7 @@
 # The java implementation to use.
 export HADOOP_INSTALL=/opt/hadoop
 export HADOOP_COMMON_LIB_NATIVE_DIR=$HADOOP_INSTALL/lib/native
-export HADOOP_OPTS="-Djava.library.path=$HADOOP_INSTALL/lib"
+export HADOOP_OPTS="$HADOOP_OPTS -Djava.library.path=$HADOOP_INSTALL/lib"
 
 export JAVA_HOME=${JAVA_HOME}
 

@@ -7,25 +7,22 @@
 - name: Decompress yourkit tar
   command: tar xfj /tmp/yourkit.tar.bz2 -C /opt/yourkit --strip-components=1
 
-
 - name: set KAFKA_OPTS (Kafka)
   sudo: yes
   sudo_user: root
-  lineinfile: dest=/etc/profile line="export KAFKA_OPTS={{ ansible_env.KAFKA_OPTS | default('') }}-agentpath:/opt/yourkit/bin/linux-x86-64/libyjpagent.so=disablestacktelemetry,disableexceptiontelemetry,delay=10000 " state=present
-
+  lineinfile: dest=/etc/environment  line="KAFKA_OPTS={{ ansible_env.KAFKA_OPTS | default('') }} -agentpath:/opt/yourkit/bin/linux-x86-64/libyjpagent.so=disablestacktelemetry,disableexceptiontelemetry,delay=10000 " state=present
 
 - name: set JVMFLAGS (Zookeeper)
   sudo: yes
   sudo_user: root
-  lineinfile: dest=/etc/profile line="export JVMFLAGS={{ ansible_env.JVMFLAGS | default('') }}-agentpath:/opt/yourkit/bin/linux-x86-64/libyjpagent.so=disablestacktelemetry,disableexceptiontelemetry,delay=10000 " state=present
+  lineinfile: dest=/etc/environment line="JVMFLAGS={{ ansible_env.JVMFLAGS | default('') }} -agentpath:/opt/yourkit/bin/linux-x86-64/libyjpagent.so=disablestacktelemetry,disableexceptiontelemetry,delay=10000 " state=present
 
 - name: set YARN_OPTS (YARN)
   sudo: yes
   sudo_user: root
-  lineinfile: dest=/etc/profile line="export YARN_OPTS={{ ansible_env.YARN_OPTS | default('') }}-agentpath:/opt/yourkit/bin/linux-x86-64/libyjpagent.so=disablestacktelemetry,disableexceptiontelemetry,delay=10000 "  state=present
-
+  lineinfile: dest=/etc/environment line="YARN_OPTS={{ ansible_env.YARN_OPTS | default('') }} -agentpath:/opt/yourkit/bin/linux-x86-64/libyjpagent.so=disablestacktelemetry,disableexceptiontelemetry,delay=10000 "  state=present
 
 - name: set HADOOP_OPTS (HDFS)
   sudo: yes
   sudo_user: root
-  lineinfile: dest=/etc/profile line="export HADOOP_OPTS={{ ansible_env.HADOOP_OPTS | default('') }}-agentpath:/opt/yourkit/bin/linux-x86-64/libyjpagent.so=disablestacktelemetry,disableexceptiontelemetry,delay=10000 "  state=present
+  lineinfile: dest=/etc/environment line="HADOOP_OPTS={{ ansible_env.HADOOP_OPTS | default('') }} -agentpath:/opt/yourkit/bin/linux-x86-64/libyjpagent.so=disablestacktelemetry,disableexceptiontelemetry,delay=10000 "  state=present
