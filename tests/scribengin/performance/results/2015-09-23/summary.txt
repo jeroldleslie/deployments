@@ -1,0 +1,35 @@
+Small Cluster
+**********************************************************************************************************************************************
+Storage  Message  GTime  ETime  VTime  Total  KWorker  Lost     Dup  TSplitter  RSplitter    TInfo   RInfo  TWarn  RWarn   TError  RError  Note
+-------  -------  --------------------------  ---------------------  ---------------------  --------------  -------------  --------------  ----
+Kafka        10M     70   1129    256  24m22        0     0       0     10.6M       11336    3.35M    3592   3.4M   3652    5.83M    6242
+
+HDFS         10M     52   1253    208  25m21        0     0       0      8.5M        9104    2.65M    2841   2.7M   2918    4.53M    4856     3*
+
+             10M     266  2015    184  41m14       25     0  101437                                                                           6*
+----------------------------------------------------------------------------------------------------------------------------------------------
+Hardware: kafka = 3 x 2GB, hadoop worker = 3 x 4GB
+Message : size = 512 
+Dataflow: worker = 2, executor per worker = 2, num of stream = 8 and 10
+
+***********************************************************************************************************************************************
+
+Performance Cluster
+**********************************************************************************************************************************************
+Storage  Message  GTime  ETime  VTime  Total  KWorker  Lost     Dup  TSplitter  RSplitter    TInfo   RInfo  TWarn  RWarn   TError  RError  Note
+-------  -------  --------------------------  ---------------------  ---------------------  --------------  -------------  --------------  ----
+Kafka        10M    269   744     270  21m30        0     0       0     10.6M       11336    3.35M    3592   3.4M   3652    5.83M    6242
+             10M    265  1154     272  28m18        0     0       0     10.6M                                                                2*
+             10M    273   923     276  24m40        0     0       0     10.6M                                                                
+             10M    279   809     283  22m58        0     0       0     10.6M                                                                3*
+
+----------------------------------------------------------------------------------------------------------------------------------------------
+Hardware: kafka = 6 x 2GB, hadoop worker = 6 x 4GB
+Message : size = 512 
+Dataflow: worker = 2, executor per worker = 4, num of stream = 16 
+
+2*:  Run with 2 exectutor, 8 streams. It seems the performance is decrease with less executors(parallelism)
+
+3*. The time for message generator almost the same, probably because only one vm generator and probably the 
+    bottle neck is the vm generator network
+***********************************************************************************************************************************************
