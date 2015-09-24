@@ -2,15 +2,45 @@ Small Cluster
 **********************************************************************************************************************************************
 Storage  Message  GTime  ETime  VTime  Total  KWorker  Lost     Dup  TSplitter  RSplitter    TInfo   RInfo  TWarn  RWarn   TError  RError  Note
 -------  -------  --------------------------  ---------------------  ---------------------  --------------  -------------  --------------  ----
-Kafka        10M     70   1129    256  24m22        0     0       0     10.6M       11336    3.35M    3592   3.4M   3652    5.83M    6242
+Kafka        10M     67   1097    236  23m26        0     0       0     9.91M       10623    3.00M    3226  3.03M   3248    3.09M    3297    1*
+             25M     69   2270    787  52m13        0     0       0    11.09M       11869    3.55M    3796  3.57M   3826    3.59M    3848    2*
 
-HDFS         10M     52   1253    208  25m21        0     0       0      8.5M        9104    2.65M    2841   2.7M   2918    4.53M    4856     3*
+             25M     69   2530    700  55m6        20     0  201023                                                                          3*
 
-             10M     266  2015    184  41m14       25     0  101437                                                                           6*
+HDFS         10M     70   1129    256  24m22        0     0       0    11.80M       12635    2.90M    3116  3.00M   3218    3.00M    3211    4*
+             25M     67   2719    494  54m48        0     0       0    11.21M       11997    2.95M    3163  2.95M   3160    2.98M    3183    5*
+
+             25M     70   4473    457  83m27       30     0  220283                                                                          6*
 ----------------------------------------------------------------------------------------------------------------------------------------------
 Hardware: kafka = 3 x 2GB, hadoop worker = 3 x 4GB
 Message : size = 512 
 Dataflow: worker = 2, executor per worker = 2, num of stream = 8 and 10
+
+1*: - Fail 1 time due to the container allocation problem. This problem is seen for long time and we do not quite understand about the problem.
+      Even move to use hadoop 2.7.1.
+
+2*: - Fail few time due to container allocation problem. 
+    - When run successfully, many executor are broken due to kafka reader can get the leader. Probably under the heavy test, kafka is too busy. 
+      Update code so the kafka partition reader can retry to connect to avoid the broken problem(probably there is a problem with kafka setting
+      and it allows only a number of connection. Our test have many thread that connect to kafka, depend on the number of streams but this 
+      problem is not seen offen probably it happens only when digitalocean is not well performed).
+    - Run successfully after fix the kafka reader
+
+3*: - The test is setup with 30 kills, but in fact the test finish in 55m and can execute only 20 kills 
+
+4*: - First run fail due to an exception that never seen. The problem look like come from the zookeeper broken connection
+
+5*: - First run successfully, but has many executor error due to the problem that kafka cannot connect even after 3 retries. The problem happen
+      only the system process few million messages, and this problem is not seen before. The previous test we run before use 10 partitions while
+      this test use 8 partitions.
+
+
+6*: - The failure simulation has no lost messages. But there are number of the duplicated messages. The test kill randomly a worker for every 
+      2 min for 30 times. The bad performance mainly come from the imbalance as for the last few tasks, the simulator keep kill the same worker 
+      as there is only one worker left.
+
+Other: - Imbalance problem can come from the distribution of master. We have a lot of master due to the design. 
+       - Imbalance can come from distribution of workers. One dataflow can run faster and finish before the other.
 
 ***********************************************************************************************************************************************
 
@@ -18,18 +48,28 @@ Performance Cluster
 **********************************************************************************************************************************************
 Storage  Message  GTime  ETime  VTime  Total  KWorker  Lost     Dup  TSplitter  RSplitter    TInfo   RInfo  TWarn  RWarn   TError  RError  Note
 -------  -------  --------------------------  ---------------------  ---------------------  --------------  -------------  --------------  ----
-Kafka        10M    269   744     270  21m30        0     0       0     10.6M       11336    3.35M    3592   3.4M   3652    5.83M    6242
-             10M    265  1154     272  28m18        0     0       0     10.6M                                                                2*
-             10M    273   923     276  24m40        0     0       0     10.6M                                                                
-             10M    279   809     283  22m58        0     0       0     10.6M                                                                3*
+Kafka        10M     76    744    289  18m40        0     0       0     15.25M      16347    4.53M    4862  4.62M    4956   4.70M    5033    1*
+             25M    191   1698    738  43m59        0     0       0     14.98M      16035    4.77M    5108  4.82M    5162   4.87M    5210    2*
+
+             25M    191   1921    757  48m59        0   675  476816                                                                          3*
 
 ----------------------------------------------------------------------------------------------------------------------------------------------
 Hardware: kafka = 6 x 2GB, hadoop worker = 6 x 4GB
 Message : size = 512 
-Dataflow: worker = 2, executor per worker = 4, num of stream = 16 
+Dataflow: worker = 2, executor per worker = 3, num of stream = 16 
 
-2*:  Run with 2 exectutor, 8 streams. It seems the performance is decrease with less executors(parallelism)
+1*: - First run is setup with 3 executors per worker and it takes about 833s
 
-3*. The time for message generator almost the same, probably because only one vm generator and probably the 
-    bottle neck is the vm generator network
+2.* - 1 container allocation problem
+
+3.* - First run cannot finish due to all the worker of one dataflow exist. The suspect problem is when when the workers are killed 
+      randomly, the task is broken and it stay in the running list. When new worker is launched, it cannot grab any task and exists, 
+      before the master detect and move the task back to the avaialable list.
+    - Seen lost error(UNKNOWN AND DANGEROUS BUG)
+
+Other: - Try to build cluster with london region and fail 3 times. Move to sgp region
+       - After about 630 - 650s, the dataflows are already processed all the messages, but it takes about 744s to finish as there is the
+         overhead to check to make sure that there is no more messages and shutdown. 
+       - Less problem with yarn container allocation
+
 ***********************************************************************************************************************************************
