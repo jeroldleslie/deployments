@@ -37,8 +37,7 @@
   hosts: monitoring
   remote_user: neverwinterdp
   roles:
-    #- influxdb
-    #- grafana
     - kibana
-    
+
+
 
