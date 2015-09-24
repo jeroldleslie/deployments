@@ -24,7 +24,7 @@ class ScribenginDigitalOcean():
     manager = digitalocean.Manager(token=self.token)
     self.defaultDropletConfig = { 
                    "region":"lon1",
-                   "image":"ubuntu-14-04-x64",
+                   "image":"centos-7-0-x64",
                    "num" : 1,
                    "memory": "512mb",
                    "ssh_keys": manager.get_all_sshkeys(),

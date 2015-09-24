@@ -1,0 +1,7 @@
+---
+
+- name: Yourkit
+  hosts: all
+  remote_user: neverwinterdp
+  roles:
+    - yourkit

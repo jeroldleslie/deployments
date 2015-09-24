@@ -8,5 +8,6 @@ $NEVERWINTERDP_DEPLOYMENTS_HOME/tools/cluster/clusterCommander.py digitalocean \
   --create-containers $NEVERWINTERDP_DEPLOYMENTS_HOME/tools/cluster/digitalOceanConfigs/scribenginSmall.yml --subdomain smallcluster
 
 
+#LogSampleChainSmallCluster.sh  --stop --clean --build --deploy --start --profile-type=small 2>&1 | tee ~/log-sample-small-cluster-10Mx512.txt
 #$NEVERWINTERDP_DEPLOYMENTS_HOME/tests/scribengin/performance/LogSampleChainSmallCluster.sh \
 #  --stop --clean --build --deploy --start --profile-type=small 2>&1 | tee ~/log-sample-small-cluster-25Mx512.txt
