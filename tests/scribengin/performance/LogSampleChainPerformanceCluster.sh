@@ -12,8 +12,8 @@ ssh -o "StrictHostKeyChecking no" neverwinterdp@hadoop-master "chmod +x /opt/nev
 
 
 STORAGE_OPTS="--storage=hdfs"
-DATAFLOW_OPTS="--dedicated-executor=false --num-of-worker=2 --num-of-executor-per-worker=4 --num-of-stream=16 --num-of-message=10000000 --message-size=512"
-#KILL_WORKER_OPTS="--kill-worker-random=true --kill-worker-max=25"
+DATAFLOW_OPTS="--dedicated-executor=false --num-of-worker=2 --num-of-executor-per-worker=4 --num-of-stream=16 --num-of-message=25000000 --message-size=512"
+KILL_WORKER_OPTS="--kill-worker-random=true --kill-worker-max=25"
 
 ssh -o "StrictHostKeyChecking no" neverwinterdp@hadoop-master \
    "cd /opt/neverwinterdp &&  time ./dataflow/log-sample/bin/run-dataflow-chain.sh $STORAGE_OPTS $DATAFLOW_OPTS $KILL_WORKER_OPTS"
