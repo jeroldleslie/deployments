@@ -1,0 +1,15 @@
+---
+
+- name: Ganglia Master
+  hosts: monitoring
+  remote_user: neverwinterdp
+  roles:
+    - ganglia_master
+
+
+- name: Ganglia
+  #Exclude monitoring machine 
+  hosts: all:!monitoring
+  remote_user: neverwinterdp
+  roles:
+    - ganglia
