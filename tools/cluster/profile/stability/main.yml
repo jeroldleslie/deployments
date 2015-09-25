@@ -1,14 +1,14 @@
 kafka:
   hardware:
-    memory: 512mb
+    memory: 2gb
     num: 3
   software:
     jvm:
-      KAFKA_HEAP_SIZE: 512
+      KAFKA_HEAP_SIZE: 1500
     server-properties:
       num_partitions: 10
       log_retention_hours: 1
-      log_retention_bytes: 30000000000
+      log_retention_bytes: 700000000
 
 zookeeper:
   hardware:
