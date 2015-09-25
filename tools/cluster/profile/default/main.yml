@@ -26,7 +26,7 @@ kafka:
       consumer_zookeeper_connection_timeout_ms: 1000000
       consumer_timeout_ms: 5000
     producer-properties:
-      producer_type: sync
+      producer_type: async
       compression_codec: none
       serializer_class: kafka.serializer.DefaultEncoder
 

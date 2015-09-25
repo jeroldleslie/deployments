@@ -1,0 +1,603 @@
+Stopping scribengin on hadoop-worker-3
+Stopping vmmaster on hadoop-worker-3
+Killing kafka on kafka-3
+Killing kafka on kafka-2
+Killing kafka on kafka-1
+Killing zookeeper on zookeeper-1
+Killing datanode on hadoop-worker-3
+Killing datanode on hadoop-worker-2
+Killing datanode on hadoop-worker-1
+Killing nodemanager on hadoop-worker-3
+Killing nodemanager on hadoop-worker-2
+Killing nodemanager on hadoop-worker-1
+Killing namenode on hadoop-master
+Killing secondarynamenode on hadoop-master
+Killing resourcemanager on hadoop-master
+Killing elasticsearch on elasticsearch-1
+Killing kibana on monitoring-1
+
+PLAY [Scribengin] *************************************************************
+
+GATHERING FACTS ***************************************************************
+ok: [hadoop-worker-3]
+ok: [hadoop-worker-2]
+ok: [hadoop-worker-1]
+ok: [hadoop-master]
+
+TASK: [scribengin | Set neverwinterdp_home to neverwinterdp_home_override if its been passed in on command line] ***
+ok: [hadoop-master]
+
+TASK: [scribengin | Check to make sure environment variables are sane] ********
+skipping: [hadoop-master] => (item=neverwinterdp_home)
+
+TASK: [scribengin | Get neverwinterdp_home path info locally] *****************
+ok: [hadoop-master -> 127.0.0.1]
+
+TASK: [scribengin | Check if neverwinterdp_home path exists locally] **********
+skipping: [hadoop-master]
+
+TASK: [scribengin | Echo local NEVERWINTERDP_HOME] ****************************
+ok: [hadoop-master] => {
+    "msg": "This is NeverwinterDP Home on the local machine /home/neverwinterdp/NeverwinterDP"
+}
+
+TASK: [scribengin | Echo local_scribengin_release_folder] *********************
+ok: [hadoop-master] => {
+    "msg": "This is Scribengin Release Directory on the local machine /home/neverwinterdp/NeverwinterDP/release"
+}
+
+TASK: [scribengin | Building Scribengin locally] ******************************
+changed: [hadoop-master -> 127.0.0.1]
+
+TASK: [scribengin | Output from gradle build] *********************************
+ok: [hadoop-master] => {
+    "var": {
+        "stdout.stdout_lines": [
+            ":client/swingui:clean",
+            ":jvmagent/DemoApp:clean",
+            ":jvmagent/bootstrap:clean",
+            ":jvmagent/registry:clean",
+            ":lib/buffer:clean",
+            ":lib/utils:clean",
+            ":lib/yara:clean",
+            ":module/commons:clean",
+            ":module/elasticsearch:clean",
+            ":module/kafka:clean",
+            ":registry/core:clean",
+            ":registry/vm:clean",
+            ":registry/vm-sample:clean",
+            ":release:clean",
+            ":scribengin/core:clean",
+            ":scribengin/core2:clean",
+            ":scribengin/dataflow/log-sample:clean",
+            ":scribengin/release:clean",
+            ":lib/utils:compileJava",
+            ":lib/utils:processResources UP-TO-DATE",
+            ":lib/utils:classes",
+            ":lib/utils:jar",
+            ":lib/yara:compileJava",
+            ":lib/yara:processResources UP-TO-DATE",
+            ":lib/yara:classes",
+            ":lib/yara:jar",
+            ":lib/buffer:compileJava",
+            ":lib/buffer:processResources UP-TO-DATE",
+            ":lib/buffer:classes",
+            ":lib/buffer:jar",
+            ":module/commons:compileJava",
+            ":module/commons:processResources UP-TO-DATE",
+            ":module/commons:classes",
+            ":module/commons:jar",
+            ":registry/core:compileJava",
+            ":registry/core:processResources UP-TO-DATE",
+            ":registry/core:classes",
+            ":registry/core:jar",
+            ":module/elasticsearch:compileJava",
+            ":module/elasticsearch:processResources",
+            ":module/elasticsearch:classes",
+            ":module/elasticsearch:jar",
+            ":module/kafka:compileJava",
+            ":module/kafka:processResources UP-TO-DATE",
+            ":module/kafka:classes",
+            ":module/kafka:jar",
+            ":registry/vm:compileJava",
+            ":registry/vm:processResources",
+            ":registry/vm:classes",
+            ":registry/vm:jar",
+            ":scribengin/core:compileJava",
+            ":scribengin/core:processResources",
+            ":scribengin/core:classes",
+            ":scribengin/core:jar",
+            ":scribengin/dataflow/log-sample:compileJava",
+            ":scribengin/dataflow/log-sample:processResources UP-TO-DATE",
+            ":scribengin/dataflow/log-sample:classes",
+            ":scribengin/dataflow/log-sample:jar",
+            ":client/swingui:compileJava",
+            ":client/swingui:processResources",
+            ":client/swingui:classes",
+            ":client/swingui:jar",
+            ":client/swingui:assemble",
+            ":client/swingui:check",
+            ":client/swingui:build",
+            ":jvmagent/bootstrap:compileJava",
+            ":jvmagent/bootstrap:processResources UP-TO-DATE",
+            ":jvmagent/bootstrap:classes",
+            ":jvmagent/bootstrap:jar",
+            ":jvmagent/registry:compileJava",
+            ":jvmagent/registry:processResources UP-TO-DATE",
+            ":jvmagent/registry:classes",
+            ":jvmagent/registry:jar",
+            ":jvmagent/DemoApp:compileJava",
+            ":jvmagent/DemoApp:processResources UP-TO-DATE",
+            ":jvmagent/DemoApp:classes",
+            ":jvmagent/DemoApp:jar",
+            ":jvmagent/DemoApp:assemble",
+            ":jvmagent/DemoApp:check",
+            ":jvmagent/DemoApp:build",
+            ":jvmagent/bootstrap:assemble",
+            ":jvmagent/bootstrap:check",
+            ":jvmagent/bootstrap:build",
+            ":jvmagent/registry:assemble",
+            ":jvmagent/registry:check",
+            ":jvmagent/registry:build",
+            ":lib/buffer:assemble",
+            ":lib/buffer:check",
+            ":lib/buffer:build",
+            ":lib/utils:assemble",
+            ":lib/utils:check",
+            ":lib/utils:build",
+            ":lib/yara:assemble",
+            ":lib/yara:check",
+            ":lib/yara:build",
+            ":module/commons:assemble",
+            ":module/commons:check",
+            ":module/commons:build",
+            ":module/elasticsearch:assemble",
+            ":module/elasticsearch:check",
+            ":module/elasticsearch:build",
+            ":module/kafka:assemble",
+            ":module/kafka:check",
+            ":module/kafka:build",
+            ":registry/core:assemble",
+            ":registry/core:check",
+            ":registry/core:build",
+            ":registry/vm:assemble",
+            ":registry/vm:check",
+            ":registry/vm:build",
+            ":registry/vm-sample:compileJava",
+            ":registry/vm-sample:processResources UP-TO-DATE",
+            ":registry/vm-sample:classes",
+            ":registry/vm-sample:jar",
+            ":registry/vm-sample:assemble",
+            ":registry/vm-sample:check",
+            ":registry/vm-sample:build",
+            ":release:compileJava UP-TO-DATE",
+            ":release:processResources UP-TO-DATE",
+            ":release:classes UP-TO-DATE",
+            ":release:jar",
+            ":release:assemble",
+            ":release:check",
+            ":release:build",
+            ":scribengin/core:assemble",
+            ":scribengin/core:check",
+            ":scribengin/core:build",
+            ":scribengin/core2:compileJava",
+            ":scribengin/core2:processResources UP-TO-DATE",
+            ":scribengin/core2:classes",
+            ":scribengin/core2:jar",
+            ":scribengin/core2:assemble",
+            ":scribengin/core2:check",
+            ":scribengin/core2:build",
+            ":scribengin/dataflow/log-sample:assemble",
+            ":scribengin/dataflow/log-sample:check",
+            ":scribengin/dataflow/log-sample:build",
+            ":scribengin/release:compileJava UP-TO-DATE",
+            ":scribengin/release:processResources UP-TO-DATE",
+            ":scribengin/release:classes UP-TO-DATE",
+            ":scribengin/release:jar",
+            ":scribengin/release:assemble",
+            ":scribengin/release:check",
+            ":scribengin/release:build",
+            ":client/swingui:compileTestJava",
+            ":client/swingui:processTestResources",
+            ":client/swingui:testClasses",
+            ":client/swingui:testJar",
+            ":client/swingui:install",
+            ":jvmagent/DemoApp:compileTestJava",
+            ":jvmagent/DemoApp:processTestResources",
+            ":jvmagent/DemoApp:testClasses",
+            ":jvmagent/DemoApp:testJar",
+            ":jvmagent/DemoApp:install",
+            ":jvmagent/bootstrap:compileTestJava",
+            ":jvmagent/bootstrap:processTestResources",
+            ":jvmagent/bootstrap:testClasses",
+            ":jvmagent/bootstrap:testJar",
+            ":jvmagent/bootstrap:install",
+            ":jvmagent/registry:compileTestJava",
+            ":jvmagent/registry:processTestResources UP-TO-DATE",
+            ":jvmagent/registry:testClasses",
+            ":jvmagent/registry:testJar",
+            ":jvmagent/registry:install",
+            ":lib/buffer:compileTestJava",
+            ":lib/buffer:processTestResources UP-TO-DATE",
+            ":lib/buffer:testClasses",
+            ":lib/buffer:testJar",
+            ":lib/buffer:install",
+            ":lib/utils:compileTestJava",
+            ":lib/utils:processTestResources UP-TO-DATE",
+            ":lib/utils:testClasses",
+            ":lib/utils:testJar",
+            ":lib/utils:install",
+            ":lib/yara:compileTestJava",
+            ":lib/yara:processTestResources UP-TO-DATE",
+            ":lib/yara:testClasses",
+            ":lib/yara:testJar",
+            ":lib/yara:install",
+            ":module/commons:compileTestJava",
+            ":module/commons:processTestResources",
+            ":module/commons:testClasses",
+            ":module/commons:testJar",
+            ":module/commons:install",
+            ":module/elasticsearch:compileTestJava",
+            ":module/elasticsearch:processTestResources",
+            ":module/elasticsearch:testClasses",
+            ":module/elasticsearch:testJar",
+            ":module/elasticsearch:install",
+            ":module/kafka:compileTestJava",
+            ":module/kafka:processTestResources",
+            ":module/kafka:testClasses",
+            ":module/kafka:testJar",
+            ":module/kafka:install",
+            ":registry/core:compileTestJava",
+            ":registry/core:processTestResources",
+            ":registry/core:testClasses",
+            ":registry/core:testJar",
+            ":registry/core:install",
+            ":registry/vm:compileTestJava",
+            ":registry/vm:processTestResources",
+            ":registry/vm:testClasses",
+            ":registry/vm:testJar",
+            ":registry/vm:install",
+            ":registry/vm-sample:compileTestJava",
+            ":registry/vm-sample:processTestResources UP-TO-DATE",
+            ":registry/vm-sample:testClasses",
+            ":registry/vm-sample:testJar",
+            ":registry/vm-sample:install",
+            ":release:compileTestJava UP-TO-DATE",
+            ":release:processTestResources UP-TO-DATE",
+            ":release:testClasses UP-TO-DATE",
+            ":release:testJar",
+            ":release:install",
+            ":scribengin/core:compileTestJava",
+            ":scribengin/core:processTestResources",
+            ":scribengin/core:testClasses",
+            ":scribengin/core:testJar",
+            ":scribengin/core:install",
+            ":scribengin/core2:compileTestJava",
+            ":scribengin/core2:processTestResources UP-TO-DATE",
+            ":scribengin/core2:testClasses",
+            ":scribengin/core2:testJar",
+            ":scribengin/core2:install",
+            ":scribengin/dataflow/log-sample:compileTestJava",
+            ":scribengin/dataflow/log-sample:processTestResources",
+            ":scribengin/dataflow/log-sample:testClasses",
+            ":scribengin/dataflow/log-sample:testJar",
+            ":scribengin/dataflow/log-sample:install",
+            ":scribengin/release:compileTestJava UP-TO-DATE",
+            ":scribengin/release:processTestResources",
+            ":scribengin/release:testClasses",
+            ":scribengin/release:testJar",
+            ":scribengin/release:install",
+            "",
+            "BUILD SUCCESSFUL",
+            "",
+            "Total time: 14.342 secs"
+        ]
+    }
+}
+
+TASK: [scribengin | Release Scribengin locally] *******************************
+changed: [hadoop-master -> 127.0.0.1]
+
+TASK: [scribengin | Output from gradle release] *******************************
+ok: [hadoop-master] => {
+    "var": {
+        "stdout.stdout_lines": [
+            ":release:clean",
+            ":release:compileJava UP-TO-DATE",
+            ":release:processResources UP-TO-DATE",
+            ":release:classes UP-TO-DATE",
+            ":release:jar",
+            ":release:assemble",
+            ":release:check",
+            ":release:build",
+            ":release:release",
+            "",
+            "",
+            "",
+            "*************************************************",
+            "Build release for release and deploy to /home/neverwinterdp/NeverwinterDP/release/build/release/neverwinterdp",
+            "*************************************************",
+            "",
+            "",
+            "",
+            "*************************************************",
+            "Build release scribengin to /home/neverwinterdp/NeverwinterDP/release/build/release/neverwinterdp",
+            "*************************************************",
+            "Copy the scribengin dependency library",
+            "Copy the scribengin library",
+            "Copy the scribengin home resources",
+            "",
+            "",
+            "",
+            "*************************************************",
+            "Build release jvmagent /home/neverwinterdp/NeverwinterDP/release/build/release/neverwinterdp/jvmagent",
+            "*************************************************",
+            "Copy the dependency library",
+            "",
+            "",
+            "",
+            "*************************************************",
+            "Build release for release and deploy to /home/neverwinterdp/NeverwinterDP/release/build/release/neverwinterdp",
+            "*************************************************",
+            "",
+            "",
+            "",
+            "*************************************************",
+            "Build release elasticsearch /home/neverwinterdp/NeverwinterDP/release/build/release",
+            "*************************************************",
+            "Copy the dependency library",
+            "Copy and override app",
+            "",
+            "BUILD SUCCESSFUL",
+            "",
+            "Total time: 3.414 secs"
+        ]
+    }
+}
+
+TASK: [scribengin | Check if remote neverwinterdp home exists] ****************
+ok: [hadoop-worker-3]
+ok: [hadoop-worker-1]
+ok: [hadoop-master]
+ok: [hadoop-worker-2]
+
+TASK: [scribengin | Delete neverwinterdp home if it exists] *******************
+changed: [hadoop-worker-2]
+changed: [hadoop-worker-1]
+changed: [hadoop-master]
+changed: [hadoop-worker-3]
+
+TASK: [scribengin | Copy local files from /home/neverwinterdp/NeverwinterDP/release/build/release/neverwinterdp/ to remote hosts /opt/neverwinterdp/] ***
+changed: [hadoop-worker-1 -> 127.0.0.1]
+changed: [hadoop-master -> 127.0.0.1]
+changed: [hadoop-worker-2 -> 127.0.0.1]
+changed: [hadoop-worker-3 -> 127.0.0.1]
+
+TASK: [scribengin | Make shell.sh executable] *********************************
+ok: [hadoop-master]
+ok: [hadoop-worker-3]
+ok: [hadoop-worker-1]
+ok: [hadoop-worker-2]
+
+TASK: [scribengin | Make kafka.sh executable] *********************************
+ok: [hadoop-worker-3]
+ok: [hadoop-worker-2]
+ok: [hadoop-master]
+ok: [hadoop-worker-1]
+
+PLAY RECAP ********************************************************************
+hadoop-master              : ok=15   changed=4    unreachable=0    failed=0
+hadoop-worker-1            : ok=15   changed=4    unreachable=0    failed=0
+hadoop-worker-2            : ok=15   changed=4    unreachable=0    failed=0
+hadoop-worker-3            : ok=15   changed=4    unreachable=0    failed=0
+
+
+
+Cleaning data of kafka on kafka-3
+Cleaning data of kafka on kafka-2
+Cleaning data of kafka on kafka-1
+Cleaning data of zookeeper on zookeeper-1
+Cleaning data of datanode on hadoop-worker-3
+Cleaning data of datanode on hadoop-worker-2
+Cleaning data of datanode on hadoop-worker-1
+Cleaning data of namenode on hadoop-master
+Cleaning data of elasticsearch on elasticsearch-1
+Starting elasticsearch on elasticsearch-1
+
+PLAY [Deploy Kibana Charts] ***************************************************
+
+GATHERING FACTS ***************************************************************
+ok: [elasticsearch-1]
+
+TASK: [kibana_charts | Wait elasticsearch to start] ***************************
+ok: [elasticsearch-1]
+
+TASK: [kibana_charts | move kibana data json files to container] **************
+ok: [elasticsearch-1]
+
+TASK: [kibana_charts | Run elasticdump] ***************************************
+changed: [elasticsearch-1]
+
+TASK: [kibana_charts | Output from gradle build] ******************************
+ok: [elasticsearch-1] => {
+    "var": {
+        "stdout.stdout_lines": [
+            "Fri, 25 Sep 2015 06:08:04 GMT | starting dump",
+            "Fri, 25 Sep 2015 06:08:04 GMT | got 44 objects from source file (offset: 0)",
+            "Fri, 25 Sep 2015 06:08:07 GMT | sent 44 objects to destination elasticsearch, wrote 44",
+            "Fri, 25 Sep 2015 06:08:07 GMT | got 0 objects from source file (offset: 44)",
+            "Fri, 25 Sep 2015 06:08:07 GMT | sent 0 objects to destination elasticsearch, wrote 0",
+            "Fri, 25 Sep 2015 06:08:07 GMT | Total Writes: 44",
+            "Fri, 25 Sep 2015 06:08:07 GMT | dump complete"
+        ]
+    }
+}
+
+TASK: [kibana_charts | debug msg="Point <monitoring server ip>:5601 in your browser to view kibana charts. If running on docker use host machines IP address i.e. <hostmachineip>:5601"] ***
+ok: [elasticsearch-1] => {
+    "msg": "Point <monitoring server ip>:5601 in your browser to view kibana charts. If running on docker use host machines IP address i.e. <hostmachineip>:5601"
+}
+
+PLAY RECAP ********************************************************************
+elasticsearch-1            : ok=6    changed=1    unreachable=0    failed=0
+
+
+
+
+PLAY [Zookeeper cluster environment] ******************************************
+
+GATHERING FACTS ***************************************************************
+ok: [zookeeper-1]
+
+TASK: [zookeeper_env | Check if zookeeper data directory exists] **************
+ok: [zookeeper-1]
+
+TASK: [zookeeper_env | Create zookeeper data directory] ***********************
+changed: [zookeeper-1]
+
+TASK: [zookeeper_env | Create myid file] **************************************
+changed: [zookeeper-1] => (item=myid)
+
+TASK: [zookeeper_env | Add zoo.cfg file] **************************************
+changed: [zookeeper-1] => (item=zoo.cfg)
+changed: [zookeeper-1] => (item=java.env)
+
+TASK: [zookeeper_env | Move configuration files to container] *****************
+changed: [zookeeper-1]
+
+PLAY RECAP ********************************************************************
+zookeeper-1                : ok=6    changed=4    unreachable=0    failed=0
+
+
+
+Starting zookeeper on zookeeper-1
+
+PLAY [Kafka cluster environment] **********************************************
+
+GATHERING FACTS ***************************************************************
+ok: [kafka-3]
+ok: [kafka-1]
+ok: [kafka-2]
+
+TASK: [kafka_env | Add configurations file] ***********************************
+changed: [kafka-2] => (item=server.properties)
+changed: [kafka-2] => (item=consumer.properties)
+changed: [kafka-2] => (item=producer.properties)
+changed: [kafka-3] => (item=server.properties)
+changed: [kafka-3] => (item=consumer.properties)
+changed: [kafka-3] => (item=producer.properties)
+changed: [kafka-1] => (item=server.properties)
+changed: [kafka-1] => (item=consumer.properties)
+changed: [kafka-1] => (item=producer.properties)
+
+TASK: [kafka_env | Add kafka-server-start.sh file] ****************************
+changed: [kafka-2] => (item=kafka-server-start.sh)
+changed: [kafka-1] => (item=kafka-server-start.sh)
+changed: [kafka-3] => (item=kafka-server-start.sh)
+
+TASK: [kafka_env | Make kafka-server-start.sh executable] *********************
+ok: [kafka-1] => (item=kafka-server-start.sh)
+ok: [kafka-3] => (item=kafka-server-start.sh)
+ok: [kafka-2] => (item=kafka-server-start.sh)
+
+TASK: [kafka_env | Move configuration files to container] *********************
+changed: [kafka-3]
+changed: [kafka-1]
+changed: [kafka-2]
+
+PLAY RECAP ********************************************************************
+kafka-1                    : ok=5    changed=3    unreachable=0    failed=0
+kafka-2                    : ok=5    changed=3    unreachable=0    failed=0
+kafka-3                    : ok=5    changed=3    unreachable=0    failed=0
+
+
+
+Starting kafka on kafka-3
+Starting kafka on kafka-2
+Starting kafka on kafka-1
+
+PLAY [Hadoop cluster environment] *********************************************
+
+GATHERING FACTS ***************************************************************
+ok: [hadoop-master]
+ok: [hadoop-worker-3]
+ok: [hadoop-worker-2]
+ok: [hadoop-worker-1]
+
+TASK: [hadoop_env | Move configuration files to container] ********************
+ok: [hadoop-worker-2]
+ok: [hadoop-worker-1]
+ok: [hadoop-master]
+ok: [hadoop-worker-3]
+
+TASK: [hadoop_env | Add masters and slaves file] ******************************
+changed: [hadoop-worker-2] => (item=slaves)
+changed: [hadoop-worker-2] => (item=masters)
+changed: [hadoop-worker-2] => (item=hadoop-env.sh)
+changed: [hadoop-worker-2] => (item=yarn-env.sh)
+ok: [hadoop-worker-2] => (item=core-site.xml)
+ok: [hadoop-worker-2] => (item=hdfs-site.xml)
+changed: [hadoop-worker-2] => (item=yarn-site.xml)
+changed: [hadoop-worker-2] => (item=capacity-scheduler.xml)
+changed: [hadoop-master] => (item=slaves)
+changed: [hadoop-master] => (item=masters)
+changed: [hadoop-master] => (item=hadoop-env.sh)
+changed: [hadoop-master] => (item=yarn-env.sh)
+ok: [hadoop-master] => (item=core-site.xml)
+ok: [hadoop-master] => (item=hdfs-site.xml)
+changed: [hadoop-master] => (item=yarn-site.xml)
+changed: [hadoop-master] => (item=capacity-scheduler.xml)
+changed: [hadoop-worker-3] => (item=slaves)
+changed: [hadoop-worker-3] => (item=masters)
+changed: [hadoop-worker-3] => (item=hadoop-env.sh)
+changed: [hadoop-worker-3] => (item=yarn-env.sh)
+ok: [hadoop-worker-3] => (item=core-site.xml)
+ok: [hadoop-worker-3] => (item=hdfs-site.xml)
+changed: [hadoop-worker-3] => (item=yarn-site.xml)
+changed: [hadoop-worker-3] => (item=capacity-scheduler.xml)
+changed: [hadoop-worker-1] => (item=slaves)
+changed: [hadoop-worker-1] => (item=masters)
+changed: [hadoop-worker-1] => (item=hadoop-env.sh)
+changed: [hadoop-worker-1] => (item=yarn-env.sh)
+ok: [hadoop-worker-1] => (item=core-site.xml)
+ok: [hadoop-worker-1] => (item=hdfs-site.xml)
+changed: [hadoop-worker-1] => (item=yarn-site.xml)
+changed: [hadoop-worker-1] => (item=capacity-scheduler.xml)
+
+TASK: [hadoop_env | Add hdfs] *************************************************
+changed: [hadoop-worker-2] => (item=hdfs)
+changed: [hadoop-worker-1] => (item=hdfs)
+changed: [hadoop-worker-3] => (item=hdfs)
+changed: [hadoop-master] => (item=hdfs)
+
+PLAY RECAP ********************************************************************
+hadoop-master              : ok=4    changed=2    unreachable=0    failed=0
+hadoop-worker-1            : ok=4    changed=2    unreachable=0    failed=0
+hadoop-worker-2            : ok=4    changed=2    unreachable=0    failed=0
+hadoop-worker-3            : ok=4    changed=2    unreachable=0    failed=0
+
+
+
+Starting namenode on hadoop-master
+Starting secondarynamenode on hadoop-master
+Starting resourcemanager on hadoop-master
+Starting datanode on hadoop-worker-3
+Starting datanode on hadoop-worker-2
+Starting datanode on hadoop-worker-1
+Starting nodemanager on hadoop-worker-3
+Starting nodemanager on hadoop-worker-2
+Starting nodemanager on hadoop-worker-1
+Starting vmmaster on hadoop-worker-3
+STDOUT from vm start: 
+/usr/lib/jvm/java-1.7.0-openjdk/bin/java
+
+
+
+------------------------------------------------------------------------
+Create VM master vm-master-1
+------------------------------------------------------------------------
+Create YarnClient
+Create YarnClientApplication via YarnClient
+Application Id = application_1443161325192_0001
+Set up the container launch context for the application master
+Command: java  -Xmx256m com.neverwinterdp.vm.VM --name vm-master-1 --role vm-master  --cpu-cores 1 --memory 256 --app-home /applications/vm-master --vm-resource:dfs-app-lib=/applications/vm-master/libs --vm-resource:df

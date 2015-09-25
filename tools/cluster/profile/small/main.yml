@@ -8,6 +8,7 @@ kafka:
     server-properties:
       num_partitions:  8
 
+      log_retention_bytes: 5000000000
 zookeeper:
   hardware:
     memory: 2gb
