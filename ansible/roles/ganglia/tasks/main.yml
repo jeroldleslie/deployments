@@ -22,7 +22,7 @@
 - name: Make sure crond is started (Docker)
   shell: crond
   sudo: yes
-  when: crond_running.stdout == "0" and ansible_virtualization_type == 'docker'
+  when: ansible_virtualization_type == 'docker' and crond_running.stdout == "0"
 
 - name: Configure gmond (cluster name)
   sudo: yes
