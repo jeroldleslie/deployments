@@ -31,13 +31,13 @@
   remote_user: neverwinterdp
   roles:
     - elasticsearch
-    - kibana_charts
+#    - kibana_charts
 
-- name: Monitoring
-  hosts: monitoring
-  remote_user: neverwinterdp
-  roles:
-    - kibana
+#- name: Monitoring
+#  hosts: monitoring
+#  remote_user: neverwinterdp
+#  roles:
+#    - kibana
 
 
 
