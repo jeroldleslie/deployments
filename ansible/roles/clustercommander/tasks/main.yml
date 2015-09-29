@@ -16,11 +16,11 @@
 - name: make clustercommander executable
   file: path=/opt/cluster/clusterCommander.py mode=0777
     
-- name: run setup script for clusterCommander
-  sudo: yes
-  shell: /opt/cluster/setup.sh
-  register: stdout
+#- name: run setup script for clusterCommander
+#  sudo: yes
+#  shell: /opt/cluster/setup.sh
+#  register: stdout
 
-- name: output from setup for clusterCommander
-  run_once: yes
-  debug: var=stdout.stdout_lines
+#- name: output from setup for clusterCommander
+#  run_once: yes
+#  debug: var=stdout.stdout_lines

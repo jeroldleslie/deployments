@@ -1,8 +1,18 @@
-- name: download epel rpm (CentOS)
-  shell: "wget --no-check-certificate http://download.fedoraproject.org/pub/epel/6/x86_64/{{ epel_filename }} -O {{ epel_rpm }} creates={{ epel_rpm }}"
-  when: ansible_distribution == 'CentOS' or ansible_distribution == 'Red Hat Enterprise Linux'
+#- name: download epel rpm (CentOS)
+#  shell: "wget --no-check-certificate http://download.fedoraproject.org/pub/epel/6/x86_64/{{ epel_filename }} -O {{ epel_rpm }} creates={{ epel_rpm }}"
+#  when: ansible_distribution == 'CentOS' or ansible_distribution == 'Red Hat Enterprise Linux'
 
-- name: yum install epel (Extra Packages for Enterprise Linux) (CentOS)
-  shell: "yum -y --nogpgcheck localinstall {{ epel_rpm }}"
+- name: install epel-release (CentOS)
+  when: ansible_distribution == 'CentOS' or ansible_distribution == 'Red Hat Enterprise Linux'
+  sudo: yes
+  yum: pkg=epel-release state=installed
+  
+#- name: yum install epel (Extra Packages for Enterprise Linux) (CentOS)
+#  shell: "yum -y --nogpgcheck localinstall {{ epel_rpm }}"
+#  sudo: yes 
+#  when: ansible_distribution == 'CentOS' or ansible_distribution == 'Red Hat Enterprise Linux'
+
+- name: yum groupinstall "Development tools" (CentOS)
+  shell: "yum groupinstall 'Development tools' -y"
   sudo: yes 
   when: ansible_distribution == 'CentOS' or ansible_distribution == 'Red Hat Enterprise Linux'

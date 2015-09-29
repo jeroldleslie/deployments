@@ -18,4 +18,15 @@
   #npm can throw errors if we're using https://launchpad.net/~chris-lea/+archive/ubuntu/node.js
   #as the PPA, so just ignore them
   ignore_errors: yes
+
+- name: install nodejs (CentOS)
+  yum: name=nodejs state=installed
+  sudo: yes
+  when: ansible_distribution == 'CentOS' or ansible_distribution == 'Red Hat Enterprise Linux'
+ 
+- name: install npm (CentOS)
+  yum: name=npm state=installed
+  sudo: yes
+  when: ansible_distribution == 'CentOS' or ansible_distribution == 'Red Hat Enterprise Linux'
+
   
