@@ -1,0 +1,8 @@
+---
+
+- name: Common Requirements
+  hosts: all
+  remote_user: neverwinterdp
+  roles:
+    - common
+    - clustercommander

@@ -1,9 +1,9 @@
 ---
 
-- name: Deploy Kibana Charts
+- name: Elasticsearch
   hosts: elasticsearch
   remote_user: neverwinterdp
   roles:
-    - kibana
+    - elasticsearch
     - kibana_charts
 
