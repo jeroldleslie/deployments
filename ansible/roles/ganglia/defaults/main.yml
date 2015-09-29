@@ -1,0 +1,3 @@
+ganglia_url: monitoring-1
+cluster: scribengin
+ganglia_home: /opt/ganglia

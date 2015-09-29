@@ -1,0 +1,55 @@
+Small Cluster
+**********************************************************************************************************************************************
+Storage  Message  GTime  ETime  VTime  Total  KWorker  Lost     Dup  TSplitter  RSplitter    TInfo   RInfo  TWarn  RWarn   TError  RError  Note
+-------  -------  --------------------------  ---------------------  ---------------------  --------------  -------------  --------------  ----
+Kafka        10M     51   1002    267   22m8        0     0       0     10.6M       11336    3.35M    3592   3.4M   3652    5.83M    6242
+             25M     56   2707    659  57m10        0     0       0      9.1M        9684    3.00M    3174   3.0M   3192    3.34M    3599
+
+HDFS         10M     52   1253    208  25m21        0     0       0      8.5M        9104    2.65M    2841   2.7M   2918    4.53M    4856     3*
+             10M     280   990    211  24m49        0     0       0     12.1M       12972    3.35M    3591  3.41M   3655    4.32M    4621     4*
+             25M     607  2369    479  57m43        0     0       0     10.4M       11089     3.4M    3609   3.4M   3633    4.80M    5109     5*
+
+             10M     266  2015    184  41m14       25     0  101437                                                                           6*
+             25M     608  3616    536  79m28       25     0   87650                                                                           7*
+----------------------------------------------------------------------------------------------------------------------------------------------
+Hardware: kafka = 3 x 2GB, hadoop worker = 3 x 4GB
+Message : size = 512 
+Dataflow: worker = 2, executor per worker = 3, num of stream = 10
+
+3*: The first run take only 1008s. But I accidentally delete the log file
+
+4*: The error dataflow run with 1 worker most of the time(yarn does not allocate vm). But the amount of processing data is about 
+    the same with warn dataflow, which run with 2 workers
+
+5*: One run has the broken worker and executor. It seems there is no problem and need to rerun
+    After the problem, cannot launch the script as the generator fail, need to run the cluster commander force stop and clean.
+    Last launch successfully without any executor, worker error. One attempt to fix the task registry
+
+6*: The first run take only 1008s. But I accidentally delete the log file
+    with 2 executor per worker
+    Imbalance kill
+
+7*: with 2 executor per worker
+
+** If I remember correctly, 10M take about 28 - 32min on 16G docker environment
+***********************************************************************************************************************************************
+
+Performance Cluster
+**********************************************************************************************************************************************
+Storage  Message  GTime  ETime  VTime  Total  KWorker  Lost     Dup  TSplitter  RSplitter    TInfo   RInfo  TWarn  RWarn   TError  RError  Note
+-------  -------  --------------------------  ---------------------  ---------------------  --------------  -------------  --------------  ----
+Kafka        10M    269   744     270  21m30        0     0       0     10.6M       11336    3.35M    3592   3.4M   3652    5.83M    6242
+             10M    265  1154     272  28m18        0     0       0     10.6M                                                                2*
+             10M    273   923     276  24m40        0     0       0     10.6M                                                                
+             10M    279   809     283  22m58        0     0       0     10.6M                                                                3*
+
+----------------------------------------------------------------------------------------------------------------------------------------------
+Hardware: kafka = 6 x 2GB, hadoop worker = 6 x 4GB
+Message : size = 512 
+Dataflow: worker = 2, executor per worker = 4, num of stream = 16 
+
+2*:  Run with 2 exectutor, 8 streams. It seems the performance is decrease with less executors(parallelism)
+
+3*. The time for message generator almost the same, probably because only one vm generator and probably the 
+    bottle neck is the vm generator network
+***********************************************************************************************************************************************

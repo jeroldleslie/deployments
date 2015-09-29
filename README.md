@@ -3,7 +3,7 @@
 This project automates the installation, configuration and integration tests of scribengin. It works independently. To launch scribengin cluster, it need  to set NEVERWINTERDP_HOME env variable or you can give --neverwinterdp-home option when running the commands.
 
 
-Components
+Components 
 ======
 ###ansible
 Used for provisioning, configuring
