@@ -11,6 +11,5 @@ ssh -o "StrictHostKeyChecking no" neverwinterdp@hadoop-master "/opt/neverwinterd
 ssh -o "StrictHostKeyChecking no" neverwinterdp@hadoop-master "chmod +x /opt/neverwinterdp/dataflow/log-sample/bin/*.sh"
 
 
-
 ssh -o "StrictHostKeyChecking no" neverwinterdp@hadoop-master \
    "cd /opt/neverwinterdp &&  time ./dataflow/log-sample/bin/run-dataflow-chain-stability.sh "
