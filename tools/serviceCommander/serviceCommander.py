@@ -14,28 +14,26 @@ path.insert(0, dirname(dirname(abspath(__file__))))
 from commons.ansibleRunner.ansibleRunner import ansibleRunner
 
 
-playbookMapping= {
-                  "start"      : "start.yml",
-                  "stop"       : "stop.yml",
-                  "force_stop" : "force-stop.yml",
-                  "clean"      : "clean.yml",
-                  }
 
+@click.command(help="Use Ansible to manage services in your cluster!\n")
+@click.option('--debug/--no-debug',      default=False, help="Turn debugging on")
+@click.option('--logfile',               default='/tmp/servicecommander.log', help="Log file to write to")
 
-@click.command()
-@click.option('--debug/--no-debug', default=False, help="Turn debugging on")
-@click.option('--logfile',  default='/tmp/clustercommander.log', help="Log file to write to")
 @click.option('--services',        '-e', default='', help="Services to impact input as a comma separated list")
 @click.option('--subset',          '-l', default='', help="Further limit selected hosts with an additional pattern")
-@click.option('--inventory-file',  '-i',   default='inventory', help="Ansible inventory file to use")
-@click.option('--max-retries',     '-m',   default=5, help="Max retries for running the playbook")
-@click.option('--restart',         '-r',  is_flag=True, help="restart services")
-@click.option('--start',           '-s',       is_flag=True, help="start services")
-@click.option('--stop',       '-t',       is_flag=True, help="stop services")
-@click.option('--force-stop',  '-f',      is_flag=True, help="kill services")
-@click.option('--clean',  '-f',      is_flag=True, help="clean services")
-@click.option('--ansible-root-dir',   default=dirname(dirname(dirname(abspath(__file__))))+"/ansible", help="Root directory for Ansible")
-def mastercommand(debug, logfile, services, subset, inventory_file, max_retries, restart, start, stop, force_stop, clean, ansible_root_dir):
+@click.option('--inventory-file',  '-i', default='inventory', help="Ansible inventory file to use")
+
+@click.option('--restart',         '-r', is_flag=True, help="restart services")
+@click.option('--start',           '-s', is_flag=True, help="start services")
+@click.option('--stop',       '-t',      is_flag=True, help="stop services")
+@click.option('--force-stop',  '-f',     is_flag=True, help="kill services")
+@click.option('--clean',  '-f',          is_flag=True, help="clean services")
+@click.option('--install',  '-n',        is_flag=True, help="install services")
+@click.option('--configure',  '-c',      is_flag=True, help="configure services")
+
+@click.option('--ansible-root-dir',      default=dirname(dirname(dirname(abspath(__file__))))+"/ansible", help="Root directory for Ansible")
+@click.option('--max-retries',     '-m', default=5, help="Max retries for running the playbook")
+def mastercommand(debug, logfile, services, subset, inventory_file, restart, start, stop, force_stop, clean, install, configure, ansible_root_dir, max_retries):
   if debug:
       #Set logging file, overwrite file, set logging level to DEBUG
       logging.basicConfig(filename=logfile, filemode="w", level=logging.DEBUG)
@@ -46,26 +44,39 @@ def mastercommand(debug, logfile, services, subset, inventory_file, max_retries,
     logging.basicConfig(filename=logfile, filemode="w", level=logging.INFO)
   
   
-  playbooksToRun=[]
+  tagsToRun=""
+  if install:
+    tagsToRun+="install,"
+  if configure:
+    tagsToRun+="configure,"
   if stop or restart:
-    playbooksToRun.append(playbookMapping["stop"])
+    tagsToRun+="stop,"
   if force_stop:
-    playbooksToRun.append(playbookMapping["force_stop"])
+    tagsToRun+="force-stop,"
   if clean:
-    playbooksToRun.append(playbookMapping["clean"])
+    tagsToRun+="clean,"
   if start or restart:
-    playbooksToRun.append(playbookMapping["start"])
-    
-  
+    tagsToRun+="start,"
+  tagsToRun=tagsToRun[:-1]
+  tagsToRun="\""+tagsToRun+"\""
+
+
   runner = ansibleRunner()
-  for playbook in playbooksToRun:
-    playbook = join(ansible_root_dir, playbook)
+  for playbook in services.split(",") :
+    playbook = join(ansible_root_dir, playbook)+".yml"
     logging.debug("Running playbook: "+playbook)
+    logging.debug("Tags: "+tagsToRun)
+    logging.debug("Inventory: "+inventory_file)
+    logging.debug("Max Retries: "+str(max_retries))
+    logging.debug("Subset: "+str(subset))
+    logging.debug("")
+    
+
     runner.deploy(playbook = playbook, 
                 inventory=inventory_file, 
                 outputToStdout=True, 
                 maxRetries=max_retries,
-                tags=services,
+                tags=tagsToRun,
                 limit=subset,)
    
 
