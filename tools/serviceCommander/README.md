@@ -52,7 +52,7 @@ Using the below structure as an example...
 - Each service must have its own playbook
 - Each service you attempt to use must correspond to a role in your [ansible-root-dir]
 - Example:
-    
+  -    
   ```
       .
       └── tools/
