@@ -25,7 +25,7 @@ Options:
   --ansible-root-dir TEXT    Root directory for Ansible
   -m, --max-retries INTEGER  Max retries for running the playbook
   --help                     Show this message and exit.
-  ```
+```
 
 ##Setup##
 ```
