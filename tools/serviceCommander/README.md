@@ -53,17 +53,17 @@ Using the below structure as an example...
 - Each service you attempt to use must correspond to a role in your [ansible-root-dir]
 - Example: 
     ```
-        .
-        └── tools/
-          └── ansible/
-          |    ├── kafka.yml
-          |    ├── zookeeper.yml
-          |    └── roles/
-          |      └──  kafka/
-          |      └──  zookeeper/
-          |      └──  common/
-          └── serviceCommander/
-              └── serviceCommander.py
+    .
+    └── tools/
+      └── ansible/
+      |    ├── kafka.yml
+      |    ├── zookeeper.yml
+      |    └── roles/
+      |      └──  kafka/
+      |      └──  zookeeper/
+      |      └──  common/
+      └── serviceCommander/
+          └── serviceCommander.py
     ```
 
 
