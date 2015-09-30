@@ -1,0 +1,7 @@
+---
+
+- name: Hadoop Workers
+  hosts: hadoop_master:hadoop_worker
+  remote_user: neverwinterdp
+  roles:
+    - hadoop

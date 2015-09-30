@@ -1,0 +1,6 @@
+---
+- name: Zookeeper
+  hosts: zookeeper
+  remote_user: neverwinterdp
+  roles:
+    - zookeeper

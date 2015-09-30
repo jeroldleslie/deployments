@@ -1,0 +1,8 @@
+---
+
+- name: Hadoop Master
+  hosts: hadoop_master
+  remote_user: neverwinterdp
+  roles:
+    - hadoop
+    - scribengin

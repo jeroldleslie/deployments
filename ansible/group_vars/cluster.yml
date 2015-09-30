@@ -1,0 +1,10 @@
+---
+
+- include: common.yml
+- include: hadoop-master.yml
+- include: hadoop-worker.yml
+- include: zookeeper.yml
+- include: kafka.yml
+- include: elasticsearch.yml
+- include: kibana.yml
+
