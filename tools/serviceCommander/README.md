@@ -25,7 +25,7 @@ Options:
   --ansible-root-dir TEXT    Root directory for Ansible
   -m, --max-retries INTEGER  Max retries for running the playbook
   --help                     Show this message and exit.
-  ```
+```
 
 ##Setup##
 ```
@@ -51,21 +51,20 @@ Using the below structure as an example...
 - You must have a directory structure to support Service Commander
 - Each service must have its own playbook
 - Each service you attempt to use must correspond to a role in your [ansible-root-dir]
-- Example:
-    
-  ```
-      .
-      └── tools/
-        └── ansible/
-        |    ├── kafka.yml
-        |    ├── zookeeper.yml
-        |    └── roles/
-        |      └──  kafka/
-        |      └──  zookeeper/
-        |      └──  common/
-        └── serviceCommander/
-            └── serviceCommander.py
-  ```
+- Example: 
+```
+  .
+  └── tools/
+    └── ansible/
+    |    ├── kafka.yml
+    |    ├── zookeeper.yml
+    |    └── roles/
+    |      └──  kafka/
+    |      └──  zookeeper/
+    |      └──  common/
+    └── serviceCommander/
+        └── serviceCommander.py
+```
 
 
 ##Playbook Setup##
