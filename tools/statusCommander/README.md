@@ -1,6 +1,11 @@
 #Status Commander#
 Get your cluster's status based on your ansible inventory file!
 
+##Installation##
+```
+user@machine: $ sudo pip install ansible tabulate
+```
+
 ##Usage##
 ```
 Usage: statusCommander.py [OPTIONS]
