@@ -39,6 +39,8 @@ class statusCommandParams():
 
 replacementString = "%identifier%"
 scribeJpsCommand = "jps -m | grep '"+replacementString+"' | awk '{print $1 \" \" $4}'"
+
+#Each key corresponds to an ansible group read in from your ansible inventory
 statusCommands = {
   "monitoring"   : [ statusCommandParams(identifiers = ["kibana"]) ],
   "elasticsearch": [ statusCommandParams(identifiers = ["Main"]) ],
@@ -84,10 +86,10 @@ def getSshOutput(host, command, identifier, group, quietIfNotRunning):
     splitoutput = line.split()
     
     pid = None
-    identifier = None
     if len(splitoutput) > 1:
       pid = splitoutput[0]
       identifier = splitoutput[1]
+    
     result.append({
             "host":host,
             "command":command,
@@ -155,7 +157,7 @@ def mastercommand(debug, logfile, threads, timeout, inventory_file):
         tableRows.append(["","",result["identifier"],result["pid"],"Running"])
       else:
         if  not result["quietIfNotRunning"]:
-          tableRows.append(["","",result["identifier"],"","Stopped"])
+          tableRows.append(["","",result["identifier"],"----", "--- Stopped"])
       
       currHost = result["host"]
         
