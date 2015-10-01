@@ -13,7 +13,7 @@ user@machine: $ sudo pip install ansible tabulate
 ```
 Usage: statusCommander.py [OPTIONS]
 
-  Get your cluster's status based on your ansible inventory file!
+  Get the status of your cluster based on your ansible inventory file!
 
 Options:
   --debug / --no-debug       Turn debugging on
@@ -26,6 +26,7 @@ Options:
 ##Example usage##
 
 ```
+
 user@machine:statusCommander $ ./statusCommander.py -i /tmp/scribengininventoryDO
 Role           Hostname         ProcessIdentifier                               ProcessID    Status
 -------------  ---------------  ----------------------------------------------  -----------  --------
@@ -68,4 +69,5 @@ hadoop_worker  hadoop-worker-3
                                 log-persister-dataflow-info-worker-0000000004   10252        Running
 elasticsearch  elasticsearch-1
                                 Main                                            11281        Running
-````
+
+```
