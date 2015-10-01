@@ -58,7 +58,10 @@ statusCommands = {
                      statusCommandParams(command =  scribeJpsCommand, 
                                           identifiers = ["dataflow-worker-*"],
                                           quietIfNotRunning = True),
-                     
+                     statusCommandParams(command =  scribeJpsCommand, 
+                                          identifiers = ["vm-log-generator-*"],
+                                          quietIfNotRunning = True),
+
                    ],
 }
 
@@ -99,8 +102,9 @@ def getSshOutput(host, command, identifier, group, quietIfNotRunning):
 @click.option('--debug/--no-debug',      default=False, help="Turn debugging on")
 @click.option('--logfile',               default='/tmp/statuscommander.log', help="Log file to write to")
 @click.option('--threads',         '-t', default=15, help="Number of threads to run simultaneously")
+@click.option('--timeout',         '-m', default=30, help="SSH timeout time (seconds)")
 @click.option('--inventory-file',  '-i', default='inventory', help="Ansible inventory file to use")
-def mastercommand(debug, logfile, threads, inventory_file):
+def mastercommand(debug, logfile, threads, timeout, inventory_file):
   if debug:
       #Set logging file, overwrite file, set logging level to DEBUG
       logging.basicConfig(filename=logfile, filemode="w", level=logging.DEBUG)
@@ -125,11 +129,11 @@ def mastercommand(debug, logfile, threads, inventory_file):
       logging.error("No commands for ansible group: "+server["group"])
       print "No commands for ansible group: "+server["group"]
   
-
+  #Get asynchronous results in order that they were added
   tableRows=[]
   currHost=""
   for async in asyncresults:
-    results = async.get(timeout=30)
+    results = async.get(timeout=timeout)
     for result in results:
 
       #Check to see if group has been added already
