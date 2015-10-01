@@ -18,11 +18,15 @@ from commons.ansibleInventoryParser.ansibleInventoryParser import ansibleInvento
 
 ################################################################################################################
 class statusCommandParams():
+
+  defaultReplacementString = "%identifier%" 
+
   """
   Helper class to store command info
   command - the command to run on remote machine
   identifiers - process names to replace in command string
   quietIfNotRunning - if set to true, and if the process isn't running, it isn't displayed in the final output
+  replacementString - string to place into the command in place of this string.  Default is statusCommandParams.defaultReplacementString
   Notes:
     the status algorithm replaces "%identifiers%" with process-identifiers
     The command is expected to return a string in this format - "[process id] [process name]"
@@ -30,15 +34,18 @@ class statusCommandParams():
   def __init__(self, 
               command = "jps -m | grep -w '%identifier%' | awk '{print $1 \" \" $2}'",
               identifiers=[], 
-              quietIfNotRunning=False,):
+              quietIfNotRunning=False,
+              replacementString = defaultReplacementString ):
     self.command = command
     self.identifiers = identifiers
     self.quietIfNotRunning = quietIfNotRunning
+    self.replacementString = replacementString
+
 ################################################################################################################
 
 
-replacementString = "%identifier%"
-scribeJpsCommand = "jps -m | grep '"+replacementString+"' | awk '{print $1 \" \" $4}'"
+
+scribeJpsCommand = "jps -m | grep '"+statusCommandParams.defaultReplacementString+"' | awk '{print $1 \" \" $4}'"
 
 #Each key corresponds to an ansible group read in from your ansible inventory
 statusCommands = {
@@ -125,7 +132,7 @@ def mastercommand(debug, logfile, threads, timeout, inventory_file):
     try:
       for services in statusCommands[server["group"]]:
         for identifier in services.identifiers:
-          command = services.command.replace(replacementString, identifier)
+          command = services.command.replace(services.replacementString, identifier)
           asyncresults.append(pool.apply_async(getSshOutput, [server["host"], command, identifier, server["group"], services.quietIfNotRunning]))
     except KeyError:
       logging.error("No commands for ansible group: "+server["group"])
