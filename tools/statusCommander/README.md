@@ -1,12 +1,15 @@
 #Status Commander#
+
 Get your cluster's status based on your ansible inventory file!
 
 ##Installation##
+
 ```
 user@machine: $ sudo pip install ansible tabulate
 ```
 
 ##Usage##
+
 ```
 Usage: statusCommander.py [OPTIONS]
 
@@ -21,6 +24,7 @@ Options:
 ```
 
 ##Example usage##
+
 ```
 user@machine:statusCommander $ ./statusCommander.py -i /tmp/scribengininventoryDO
 Role           Hostname         ProcessIdentifier                               ProcessID    Status
