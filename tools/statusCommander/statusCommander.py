@@ -136,26 +136,28 @@ def mastercommand(debug, logfile, threads, timeout, inventory_file):
     results = async.get(timeout=timeout)
     for result in results:
 
-      #Check to see if group has been added already
+      #Check to see if group has been added already to the table
       needToAppendGroup = True
       for row in tableRows:
         if row[0] == result["group"]:
           needToAppendGroup = False
 
-      #Add role info if not added yet
+      #Add group info to the table if its not been added yet
       if needToAppendGroup:
         tableRows.append([result["group"],result["host"],"","",""])
+      #Otherwise just add the hostname, if and only if we haven't 
+      #added this hostname already to this group
       elif currHost != result["host"]:
         tableRows.append(["",result["host"],"","",""])
 
       #Set results as "Running" if PID is valid, otherwise its stopped
       if result["pid"]:
         tableRows.append(["","",result["identifier"],result["pid"],"Running"])
-        currHost = result["host"]
       else:
         if  not result["quietIfNotRunning"]:
           tableRows.append(["","",result["identifier"],"","Stopped"])
-          currHost = result["host"]
+      
+      currHost = result["host"]
         
   
   #Print out table
