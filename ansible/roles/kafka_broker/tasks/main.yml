@@ -1,11 +1,84 @@
 ---
-- name: download tar 
-  get_url: url={{ kafka_tgz_url }} dest=/tmp/kafka.tar.gz
-
 - name: Create kafka directory
-  file: path=/opt/kafka state=directory
+  file: path={{ kafka_home_dir }} state=directory
+  tags:
+    - install
+
+- name: Check if Kafka is already downloaded
+  stat: path=/tmp/{{ kafka_tgz }}
+  register: downloaded
+  tags:
+    - install
+  
+- name: Downloading Kafka 
+  get_url: url={{ kafka_tgz_url  }} dest=/tmp/{{ kafka_tgz }}
+  when: downloaded.stat.exists == false
+  tags:
+    - install
 
 - name: Decompress tar
-  command: tar xfz /tmp/kafka.tar.gz -C /opt/kafka --strip-components=1
+  command: tar xfz /tmp/{{ kafka_tgz }} -C {{ kafka_home_dir }} --strip-components=1
+  tags:
+    - install
+  
+- name: Rendering kafka-broker.service
+  template: src={{ item }}.j2 dest=/lib/systemd/system/{{ item }}
+  sudo: yes
+  with_items:
+    - kafka-broker.service
+  tags:
+  - install
+  
+- name: Add configurations file
+  template: src={{ item }}.j2 dest={{ kafka_home_dir }}/config/{{ item }}
+  sudo: yes
+  with_items:
+    - server.properties
+    - consumer.properties
+    - producer.properties
+  tags:
+    - configure
+        
+- name: Add kafka-server-start.sh file
+  template: src={{ item }}.j2 dest={{ kafka_home_dir }}/bin/{{ item }}
+  sudo: yes
+  with_items:
+    - kafka-server-start.sh
+  tags:
+    - configure
 
+- name: Make kafka-server-start.sh executable
+  file: mode=u+rxw path={{ kafka_home_dir }}/bin/{{ item }}
+  with_items:
+    - kafka-server-start.sh
+  tags:
+    - configure
+    
+- name: Move configuration files to container
+  copy: src=config/ dest={{ kafka_home_dir }}/config/
+  tags:
+    - configure
 
+- name: Stop Kafka Service
+  service: name=kafka-broker state=stopped enabled=no
+  sudo: true
+  tags:
+    - stop
+
+- name: Clean kafka logs and datas
+  shell: "rm -rf {{ kafka_home_dir }}/data && rm -rf {{ kafka_home_dir }}/logs"
+  sudo: yes 
+  tags:
+    - clean
+  
+- name: Start Kafka Service
+  service: name=kafka-broker state=started enabled=yes
+  sudo: true
+  tags:
+    - start
+  
+- name: Restart Kafka Service
+  service: name=kafka-broker state=restarted enabled=no
+  sudo: true
+  tags:
+    - restart  

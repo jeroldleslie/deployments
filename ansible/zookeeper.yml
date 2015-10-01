@@ -3,4 +3,4 @@
   hosts: zookeeper
   remote_user: neverwinterdp
   roles:
-    - zookeeper
+   - zookeeper

@@ -1,0 +1,17 @@
+- name: Stop resourcemanager Service
+  service: name=hadoop-resourcemanager state=stopped enabled=no
+  sudo: true
+  tags:
+  - stop
+  
+- name: Start resourcemanager Service
+  service: name=hadoop-resourcemanager state=started enabled=yes
+  sudo: true
+  tags:
+  - start
+  
+- name: Restart resourcemanager Service
+  service: name=hadoop-resourcemanager state=restarted enabled=no
+  sudo: true
+  tags:
+  - restart 

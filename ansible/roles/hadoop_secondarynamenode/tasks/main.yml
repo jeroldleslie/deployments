@@ -1,0 +1,17 @@
+- name: Stop secondarynamenode Service
+  service: name=hadoop-secondarynamenode state=stopped enabled=no
+  sudo: true
+  tags:
+  - stop
+  
+- name: Start secondarynamenode Service
+  service: name=hadoop-secondarynamenode state=started enabled=yes
+  sudo: true
+  tags:
+  - start
+  
+- name: Restart secondarynamenode Service
+  service: name=hadoop-secondarynamenode state=restarted enabled=no
+  sudo: true
+  tags:
+  - restart 

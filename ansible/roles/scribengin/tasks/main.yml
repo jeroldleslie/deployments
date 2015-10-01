@@ -13,65 +13,147 @@
   run_once: true
   set_fact:
     neverwinterdp_home: "{{neverwinterdp_home_override}}"
-
+  tags:
+    - install
+  
 - name: Check to make sure environment variables are sane
   fail: msg="Variable '{{ item }}' is not defined" 
   when: ({{item}} is undefined) or ({{item}} is none) or ({{item}}|trim == '') 
   run_once: true
   with_items: 
     - neverwinterdp_home
-
+  tags:
+    - install
+  
 - name: Get neverwinterdp_home path info locally
   local_action: stat path={{neverwinterdp_home}}
   register: check_path
   run_once: true
-
+  tags:
+    - install
+  
 - name: Check if neverwinterdp_home path exists locally
   local_action: fail msg='{{neverwinterdp_home}} does not exist'
   when: not(check_path.stat.exists)
   run_once: true
+  tags:
+    - install
 
 - name: Echo local NEVERWINTERDP_HOME
   debug: msg="This is NeverwinterDP Home on the local machine {{neverwinterdp_home}}"
   run_once: true
+  tags:
+    - install
 
 - name: Echo local_scribengin_release_folder
   debug: msg="This is Scribengin Release Directory on the local machine {{local_scribengin_release_root_folder}}"
   run_once: true
+  tags:
+    - install
 
 - name: Building Scribengin locally
   local_action: shell cd {{neverwinterdp_home}} && gradle clean build install -x test
   register: stdout
   run_once: true
+  tags:
+    - install
 
 - name: Output from gradle build
   debug: var=stdout.stdout_lines
   run_once: true
+  tags:
+    - install
 
 - name: Release Scribengin locally
   local_action: shell cd {{neverwinterdp_home}}/release && gradle clean build release -x test
   register: stdout
   run_once: true
+  tags:
+    - install
   
 - name: Output from gradle release
   debug: var=stdout.stdout_lines
   run_once: true
-
+  tags:
+    - install
 
 - name: Check if remote neverwinterdp home exists
   stat: path={{remote_scribengin_home}}
   register: neverwinterdp_home_status
+  tags:
+    - install
 
 - name: Delete neverwinterdp home if it exists
   command: rm -rf {{remote_scribengin_home}}
   when: neverwinterdp_home_status.stat.exists
+  tags:
+    - install
 
 - name: Copy local files from {{neverwinterdp_home}}/release/build/release/neverwinterdp/ to remote hosts {{remote_scribengin_home}}
   synchronize: src={{neverwinterdp_home}}/release/build/release/neverwinterdp/ dest={{remote_scribengin_home}}
+  tags:
+    - install
   
 - name: Make shell.sh executable
   file: mode=u+rxw path={{remote_scribengin_home}}/scribengin/bin/shell.sh
+  tags:
+    - install
 
 - name: Make kafka.sh executable
   file: mode=u+rxw path={{remote_scribengin_home}}/scribengin/tools/kafka/kafka.sh
+  tags:
+    - install
+     
+- name: Rendering scribengin services
+  template: src={{ item }}.j2 dest=/lib/systemd/system/{{ item }}
+  sudo: yes
+  with_items:
+    - vm.service
+    - scribengin.service
+  tags:
+    - install
   
+- name: Stop VM Service
+  #service: name=vm state=stopped enabled=no
+  command: "{{ remote_scribengin_home }}scribengin/bin/shell.sh vm shutdown"
+  sudo: true
+  tags:
+    - stop
+
+- name: Stop scribengin Service
+  #service: name=scribengin state=stopped enabled=no
+  command: "{{ remote_scribengin_home }}scribengin/bin/shell.sh scribengin shutdown"
+  sudo: true
+  tags:
+    - stop
+  
+- name: Start VM Service
+  #service: name=vm state=started enabled=yes
+  command: "{{ remote_scribengin_home }}scribengin/bin/shell.sh vm start"
+  sudo: true
+  tags:
+    - start
+
+- name: Start scribengin Service
+  #service: name=scribengin state=started enabled=yes
+  command: "{{ remote_scribengin_home }}scribengin/bin/shell.sh scribengin start"
+  sudo: true
+  tags:
+    - start
+
+- name: Start scribengin Service
+  debug: msg="Cleaning hadoop datas is enough"
+  tags:
+    - clean
+    
+#- name: Restart VM Service
+#  service: name=vm state=restarted enabled=no
+#  sudo: true
+#  tags:
+#    - restart  
+      
+#- name: Restart scribengin Service
+#  service: name=scribengin state=restarted enabled=no
+#  sudo: true
+#  tags:
+#    - restart  

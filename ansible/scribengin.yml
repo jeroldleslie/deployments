@@ -1,8 +1,6 @@
 ---
-
 - name: Scribengin
-  hosts: hadoop_master:hadoop_worker
+  hosts: hadoop_master
   remote_user: neverwinterdp
   roles:
     - scribengin
-

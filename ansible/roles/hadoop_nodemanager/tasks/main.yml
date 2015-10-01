@@ -1,0 +1,17 @@
+- name: Stop nodemanager Service
+  service: name=hadoop-nodemanager state=stopped enabled=no
+  sudo: true
+  tags:
+  - stop
+  
+- name: Start nodemanager Service
+  service: name=hadoop-nodemanager state=started enabled=yes
+  sudo: true
+  tags:
+  - start
+  
+- name: Restart nodemanager Service
+  service: name=hadoop-nodemanager state=restarted enabled=no
+  sudo: true
+  tags:
+  - restart 

@@ -1,0 +1,17 @@
+- name: Stop datanode Service
+  service: name=hadoop-datanode state=stopped enabled=no
+  sudo: true
+  tags:
+  - stop
+  
+- name: Start datanode Service
+  service: name=hadoop-datanode state=started enabled=yes
+  sudo: true
+  tags:
+  - start
+  
+- name: Restart datanode Service
+  service: name=hadoop-datanode state=restarted enabled=no
+  sudo: true
+  tags:
+  - restart 

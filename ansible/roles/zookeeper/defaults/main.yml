@@ -1,10 +1,21 @@
 # Variables for only this role
-zookeeper_log_dir: /var/log/zookeeper
-zookeeper_pid_dir: /var/run/zookeeper
-zookeeper_data_dir: /grid/hadoop/zookeeper/data
+zookeeper_home_dir: /opt/zookeeper
+zookeeper_log_dir: /opt/zookeeper/logs
+zookeeper_data_dir: /opt/zookeeper/data
 zookeeper_clientport: 2181 
 zookeeper_leader_port: 2888
 zookeeper_election_port: 3888
 
 #zookeeper_url: http://mirrors.digipower.vn/apache/zookeeper/zookeeper-3.4.6/zookeeper-3.4.6.tar.gz
-zookeeper_url: http://jenkinsdp.do.demandcube.com/zookeeper-3.4.6.tar.gz
+zookeeper_tar: zookeeper-3.4.6.tar.gz
+zookeeper_url: http://jenkinsdp.do.demandcube.com/{{zookeeper_tar}}
+
+ZOOKEEPER_HEAP_SIZE: 2048
+
+tickTime: 2000
+initLimit: 10
+syncLimit: 5
+maxClientCnxns: 60
+autopurge_snapRetainCount: 3
+autopurge_purgeInterval: 1
+

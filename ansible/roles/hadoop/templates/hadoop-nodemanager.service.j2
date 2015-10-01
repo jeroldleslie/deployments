@@ -1,6 +1,6 @@
-#/lib/systemd/system/kafka-broker.service
+#/lib/systemd/system/hadoop-nodemanager.service
 [Unit]
-Description=Kafka Broker Service
+Description=Hadoop nodemanager Service
 DefaultDependencies=no
 After=local-fs.target systemd-tmpfiles-setup.service
 Conflicts=shutdown.target
@@ -8,9 +8,9 @@ Before=sysinit.target shutdown.target
 RefuseManualStop=no
 
 [Service]
-Type=simple
+Type=forking
 User=neverwinterdp
-ExecStart={{ kafka_home_dir }}/bin/kafka-server-start.sh {{ kafka_home_dir }}/config/server.properties
+ExecStart={{ hadoop_home_dir }}/sbin/yarn-daemon.sh start nodemanager
 
 [Install]
 WantedBy=multi-user.target

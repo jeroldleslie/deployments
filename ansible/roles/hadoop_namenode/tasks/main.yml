@@ -1,0 +1,17 @@
+- name: Stop Namenode Service
+  service: name=hadoop-namenode state=stopped enabled=no
+  sudo: true
+  tags:
+  - stop
+  
+- name: Start Namenode Service
+  service: name=hadoop-namenode state=started enabled=yes
+  sudo: true
+  tags:
+  - start
+  
+- name: Restart Namenode Service
+  service: name=hadoop-namenode state=restarted enabled=no
+  sudo: true
+  tags:
+  - restart 

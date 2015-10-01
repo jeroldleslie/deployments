@@ -1,11 +1,11 @@
-- name: install wget (CentOS)
+- name: install libffi (CentOS)
   yum: name='{{item}}' state=installed
   sudo: yes
   with_items:
     - libffi-devel
   when: ansible_distribution == 'CentOS' or ansible_distribution == 'Red Hat Enterprise Linux'
   
-- name: install wget (Ubuntu)
+- name: install libffi (Ubuntu)
   apt: pkg='{{item}}' state=latest
   sudo: yes
   with_items:
