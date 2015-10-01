@@ -40,15 +40,17 @@ user@machine:statusCommander $ ./statusCommander.py -i inventoryFile --timeout 4
 ##Example Output##
 ```
 Role           Hostname         ProcessIdentifier                               ProcessID    Status
--------------  ---------------  ----------------------------------------------  -----------  --------
+-------------  ---------------  ----------------------------------------------  -----------  -----------
 monitoring     monitoring-1
-                                                                                             Stopped
+                                kibana                                          ----         --- Stopped
 hadoop_master  hadoop-master
                                 SecondaryNameNode                               25462        Running
                                 ResourceManager                                 25532        Running
                                 NameNode                                        25371        Running
 zookeeper      zookeeper-1
                                 QuorumPeerMain                                  11049        Running
+               kafka-1
+                                QuorumPeerMain                                  ----         --- Stopped
 kafka          kafka-2
                                 Kafka                                           12162        Running
                kafka-3
@@ -62,8 +64,8 @@ hadoop_worker  hadoop-worker-3
                                 log-persister-dataflow-warn-master-0000000003   28766        Running
                                 log-splitter-dataflow-worker-0000000002         28100        Running
                                 log-splitter-dataflow-worker-0000000001         27970        Running
-                                log-persister-dataflow-info-worker-0000000004   28617        Running
                                 log-persister-dataflow-info-worker-0000000003   28591        Running
+                                log-persister-dataflow-info-worker-0000000004   28617        Running
                hadoop-worker-1
                                 DataNode                                        21486        Running
                                 NodeManager                                     21589        Running
