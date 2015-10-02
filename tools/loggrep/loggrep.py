@@ -76,6 +76,10 @@ def getLogs(group, command):
       print "STDERR:"
       print results["stderr"]
 
+
+def buildCommandString(find_folder, find_iname, grep_options, grep_string):
+  return "find "+find_folder+" \\( -iname \""+find_iname+"\" \\) -exec grep "+grep_options+" '"+grep_string+"' {} \; -print"
+
 @click.group(chain=True, help="Parse your cluster's logs!")
 @click.option('--debug/--no-debug',      default=False, help="Turn debugging on")
 @click.option('--logfile',               default='/tmp/clusterlog.log', help="Log file to write to")
@@ -104,39 +108,80 @@ def mastercommand(debug, logfile, threads, timeout, inventory_file):
     logging.basicConfig(filename=logfile, filemode="w", level=logging.INFO)
 
 @mastercommand.command(help="Get Kafka logs")
-@click.option('--log-command',  '-c', default="find /opt/kafka/logs/ -iname \"*.log\" -exec grep -i 'exception' {} \; -print", help="Command to run to get logs")
-def kafka(log_command):
-  getLogs(getGroup("kafka"), log_command)
+@click.option('--find-folder',  '-f', default="/opt/kafka/logs/", help="Folder to find logs")
+@click.option('--find-iname',   '-n', default="*.log", help="Name to look for - (find's -iname option)")
+@click.option('--grep-options', '-g', default="-i", help="Options for grep")
+@click.option('--grep-string',  '-s', default="exception", help="What to grep for")
+def kafka(find_folder, find_iname, grep_options, grep_string):
+  getLogs(getGroup("kafka"), buildCommandString(find_folder, find_iname, grep_options, grep_string))
 
- 
-@mastercommand.command(help="Get Hadoop logs")
-@click.option('--log-command',  '-c', default="find /opt/hadoop/logs/ -iname \"stdout\" -exec grep -i 'exception' {} \; -print", help="Command to run to get logs")
-def hadoop(log_command):
-  group = getGroup("hadoop_worker") + getGroup("hadoop_master")
-  getLogs(group, log_command)
 
 @mastercommand.command(help="Get Zookeeper logs")
-@click.option('--log-command',  '-c', default="find /opt/zookeeper/logs/ -iname \"zookeeper.*\" -exec grep -i 'exception' {} \; -print", help="Command to run to get logs")
-def zookeeper(log_command):
-  getLogs(getGroup("zookeeper"), log_command)
+@click.option('--find-folder',  '-f', default="/opt/zookeeper/logs/", help="Command to run to get logs")
+@click.option('--find-iname',   '-n', default="zookeeper.*", help="Name to look for - (find's -iname option)")
+@click.option('--grep-options', '-g', default="-i", help="Options for grep")
+@click.option('--grep-string',  '-s', default="exception", help="What to grep for")
+def zookeeper(find_folder, find_iname, grep_options, grep_string):
+  getLogs(getGroup("zookeeper"), buildCommandString(find_folder, find_iname, grep_options, grep_string))
+
+
+@mastercommand.command(help="Get Hadoop logs")
+@click.option('--find-folder',  '-f', default="/opt/hadoop/logs/", help="Command to run to get logs")
+@click.option('--find-iname',   '-n', default="*.log", help="Name to look for - (find's -iname option)")
+@click.option('--grep-options', '-g', default="-i", help="Options for grep")
+@click.option('--grep-string',  '-s', default="exception", help="What to grep for")
+def hadoop(find_folder, find_iname, grep_options, grep_string):
+  group = getGroup("hadoop_worker") + getGroup("hadoop_master")
+  getLogs(group, buildCommandString(find_folder, find_iname, grep_options, grep_string))
+
+
+
+@mastercommand.command(help="Get YARN App logs")
+@click.option('--find-folder',  '-f', default="/opt/hadoop/vm/", help="Command to run to get logs")
+@click.option('--find-iname',   '-n', default="stdout\" -o -iname \"stderr", help="Name to look for - (find's -iname option)")
+@click.option('--grep-options', '-g', default="-i", help="Options for grep")
+@click.option('--grep-string',  '-s', default="exception", help="What to grep for")
+def yarnapp(find_folder, find_iname, grep_options, grep_string):
+  getLogs(getGroup("hadoop_worker"), buildCommandString(find_folder, find_iname, grep_options, grep_string))
+
+
+
+@mastercommand.command(help="Get YARN VM App logs")
+@click.option('--find-folder',  '-f', default="/opt/hadoop/vm/", help="Command to run to get logs")
+@click.option('--find-iname',   '-n', default="*.log", help="Name to look for - (find's -iname option)")
+@click.option('--grep-options', '-g', default="-i", help="Options for grep")
+@click.option('--grep-string',  '-s', default="exception", help="What to grep for")
+def yarnvmapp(find_folder, find_iname, grep_options, grep_string):
+  getLogs(getGroup("hadoop_worker"), buildCommandString(find_folder, find_iname, grep_options, grep_string))
+
+
+@mastercommand.command(help="Get YARN logs")
+@click.option('--find-folder',  '-f', default="/opt/hadoop/logs/", help="Command to run to get logs")
+@click.option('--find-iname',   '-n', default=".*yarn*.log", help="Name to look for - (find's -iname option)")
+@click.option('--grep-options', '-g', default="-i", help="Options for grep")
+@click.option('--grep-string',  '-s', default="exception", help="What to grep for")
+def yarn(find_folder, find_iname, grep_options, grep_string):
+  group = getGroup("hadoop_worker") + getGroup("hadoop_master")
+  getLogs(group, buildCommandString(find_folder, find_iname, grep_options, grep_string))
+
+
 
 @mastercommand.command(help="Get Cluster logs")
-@click.option('--log-command',  '-c', default=None, help="Command to run to get logs")
+@click.option('--grep-options', '-g', default="-i", help="Options for grep")
+@click.option('--grep-string',  '-s', default="exception", help="What to grep for")
 @click.pass_context
-def cluster(ctx, log_command):
-  if log_command is None:
-    ctx.invoke(zookeeper)
-    ctx.invoke(kafka)
-    ctx.invoke(hadoop)
-  else:
-    ctx.invoke(zookeeper, log_command=log_command)
-    ctx.invoke(kafka, log_command=log_command)
-    ctx.invoke(hadoop, log_command=log_command)
+def cluster(ctx, grep_options, grep_string):
+  ctx.invoke(zookeeper, grep_options=grep_options, grep_string=grep_string)
+  ctx.invoke(kafka,     grep_options=grep_options, grep_string=grep_string)
+  ctx.invoke(hadoop,    grep_options=grep_options, grep_string=grep_string)
+  ctx.invoke(yarn,   grep_options=grep_options, grep_string=grep_string)
+  ctx.invoke(yarnapp,   grep_options=grep_options, grep_string=grep_string)
+  ctx.invoke(yarnvmapp,   grep_options=grep_options, grep_string=grep_string)
 
-  
-    
 
 
 
 if __name__ == '__main__':
   mastercommand()
+
+
