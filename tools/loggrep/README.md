@@ -1,4 +1,4 @@
-#Cluster Log Tool#
+#Cluster LogGrep Tool#
 
 Search through your cluster's log based on your ansible inventory file!
 
@@ -13,7 +13,7 @@ user@machine: $ sudo pip install ansible click paramiko
 ##Usage##
 
 ```
-Usage: log.py [OPTIONS] COMMAND1 [ARGS]... [COMMAND2 [ARGS]...]...
+Usage: loggrep.py [OPTIONS] COMMAND1 [ARGS]... [COMMAND2 [ARGS]...]...
 
   Parse your cluster's logs!
 
@@ -36,16 +36,16 @@ Commands:
 ##Examples##
 ```
 #Search kafka logs
-./log.py -i /tmp/scribenginInventoryDO kafka
+./loggrep.py -i /tmp/scribenginInventoryDO kafka
 
 #Search kafka and zookeeper logs
-./log.py -i /tmp/scribenginInventoryDO kafka zookeeper
+./loggrep.py -i /tmp/scribenginInventoryDO kafka zookeeper
 
 #Search the whole cluster's logs (kafka, zk, and hadoop)
-./log.py -i /tmp/scribenginInventoryDO cluster
+./loggrep.py -i /tmp/scribenginInventoryDO cluster
 
 #Run a custom command on your cluster
-./log.py -i /tmp/scribengininventoryDO cluster -c "cat /etc/hosts"
+./loggrep.py -i /tmp/scribengininventoryDO cluster -c "cat /etc/hosts"
 
 ```
 
