@@ -14,7 +14,7 @@
   num: 3
   role: hadoop-worker
 
-- memory: 512mb
+- memory: 4gb
   num: 1
   role: elasticsearch
 
