@@ -1,6 +1,6 @@
 #Cluster LogGrep Tool#
 
-Search through your cluster's log based on your ansible inventory file!
+Search through the logs on your cluster based on your ansible inventory file!
 
 Constructs a find query to run on your cluster based on this:
 ```
