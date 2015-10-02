@@ -78,7 +78,7 @@ def getLogs(group, command):
 
 @click.group(chain=True, help="Parse your cluster's logs!")
 @click.option('--debug/--no-debug',      default=False, help="Turn debugging on")
-@click.option('--logfile',               default='/tmp/statuscommander.log', help="Log file to write to")
+@click.option('--logfile',               default='/tmp/clusterlog.log', help="Log file to write to")
 @click.option('--threads',         '-t', default=15, help="Number of threads to run simultaneously")
 @click.option('--timeout',         '-m', default=30, help="SSH timeout time (seconds)")
 @click.option('--inventory-file',  '-i', default='inventory', help="Ansible inventory file to use")
