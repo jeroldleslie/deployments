@@ -164,7 +164,7 @@ def mastercommand(debug, logfile, threads, timeout, inventory_file):
         tableRows.append(["","",result["identifier"],result["pid"],"Running"])
       else:
         if  not result["quietIfNotRunning"]:
-          tableRows.append(["","",result["identifier"],"----", "--- Stopped"])
+          tableRows.append(["","",result["identifier"],"----", "Stopped"])
       
       currHost = result["host"]
         
