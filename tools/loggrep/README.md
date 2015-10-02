@@ -19,7 +19,7 @@ user@machine: $ sudo pip install ansible click paramiko
 ```
 Usage: loggrep.py [OPTIONS] COMMAND1 [ARGS]... [COMMAND2 [ARGS]...]...
 
-  Parse your cluster's logs!
+  Parse your clusters logs!
 
 Options:
   --debug / --no-debug       Turn debugging on
