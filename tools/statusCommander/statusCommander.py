@@ -120,13 +120,12 @@ def getSshOutput(host, command, identifier, group, quietIfNotRunning):
 @click.command(help="Get your cluster's status based on your ansible inventory file!")
 @click.option('--debug/--no-debug',      default=False, help="Turn debugging on")
 @click.option('--logfile',               default='/tmp/statuscommander.log', help="Log file to write to")
-@click.option('--threads',         '-t', default=15, help="Number of threads to run simultaneously")
 @click.option('--timeout',         '-m', default=30, help="SSH timeout time (seconds)")
 @click.option('--inventory-file',  '-i', default='inventory', help="Ansible inventory file to use")
 @click.option('--monitor',         '-n', is_flag=True, help="Run continuously")
 @click.option('--monitor-sleep',   '-s', default=10, help="How long to sleep between checks while monitoring")
 @click.pass_context
-def mastercommand(ctx, debug, logfile, threads, timeout, inventory_file, monitor, monitor_sleep):
+def mastercommand(ctx, debug, logfile, timeout, inventory_file, monitor, monitor_sleep):
   global _pool
   if debug:
       #Set logging file, overwrite file, set logging level to DEBUG
@@ -137,11 +136,7 @@ def mastercommand(ctx, debug, logfile, threads, timeout, inventory_file, monitor
     #Set logging file, overwrite file, set logging level to INFO
     logging.basicConfig(filename=logfile, filemode="w", level=logging.INFO)
   
-  #Asynchronously launch all the SSH threads to get status
-  pool = Pool(processes=threads)
-  #Set global _pool to pool in case we get a SIGINT/Ctrl+C
-  _pool = pool
-  asyncresults = []
+  
 
   #Check if inventory file exists
   if not isfile(inventory_file):
@@ -151,6 +146,13 @@ def mastercommand(ctx, debug, logfile, threads, timeout, inventory_file, monitor
     exit(-1)
 
   i = ansibleInventoryParser(inventory_file)
+
+  #Asynchronously launch all the SSH threads to get status
+  pool = Pool(processes=len(i.parseInventoryFile()))
+  #Set global _pool to pool in case we get a SIGINT/Ctrl+C
+  _pool = pool
+  asyncresults = []
+
   for server in i.parseInventoryFile():
     #Go through and asynchronously run ssh commands to get process status
     try:
@@ -203,7 +205,7 @@ def mastercommand(ctx, debug, logfile, threads, timeout, inventory_file, monitor
   if monitor:
     print "\n\n*******************************************************************\n\n"
     sleep(monitor_sleep)
-    ctx.invoke(mastercommand, debug=debug, logfile=logfile, threads=threads, timeout=timeout,
+    ctx.invoke(mastercommand, debug=debug, logfile=logfile, timeout=timeout,
                 inventory_file=inventory_file, monitor=monitor, monitor_sleep=monitor_sleep)
 
    
