@@ -2,7 +2,7 @@
   num: 3
   role: kafka
 
-- memory: 512mb
+- memory: 2gb
   num: 1
   role: zookeeper
 

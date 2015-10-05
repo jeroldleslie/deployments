@@ -3,18 +3,26 @@
 exec python $0 ${1+"$@"}
 """
 
-import click,logging
+import click,logging, signal
 from sys import stdout
 from tabulate import tabulate
 from os.path import abspath, dirname, join, isfile
 from sys import path
 from multiprocessing import Pool
+from time import sleep
               
 #Make sure the commons package is on the path correctly
 path.insert(0, dirname(dirname(abspath(__file__))))
 from commons.ssh.ssh import ssh
 from commons.ansibleInventoryParser.ansibleInventoryParser import ansibleInventoryParser
 
+#Handle a SIGINT/ctrl+c signal cleanly without messy error output
+def signal_handler(signal, frame):
+  global _pool
+  if _pool:
+    _pool.terminate()
+  import sys
+  sys.exit(0)
 
 ################################################################################################################
 class statusCommandParams():
@@ -44,6 +52,8 @@ class statusCommandParams():
 ################################################################################################################
 
 
+#_pool is to help us clean up threads when ctrl+c/SIGINT is entered
+_pool = None
 
 scribeJpsCommand = "jps -m | grep '"+statusCommandParams.defaultReplacementString+"' | awk '{print $1 \" \" $4}'"
 
@@ -113,7 +123,11 @@ def getSshOutput(host, command, identifier, group, quietIfNotRunning):
 @click.option('--threads',         '-t', default=15, help="Number of threads to run simultaneously")
 @click.option('--timeout',         '-m', default=30, help="SSH timeout time (seconds)")
 @click.option('--inventory-file',  '-i', default='inventory', help="Ansible inventory file to use")
-def mastercommand(debug, logfile, threads, timeout, inventory_file):
+@click.option('--monitor',         '-n', is_flag=True, help="Run continuously")
+@click.option('--monitor-sleep',   '-s', default=10, help="How long to sleep between checks while monitoring")
+@click.pass_context
+def mastercommand(ctx, debug, logfile, threads, timeout, inventory_file, monitor, monitor_sleep):
+  global _pool
   if debug:
       #Set logging file, overwrite file, set logging level to DEBUG
       logging.basicConfig(filename=logfile, filemode="w", level=logging.DEBUG)
@@ -125,9 +139,11 @@ def mastercommand(debug, logfile, threads, timeout, inventory_file):
   
   #Asynchronously launch all the SSH threads to get status
   pool = Pool(processes=threads)
+  #Set global _pool to pool in case we get a SIGINT/Ctrl+C
+  _pool = pool
   asyncresults = []
 
-  
+  #Check if inventory file exists
   if not isfile(inventory_file):
     logging.error(inventory_file+" is not a file!  -i option needs to point to a valid ansible inventory file")
     print inventory_file+" is not a file!  -i option needs to point to a valid ansible inventory file"
@@ -180,8 +196,17 @@ def mastercommand(debug, logfile, threads, timeout, inventory_file):
   #Print out table
   tableHeaders  = ["Role", "Hostname", "ProcessIdentifier", "ProcessID", "Status"]
   print tabulate(tableRows, headers=tableHeaders)
+  
+  #If monitor==true, then monitor again after sleeping for monitor_sleep
+  if monitor:
+    print "\n\n*******************************************************************\n\n"
+    sleep(monitor_sleep)
+    ctx.invoke(mastercommand, debug=debug, logfile=logfile, threads=threads, timeout=timeout,
+                inventory_file=inventory_file, monitor=monitor, monitor_sleep=monitor_sleep)
+
    
 
 if __name__ == '__main__':
+  signal.signal(signal.SIGINT, signal_handler)
   mastercommand()
   

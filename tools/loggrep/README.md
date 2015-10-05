@@ -24,9 +24,8 @@ Usage: loggrep.py [OPTIONS] COMMAND1 [ARGS]... [COMMAND2 [ARGS]...]...
 Options:
   --debug / --no-debug       Turn debugging on
   --logfile TEXT             Log file to write to
-  -t, --threads INTEGER      Number of threads to run simultaneously
   -m, --timeout INTEGER      SSH timeout time (seconds)
-  -i, --inventory-file TEXT  Ansible inventory file to use
+  -i, --inventory-file TEXT  Ansible inventory file to use.  Default is ./inventory
   --help                     Show this message and exit.
 
 Commands:
@@ -68,10 +67,10 @@ Options:
 
 ##Examples##
 ```
-#Search kafka logs
-./loggrep.py -i /tmp/scribengininventoryDO kafka
+#Search kafka logs  (This assumes your ansible inventory file is found at ./inventory)
+./loggrep.py kafka
 
-#Search kafka and zookeeper logs
+#Search kafka and zookeeper logs, specify an inventory file
 ./loggrep.py -i /tmp/scribengininventoryDO kafka zookeeper
 
 #Search the whole cluster's logs (kafka, zk, and hadoop)

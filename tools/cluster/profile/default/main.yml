@@ -22,6 +22,7 @@ kafka:
       log_retention_check_interval_ms: 60000
       log_cleaner_enable: 'false'
       zookeeper_connection_timeout_ms: 1000000
+      default_replication_factor: 3
     consumer-properties:
       consumer_zookeeper_connection_timeout_ms: 1000000
       consumer_timeout_ms: 5000

@@ -83,6 +83,9 @@ num.recovery.threads.per.data.dir={{ num_recovery_threads_per_data_dir }}
 # The maximum amount of time a message can sit in a log before we force a flush
 #log.flush.interval.ms={{ log_flush_interval_ms }}
 
+
+default.replication.factor: {{ default_replication_factor }}
+
 ############################# Log Retention Policy #############################
 
 # The following configurations control the disposal of log segments. The policy can
@@ -119,3 +122,5 @@ zookeeper.connect={% for host in groups['zookeeper'] %}{{ host }}:{{ zookeeper_c
 
 # Timeout in ms for connecting to zookeeper
 zookeeper.connection.timeout.ms={{ zookeeper_connection_timeout_ms }}
+
+
