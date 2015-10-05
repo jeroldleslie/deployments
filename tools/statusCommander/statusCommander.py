@@ -199,7 +199,8 @@ def mastercommand(ctx, debug, logfile, timeout, inventory_file, monitor, monitor
   tableHeaders  = ["Role", "Hostname", "ProcessIdentifier", "ProcessID", "Status"]
   print tabulate(tableRows, headers=tableHeaders)
 
-  del pool
+  pool.terminate()
+  pool.join()
   
   #If monitor==true, then monitor again after sleeping for monitor_sleep
   if monitor:
