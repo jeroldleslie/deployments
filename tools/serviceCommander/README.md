@@ -1,6 +1,12 @@
 #Service Commander#
 Use Ansible to manage services in your cluster!
 
+
+##Setup##
+```
+sudo pip install click paramiko
+```
+
 ##Usage##
 ```
 Usage: serviceCommander.py [OPTIONS]
@@ -27,10 +33,6 @@ Options:
   --help                     Show this message and exit.
 ```
 
-##Setup##
-```
-sudo pip install click
-```
 
 
 ##Examples##

@@ -6,7 +6,7 @@ exec python $0 ${1+"$@"}
 import click,logging
 from sys import stdout
 from tabulate import tabulate
-from os.path import abspath, dirname, join
+from os.path import abspath, dirname, join, isfile
 from sys import path
 from multiprocessing import Pool
               
@@ -126,6 +126,14 @@ def mastercommand(debug, logfile, threads, timeout, inventory_file):
   #Asynchronously launch all the SSH threads to get status
   pool = Pool(processes=threads)
   asyncresults = []
+
+  
+  if not isfile(inventory_file):
+    logging.error(inventory_file+" is not a file!  -i option needs to point to a valid ansible inventory file")
+    print inventory_file+" is not a file!  -i option needs to point to a valid ansible inventory file"
+    from sys import exit
+    exit(-1)
+
   i = ansibleInventoryParser(inventory_file)
   for server in i.parseInventoryFile():
     #Go through and asynchronously run ssh commands to get process status
@@ -164,7 +172,7 @@ def mastercommand(debug, logfile, threads, timeout, inventory_file):
         tableRows.append(["","",result["identifier"],result["pid"],"Running"])
       else:
         if  not result["quietIfNotRunning"]:
-          tableRows.append(["","",result["identifier"],"----", "--- Stopped"])
+          tableRows.append(["","",result["identifier"],"----", "Stopped"])
       
       currHost = result["host"]
         

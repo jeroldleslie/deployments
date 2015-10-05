@@ -5,7 +5,7 @@ Get your cluster's status based on your ansible inventory file!
 ##Installation##
 
 ```
-user@machine: $ sudo pip install ansible tabulate
+user@machine: $ sudo pip install ansible tabulate click paramiko
 ```
 
 ##Usage##
