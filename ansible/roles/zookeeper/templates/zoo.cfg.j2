@@ -1,11 +1,11 @@
 # The number of milliseconds of each tick
-tickTime={{ tickTime }}
+tickTime={{ zookeeper.software.zoo_cfg.tickTime }}
 # The number of ticks that the initial 
 # synchronization phase can take
-initLimit={{ initLimit }}
+initLimit={{ zookeeper.software.zoo_cfg.initLimit }}
 # The number of ticks that can pass between 
 # sending a request and getting an acknowledgement
-syncLimit={{ syncLimit }}
+syncLimit={{ zookeeper.software.zoo_cfg.syncLimit }}
 # the directory where the snapshot is stored.
 # do not use /tmp for storage, /tmp here is just 
 # example sakes.
@@ -14,7 +14,7 @@ dataDir={{ zookeeper_data_dir }}
 clientPort={{ zookeeper_clientport }}
 # the maximum number of client connections.
 # increase this if you need to handle more clients
-#maxClientCnxns={{ maxClientCnxns }}
+#maxClientCnxns={{ zookeeper.software.zoo_cfg.maxClientCnxns }}
 #
 # Be sure to read the maintenance section of the 
 # administrator guide before turning on autopurge.
@@ -22,10 +22,10 @@ clientPort={{ zookeeper_clientport }}
 # http://zookeeper.apache.org/doc/current/zookeeperAdmin.html#sc_maintenance
 #
 # The number of snapshots to retain in dataDir
-#autopurge.snapRetainCount={{ autopurge_snapRetainCount }}
+#autopurge.snapRetainCount={{ zookeeper.software.zoo_cfg.autopurge_snapRetainCount }}
 # Purge task interval in hours
 # Set to 0 to disable auto purge feature
-#autopurge.purgeInterval={{ autopurge_purgeInterval }}
+#autopurge.purgeInterval={{ zookeeper.software.zoo_cfg.autopurge_purgeInterval }}
 
 {% for host in groups['zookeeper'] %}
 server.{{ host | regex_replace('.*?([0-9]+)$', '\\1') }}={{ host }}:{{zookeeper_leader_port}}:{{zookeeper_election_port}}

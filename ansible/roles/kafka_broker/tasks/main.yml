@@ -1,4 +1,9 @@
 ---
+#Include variables from file
+- include_vars: "../../../profile/{{ profile_type | default('default') }}.yml"
+  tags: 
+    [ configure, install ]
+    
 - name: Create kafka directory
   file: path={{ kafka_home_dir }} state=directory
   tags:

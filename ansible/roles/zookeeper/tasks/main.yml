@@ -1,3 +1,8 @@
+#Include variables from file
+- include_vars: "../../../profile/{{ profile_type | default('default') }}.yml"
+  tags: 
+    [ configure, install ]
+
 - name: Create zookeeper directory
   file: path={{zookeeper_home_dir}} state=directory
   tags:
