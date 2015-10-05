@@ -1,6 +1,6 @@
 #Cluster LogGrep Tool#
 
-Search through your cluster's log based on your ansible inventory file!
+Search through the logs on your cluster based on your ansible inventory file!
 
 Constructs a find query to run on your cluster based on this:
 ```
@@ -19,7 +19,7 @@ user@machine: $ sudo pip install ansible click paramiko
 ```
 Usage: loggrep.py [OPTIONS] COMMAND1 [ARGS]... [COMMAND2 [ARGS]...]...
 
-  Parse your cluster's logs!
+  Parse your clusters logs!
 
 Options:
   --debug / --no-debug       Turn debugging on
