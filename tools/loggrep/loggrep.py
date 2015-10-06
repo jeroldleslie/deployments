@@ -15,9 +15,17 @@ from commons.ssh.ssh import ssh
 from commons.ansibleInventoryParser.ansibleInventoryParser import ansibleInventoryParser
 
 
-_threads = 15
+
 _timeout = 30
 _inventory_file = "inventory"
+
+def getMaxThreads():
+  """
+  Returns number of hosts
+  """
+  global _inventory_file
+  i = ansibleInventoryParser(_inventory_file)
+  return len(i.parseInventoryFile())
 
 def getGroup(group):
   """
@@ -53,9 +61,9 @@ def getLogs(group, command):
   """
   SSH's onto machine, runs command, outputs STDOUT and STDERR
   """
-  global _threads, _timeout
+  global _timeout
   #Asynchronously launch all the SSH threads 
-  pool = Pool(processes=_threads)
+  pool = Pool(processes=getMaxThreads())
   asyncresults = []
   
   #Go through and asynchronously run ssh commands to get logs
@@ -85,12 +93,12 @@ def buildCommandString(find_folder, find_iname, grep_options, grep_string):
 @click.option('--logfile',               default='/tmp/clusterlog.log', help="Log file to write to")
 @click.option('--threads',         '-t', default=15, help="Number of threads to run simultaneously")
 @click.option('--timeout',         '-m', default=30, help="SSH timeout time (seconds)")
-@click.option('--inventory-file',  '-i', default='inventory', help="Ansible inventory file to use")
+@click.option('--inventory-file',  '-i', default='inventory', help="Ansible inventory file to use. Default is ./inventory")
 def mastercommand(debug, logfile, threads, timeout, inventory_file):
-  global _threads, _timeout, _inventory_file
-  _threads = threads
+  global _timeout, _inventory_file
   _timeout = timeout
   _inventory_file = inventory_file
+
 
   if not isfile(inventory_file):
     logging.error(inventory_file+" is not a file!  -i option needs to point to a valid ansible inventory file")

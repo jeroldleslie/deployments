@@ -16,12 +16,14 @@ Usage: statusCommander.py [OPTIONS]
   Get your cluster's status based on your ansible inventory file!
 
 Options:
-  --debug / --no-debug       Turn debugging on
-  --logfile TEXT             Log file to write to
-  -t, --threads INTEGER      Number of threads to run simultaneously
-  -m, --timeout INTEGER      SSH timeout time (seconds)
-  -i, --inventory-file TEXT  Ansible inventory file to use
-  --help                     Show this message and exit.
+  --debug / --no-debug         Turn debugging on
+  --logfile TEXT               Log file to write to
+  -m, --timeout INTEGER        SSH timeout time (seconds)
+  -i, --inventory-file TEXT    Ansible inventory file to use
+  -n, --monitor                Run continuously
+  -s, --monitor-sleep INTEGER  How long to sleep between checks while
+                               monitoring
+  --help                       Show this message and exit.
 ```
 
 ##Example usage##

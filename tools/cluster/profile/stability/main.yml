@@ -8,15 +8,16 @@ kafka:
     server-properties:
       num_partitions: 10
       log_retention_hours: 1
-      log_retention_bytes: 700000000
+      log_retention_bytes: 250000000
+      default_replication_factor: 3
 
 zookeeper:
   hardware:
-    memory: 512mb
+    memory: 2gb
     num: 1
   software:
     jvm:
-      ZOOKEEPER_HEAP_SIZE: 256
+      ZOOKEEPER_HEAP_SIZE: 1024
 
 hadoop-master:
   hardware:
