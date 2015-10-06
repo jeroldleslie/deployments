@@ -21,11 +21,13 @@ Options:
   -l, --subset TEXT          Further limit selected hosts with an additional
                              pattern
   -i, --inventory-file TEXT  Ansible inventory file to use
+  -u, --cluster              Alternative to --services option, runs for entire
+                             cluster
   -r, --restart              restart services
   -s, --start                start services
   -t, --stop                 stop services
   -f, --force-stop           kill services
-  -f, --clean                clean services
+  -a, --clean                clean services
   -n, --install              install services
   -c, --configure            configure services
   --ansible-root-dir TEXT    Root directory for Ansible
@@ -38,6 +40,15 @@ Options:
 ##Examples##
 Using the below structure as an example...
 ```
+#Start all cluster services
+./serviceCommander.py --cluster --start
+
+#Install, configure, force-stop, clean, restart cluster
+./serviceCommander.py --cluster --install --configure --force-stop --clean --start
+
+#Start all cluster services and also two extra services called serviceX and serviceY
+./serviceCommander.py --cluster --services serviceX,serviceY  --start
+
 #Install, configure, and start kafka and zookeeper
 ./serviceCommander.py --services kafka,zookeeper --install --configure --start 
 
