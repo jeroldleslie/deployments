@@ -19,7 +19,7 @@ zookeeper:
     jvm:
       ZOOKEEPER_HEAP_SIZE: 1024
     zoo-cfg:
-      maxClientCnxns: 25
+      maxClientCnxns: 60
 
 hadoop-master:
   hardware:

@@ -42,7 +42,7 @@ zookeeper:
       tickTime: 2000
       initLimit: 10
       syncLimit: 5
-      maxClientCnxns: 10
+      maxClientCnxns: 60
       autopurge_snapRetainCount: 3
       autopurge_purgeInterval: 1
 
