@@ -1,7 +1,7 @@
 kafka:
   hardware:
     memory: 2gb
-    num: 3
+    num: 6
   software:
     jvm:
       KAFKA_HEAP_SIZE: 1536
@@ -14,7 +14,7 @@ kafka:
       socket_receive_buffer_bytes: 1048576
       socket_request_max_bytes: 104857600
       log_dirs: /opt/kafka/data
-      num_partitions: 10
+      num_partitions: 16
       num_recovery_threads_per_data_dir: 1
       log_retention_hours: 168
       log_retention_bytes: 5000000000
@@ -59,12 +59,12 @@ zookeeper:
 
 hadoop_master:
   hardware:
-    memory: 2gb
+    memory: 4gb
     num: 1
   software:
     jvm:
       NAMENODE_HEAPSIZE: 1024
-      SECONDARYNAMENODE_HEAPSIZE: 512
+      SECONDARYNAMENODE_HEAPSIZE: 1024
       DATANODE_HEAPSIZE: 1024
       YARN_RESOURCEMANAGER_HEAPSIZE: 1024
       YARN_NODEMANAGER_HEAPSIZE: 1024
@@ -79,28 +79,28 @@ hadoop_master:
       yarn_nodemanager_hostname: 0.0.0.0
       yarn_resourcemanager_scheduler_class: org.apache.hadoop.yarn.server.resourcemanager.scheduler.capacity.CapacityScheduler
 
-      yarn_nodemanager_resource_cpu_vcores: 4
-      yarn_nodemanager_resource_memory_mb: 2048
-      yarn_nodemanager_vmem_pmem_ratio: 2
+      yarn_nodemanager_resource_cpu_vcores: 3
+      yarn_nodemanager_resource_memory_mb: 3072
+      yarn_nodemanager_vmem_pmem_ratio: 1
       yarn_nodemanager_vmem_check_enabled: false
 
-      yarn_scheduler_minimum_allocation_mb: 256
-      yarn_scheduler_maximum_allocation_mb: 256
+      yarn_scheduler_minimum_allocation_mb: 1024
+      yarn_scheduler_maximum_allocation_mb: 1024
       yarn_scheduler_minimum_allocation_vcores: 1
       yarn_scheduler_maximum_allocation_vcores: 1
 
     capacity_scheduler:
-      yarn_scheduler_capacity_resource_calculator: org.apache.hadoop.yarn.util.resource.DefaultResourceCalculator
+      yarn_scheduler_capacity_resource_calculator: org.apache.hadoop.yarn.util.resource.DominantResourceCalculator
       
 hadoop_worker:
   hardware:
-    memory: 2gb
-    num: 3
+    memory: 4gb
+    num: 6
   software:
   
 elasticsearch:  
   hardware:
-    memory: 2gb
+    memory: 8gb
     num: 1
   software:
 

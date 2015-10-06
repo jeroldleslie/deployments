@@ -52,7 +52,7 @@ fi
 # and/or YARN_RESOURCEMANAGER_OPTS.
 # If not specified, the default value will be picked from either YARN_HEAPMAX
 # or JAVA_HEAP_MAX with YARN_HEAPMAX as the preferred option of the two.
-export YARN_RESOURCEMANAGER_HEAPSIZE={{YARN_RESOURCEMANAGER_HEAPSIZE}}
+export YARN_RESOURCEMANAGER_HEAPSIZE={{ hadoop_master.software.jvm.YARN_RESOURCEMANAGER_HEAPSIZE }}
 
 # Specify the max Heapsize for the HistoryManager using a numerical value
 # in the scale of MB. For example, to specify an jvm option of -Xmx1000m, set
@@ -77,7 +77,7 @@ export YARN_RESOURCEMANAGER_HEAPSIZE={{YARN_RESOURCEMANAGER_HEAPSIZE}}
 # and/or YARN_NODEMANAGER_OPTS.
 # If not specified, the default value will be picked from either YARN_HEAPMAX
 # or JAVA_HEAP_MAX with YARN_HEAPMAX as the preferred option of the two.
-export YARN_NODEMANAGER_HEAPSIZE={{YARN_NODEMANAGER_HEAPSIZE}}
+export YARN_NODEMANAGER_HEAPSIZE={{ hadoop_master.software.jvm.YARN_NODEMANAGER_HEAPSIZE }}
 
 # Specify the JVM options to be used when starting the NodeManager.
 # These options will be appended to the options specified as YARN_OPTS

@@ -2,59 +2,59 @@
 <configuration>
   <property>
     <name>yarn.resourcemanager.hostname</name>
-    <value>{{yarn_resourcemanager_hostname}}</value>
+    <value>{{hadoop_master.software.yarn_site.yarn_resourcemanager_hostname}}</value>
   </property>
 
   <property>
     <name>yarn.nodemanager.hostname</name>
-    <value>{{yarn_nodemanager_hostname}}</value>
+    <value>{{hadoop_master.software.yarn_site.yarn_nodemanager_hostname}}</value>
   </property>
 
   <property>
     <name>yarn.nodemanager.resource.cpu-vcores</name>
-    <value>{{yarn_nodemanager_resource_cpu_vcores}}</value>
+    <value>{{hadoop_master.software.yarn_site.yarn_nodemanager_resource_cpu_vcores}}</value>
   </property>
 
   <property>
     <name>yarn.nodemanager.resource.memory-mb</name>
-    <value>{{yarn_nodemanager_resource_memory_mb}}</value>
+    <value>{{hadoop_master.software.yarn_site.yarn_nodemanager_resource_memory_mb}}</value>
   </property>
 
   <property>
     <name>yarn.nodemanager.vmem-pmem-ratio</name>
-    <value>{{yarn_nodemanager_vmem_pmem_ratio}}</value>
+    <value>{{hadoop_master.software.yarn_site.yarn_nodemanager_vmem_pmem_ratio}}</value>
   </property>
 
   <property>
     <name>yarn.nodemanager.vmem-check-enabled</name>
-    <value>{{yarn_nodemanager_vmem_check_enabled}}</value>
+    <value>{{hadoop_master.software.yarn_site.yarn_nodemanager_vmem_check_enabled}}</value>
     <description>Whether virtual memory limits will be enforced for containers.</description>
   </property>
 
 
   <property>
     <name>yarn.resourcemanager.scheduler.class</name>
-    <value>{{yarn_resourcemanager_scheduler_class}}</value>
+    <value>{{hadoop_master.software.yarn_site.yarn_resourcemanager_scheduler_class}}</value>
   </property>
 
   <property>
     <name>yarn.scheduler.minimum-allocation-mb</name>
-    <value>{{yarn_scheduler_minimum_allocation_mb}}</value>
+    <value>{{hadoop_master.software.yarn_site.yarn_scheduler_minimum_allocation_mb}}</value>
   </property>
 
   <property>
     <name>yarn.scheduler.maximum-allocation-mb</name>
-    <value>{{yarn_scheduler_minimum_allocation_mb}}</value>
+    <value>{{hadoop_master.software.yarn_site.yarn_scheduler_maximum_allocation_mb}}</value>
   </property>
 
   <property>
     <name>yarn.scheduler.minimum-allocation-vcores</name>
-    <value>{{yarn_scheduler_minimum_allocation_vcores}}</value>
+    <value>{{hadoop_master.software.yarn_site.yarn_scheduler_minimum_allocation_vcores}}</value>
   </property>
 
   <property>
     <name>yarn.scheduler.maximum-allocation-vcores</name>
-    <value>{{yarn_scheduler_maximum_allocation_vcores}}</value>
+    <value>{{hadoop_master.software.yarn_site.yarn_scheduler_maximum_allocation_vcores}}</value>
   </property>
 
 </configuration>

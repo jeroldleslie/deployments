@@ -4,16 +4,16 @@
 <configuration>
   <property>
     <name>hadoop.tmp.dir</name>
-    <value>{{hadoop_tmp_dir}}</value>
+    <value>{{ hadoop_master.software.core_site.hadoop_tmp_dir }}</value>
   </property>
 
   <property>
     <name>fs.default.name</name>
-    <value>{{fs_default_name}}</value>
+    <value>{{ hadoop_master.software.core_site.fs_default_name }}</value>
   </property>
   
   <property>
     <name>hadoop.http.staticuser.user</name>
-    <value>{{hadoop_http_staticuser_user}}</value>
+    <value>{{ hadoop_master.software.core_site.hadoop_http_staticuser_user }}</value>
   </property>
 </configuration>
