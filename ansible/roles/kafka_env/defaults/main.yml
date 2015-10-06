@@ -7,7 +7,7 @@ zookeeper_clientport: 2181
 
 # SERVER PROPERTIES
 port: 9092
-
+default_replication_factor: 1
 num_network_threads: 2
 num_io_threads: 8
 socket_send_buffer_bytes: 1048576
