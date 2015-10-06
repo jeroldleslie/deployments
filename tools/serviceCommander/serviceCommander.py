@@ -30,10 +30,10 @@ from commons.ansibleRunner.ansibleRunner import ansibleRunner
 @click.option('--clean',  '-f',          is_flag=True, help="clean services")
 @click.option('--install',  '-n',        is_flag=True, help="install services")
 @click.option('--configure',  '-c',      is_flag=True, help="configure services")
-
+@click.option('--profile', '-p',         default='', help="profile type for service configuration" )
 @click.option('--ansible-root-dir',      default=dirname(dirname(dirname(abspath(__file__))))+"/ansible", help="Root directory for Ansible")
 @click.option('--max-retries',     '-m', default=5, help="Max retries for running the playbook")
-def mastercommand(debug, logfile, services, subset, inventory_file, restart, start, stop, force_stop, clean, install, configure, ansible_root_dir, max_retries):
+def mastercommand(debug, logfile, services, subset, inventory_file, restart, start, stop, force_stop, clean, install, configure, profile, ansible_root_dir, max_retries):
   if debug:
       #Set logging file, overwrite file, set logging level to DEBUG
       logging.basicConfig(filename=logfile, filemode="w", level=logging.DEBUG)
@@ -60,7 +60,10 @@ def mastercommand(debug, logfile, services, subset, inventory_file, restart, sta
   tagsToRun=tagsToRun[:-1]
   tagsToRun="\""+tagsToRun+"\""
 
-
+  extra_vars={}
+  if (profile != ""):
+    extra_vars['profile_type'] = profile
+    
   runner = ansibleRunner()
   for playbook in services.split(",") :
     playbook = join(ansible_root_dir, playbook)+".yml"
@@ -77,6 +80,7 @@ def mastercommand(debug, logfile, services, subset, inventory_file, restart, sta
                 outputToStdout=True, 
                 maxRetries=max_retries,
                 tags=tagsToRun,
+                extra_vars=extra_vars,
                 limit=subset,)
    
 
