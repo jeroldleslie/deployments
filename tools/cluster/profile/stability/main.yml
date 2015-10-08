@@ -7,7 +7,9 @@ kafka:
       KAFKA_HEAP_SIZE: 1536
     server-properties:
       num_partitions: 8
-      log_retention_bytes: 5000000000
+      log_retention_bytes: 524288000
+      default_replication_factor: 2
+      log_segment_bytes: 26214400
 
 zookeeper:
   hardware:
