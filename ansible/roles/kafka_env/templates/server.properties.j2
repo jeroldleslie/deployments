@@ -84,7 +84,7 @@ num.recovery.threads.per.data.dir={{ num_recovery_threads_per_data_dir }}
 #log.flush.interval.ms={{ log_flush_interval_ms }}
 
 
-default.replication.factor: {{ default_replication_factor }}
+default.replication.factor={{ default_replication_factor }}
 
 ############################# Log Retention Policy #############################
 
@@ -93,15 +93,15 @@ default.replication.factor: {{ default_replication_factor }}
 # A segment will be deleted whenever *either* of these criteria are met. Deletion always happens
 # from the end of the log.
 
+# The maximum size of a log segment file. When this size is reached a new log segment will be created.
+log.segment.bytes={{ log_segment_bytes }}
+
 # The minimum age of a log file to be eligible for deletion
 log.retention.hours={{ log_retention_hours }}
 
 # A size-based retention policy for logs. Segments are pruned from the log as long as the remaining
 # segments don't drop below log.retention.bytes.
 log.retention.bytes={{ log_retention_bytes }}
-
-# The maximum size of a log segment file. When this size is reached a new log segment will be created.
-log.segment.bytes={{ log_segment_bytes }}
 
 # The interval at which log segments are checked to see if they can be deleted according 
 # to the retention policies
@@ -111,6 +111,7 @@ log.retention.check.interval.ms={{ log_retention_check_interval_ms }}
 # If log.cleaner.enable=true is set the cleaner will be enabled and individual logs can then be marked for log compaction.
 log.cleaner.enable={{ log_cleaner_enable }}
 
+log.cleanup.policy=delete
 ############################# Zookeeper #############################
 
 # Zookeeper connection string (see zookeeper docs for details).
@@ -118,9 +119,7 @@ log.cleaner.enable={{ log_cleaner_enable }}
 # server. e.g. "127.0.0.1:3000,127.0.0.1:3001,127.0.0.1:3002".
 # You can also append an optional chroot string to the urls to specify the
 # root directory for all kafka znodes.
-zookeeper.connect={% for host in groups['zookeeper'] %}{{ host }}:{{ zookeeper_clientport }},{% endfor %}
+zookeeper.connect=zookeeper-1:2181
 
 # Timeout in ms for connecting to zookeeper
 zookeeper.connection.timeout.ms={{ zookeeper_connection_timeout_ms }}
-
-
