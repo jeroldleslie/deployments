@@ -75,14 +75,10 @@ def mastercommand(debug, logfile, services, subset, inventory_file, cluster, res
   
   
   #In case user passes in some services that aren't in _cluster_array, we don't want to omit them
-  print set(services.split(","))
   services = filter(bool, services.split(","))
-  print services
   nonClusterServices = list(set(services)-set(_cluster_array))
-  print "nonClusterServices>>>>>>"
   print nonClusterServices
   if not nonClusterServices:
-    print "getting inside" 
     nonClusterServices = None
 
   #_cluster_array is in order of which services to start first
@@ -99,15 +95,10 @@ def mastercommand(debug, logfile, services, subset, inventory_file, cluster, res
   print _cluster_array
   
   servicesToRun = _cluster_array
-  print "before nonClusterServices"
-  print servicesToRun
-  print nonClusterServices
   if nonClusterServices:
     servicesToRun += nonClusterServices
   #The reversed list is the order to stop/force-stop
   servicesToRunReversed = list(reversed(servicesToRun))
-  print "after nonClusterServices"
-  print servicesToRun
   
   extra_vars={}
   if (profile != ""):
