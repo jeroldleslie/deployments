@@ -5,7 +5,7 @@ DESC="Kibana 4"
 NAME=kibana
 DAEMON=$KIBANA_BIN/$NAME
 DAEMON_ARGS=""
-PIDFILE=/var/run/$NAME.pid
+PIDFILE=/opt/kibana/$NAME.pid
 SCRIPTNAME=/etc/init.d/$NAME
 LOG=$KIBANA_BIN/kibana.log
  

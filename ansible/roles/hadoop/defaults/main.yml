@@ -1,4 +1,0 @@
-hadoop_home_dir: /opt/hadoop
-hadoop_log_dir: /opt/hadoop/logs 
-hadoop_tar: hadoop-2.7.1.tar.gz
-hadoop_url: https://archive.apache.org/dist/hadoop/core/hadoop-2.7.1/hadoop-2.7.1.tar.gz

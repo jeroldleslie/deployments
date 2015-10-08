@@ -8,30 +8,40 @@
 #    #> ansible-playbook playbooks/scribenginCluster.yml -i scribengininventory --extra-vars "neverwinterdp_home_override=/path/to/NeverwinterDP"
 #############################################################################################################################################################
 - include: ../../../programs/npm.yml
-
+  tags:
+    - install
+    
 - name: Set neverwinterdp_home to neverwinterdp_home_override if its been passed in on command line
   when: neverwinterdp_home_override is defined
   run_once: true
   set_fact:
     neverwinterdp_home: "{{neverwinterdp_home_override}}"
-
+  tags:
+    - install
+    
 - name: Check to make sure environment variables are sane
   fail: msg="Variable '{{ item }}' is not defined" 
   when: ({{item}} is undefined) or ({{item}} is none) or ({{item}}|trim == '') 
   run_once: true
   with_items: 
     - neverwinterdp_home
-
+  tags:
+    - install
+    
 - name: Get neverwinterdp_home path info locally
   local_action: stat path={{neverwinterdp_home}}
   register: check_path
   run_once: true
-
+  tags:
+    - install
+    
 - name: Check if neverwinterdp_home path exists locally
   local_action: fail msg='{{neverwinterdp_home}} does not exist'
   when: not(check_path.stat.exists)
   run_once: true
-
+  tags:
+    - install
+    
 #- name: Echo local NEVERWINTERDP_HOME
 #  debug: msg="This is NeverwinterDP Home on the local machine {{neverwinterdp_home}}"
 #  run_once: true
@@ -40,30 +50,85 @@
   local_action: shell cd {{neverwinterdp_home}}//module/elasticsearch/ && gradle clean build install -x test
   register: stdout
   run_once: true
-
+  tags:
+    - install
+    
 - name: Output from gradle build
   debug: var=stdout.stdout_lines
   run_once: true
-
+  tags:
+    - install
+    
 - name: Release Elasticsearch locally
   local_action: shell cd {{neverwinterdp_home}}//module/elasticsearch/ && gradle clean build release -x test
   register: stdout
   run_once: true
-  
+  tags:
+    - install
+      
 - name: Output from gradle release
   debug: var=stdout.stdout_lines
   run_once: true
-
+  tags:
+    - install
+    
 - name: Copy local files from {{neverwinterdp_home}}/module/elasticsearch/build/release/ to remote hosts /opt/
   copy: src={{neverwinterdp_home}}/module/elasticsearch/build/release/ dest=/opt/
-
+  tags:
+    - install
+    
 - name: Make elasticsearch.sh executable
   file: mode=u+rxw path=/opt/elasticsearch/bin/elasticsearch.sh
-  
+  tags:
+    - install
+      
 - name: Install elasticdump
   sudo: yes
   shell: npm install elasticdump -g
+  tags:
+    - install
 
-- name: Start elasticsearch
-  shell: /opt/elasticsearch/bin/elasticsearch.sh
+- name: Rendering elasticsearch.service
+  template: src={{ item }}.j2 dest=/lib/systemd/system/{{ item }}
+  sudo: yes
+  with_items:
+    - elasticsearch.service
+  tags:
+    - install
+     
+#- name: Start elasticsearch
+#  shell: /opt/elasticsearch/bin/elasticsearch.sh
+#  tags:
+#    - install
 
+- name: Stop Elasticsearch Service
+  service: name=elasticsearch state=stopped enabled=no
+  sudo: true
+  when: ansible_virtualization_type != 'docker'
+  tags:
+  - stop
+
+- name: Stop Elasticsearch Service on docker container
+  shell: "/opt/elasticsearch/bin/elasticsearch.sh"
+  when: ansible_virtualization_type == 'docker'
+  tags:
+  - stop
+
+- name: Clean Elasticsearch logs and datas
+  shell: "/opt/elasticsearch/data"
+  sudo: yes 
+  tags:
+  - clean
+  
+- name: Start Elasticsearch Service
+  service: name=elasticsearch state=started enabled=yes
+  sudo: true
+  when: ansible_virtualization_type != 'docker'
+  tags:
+    - start
+
+- name: Start Elasticsearch Service on docker container
+  shell: "/opt/elasticsearch/bin/elasticsearch.sh"
+  when: ansible_virtualization_type == 'docker'
+  tags:
+    - start

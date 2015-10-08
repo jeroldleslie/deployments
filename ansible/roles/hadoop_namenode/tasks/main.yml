@@ -1,17 +1,31 @@
+#Include variables from file
+- include_vars: "../../../profile/{{ profile_type | default('default') }}.yml"
+  tags: 
+    [ start, stop ]
+
 - name: Stop Namenode Service
   service: name=hadoop-namenode state=stopped enabled=no
   sudo: true
+  when: ansible_virtualization_type != 'docker'
   tags:
-  - stop
+    - stop
+  
+- name: Stop Namenode Service on docker
+  shell: "{{ hadoop_master.software.installation.hadoop_home_dir }}/sbin/hadoop-daemon.sh stop namenode"
+  when: ansible_virtualization_type == 'docker'
+  tags:
+    - stop
   
 - name: Start Namenode Service
   service: name=hadoop-namenode state=started enabled=yes
   sudo: true
+  when: ansible_virtualization_type != 'docker'
   tags:
-  - start
+    - start
+
+- name: Start Namenode Service on docker
+  shell: "{{ hadoop_master.software.installation.hadoop_home_dir }}/sbin/hadoop-daemon.sh start namenode"
+  when: ansible_virtualization_type == 'docker'
+  tags:
+    - start
   
-- name: Restart Namenode Service
-  service: name=hadoop-namenode state=restarted enabled=no
-  sudo: true
-  tags:
-  - restart 

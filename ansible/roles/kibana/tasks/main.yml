@@ -1,32 +1,82 @@
 
 - name: download kibana url = {{kibana_url}}
   get_url: url={{kibana_url}} dest=/tmp/kibana.tar.gz
+  tags:
+    - install
 
 - name: Copy kibana4
   sudo: yes
   copy: src=kibana4 dest=/etc/init.d/kibana4
+  tags:
+    - install
 
 - name: Make kibana4 executable
   sudo: yes
-  file: mode=u+rxw path=/etc/init.d/kibana4
+  file: mode=u+rxw path=/etc/init.d/kibana4 owner=neverwinterdp
+  tags:
+    - install
 
 - name: initialize kibana4 service (Ubuntu)
   command: update-rc.d kibana4 defaults 96 9
   sudo: yes
   when: ansible_distribution == 'Debian' or ansible_distribution == 'Ubuntu'
+  tags:
+    - install
   
 - name: creating /opt/kibana directory
   sudo: yes
   file: path=/opt/kibana state=directory mode=0755
+  tags:
+    - install
 
 - name: uncompress tar
   sudo: yes
   command: tar xf /tmp/kibana.tar.gz -C /opt/kibana --strip 1
+  tags:
+    - install
 
 - name: set location of elasticsearch
   sudo: yes
   lineinfile: 'dest=/opt/kibana/config/kibana.yml regexp="elasticsearch_url.*9200" line="elasticsearch_url: \"http://elasticsearch-1:9200\""'
+  tags:
+    - install
 
+- name: Rendering kibana.service
+  template: src={{ item }}.j2 dest=/lib/systemd/system/{{ item }}
+  sudo: yes
+  with_items:
+    - kibana.service
+  tags:
+    - install
+    
+- name: Stop Kibana Service
+  service: name=kibana state=stopped enabled=no
+  sudo: true
+  when: ansible_virtualization_type != 'docker'
+  tags:
+  - stop
+
+- name: Stop Kibana Service on docker container
+  shell: "/etc/init.d/kibana4 stop"
+  sudo: yes
+  when: ansible_virtualization_type == 'docker'
+  tags:
+  - stop
+  
+- name: Start Kibana Service
+  service: name=kibana state=started enabled=yes
+  sudo: yes
+  when: ansible_virtualization_type != 'docker'
+  tags:
+    - start
+
+- name: Start Kibana Service on docker container
+  shell: "nohup /opt/kibana/bin/kibana &"
+  sudo_user: neverwinterdp
+  when: ansible_virtualization_type == 'docker'
+  tags:
+    - start
+       
 #- name: Start kibana service
 #  sudo: yes
 #  service: name=kibana4 state=started enabled=yes

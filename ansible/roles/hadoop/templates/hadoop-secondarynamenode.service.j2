@@ -10,7 +10,8 @@ RefuseManualStop=no
 [Service]
 Type=forking
 User=neverwinterdp
-ExecStart={{ hadoop_home_dir }}/sbin/hadoop-daemon.sh start secondarynamenode
+ExecStart={{ hadoop_master.software.installation.hadoop_home_dir }}/sbin/hadoop-daemon.sh start secondarynamenode
+ExecStop={{ hadoop_master.software.installation.hadoop_home_dir }}/sbin/hadoop-daemon.sh stop secondarynamenode
 
 [Install]
 WantedBy=multi-user.target

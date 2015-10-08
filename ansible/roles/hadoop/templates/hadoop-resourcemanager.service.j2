@@ -10,7 +10,8 @@ RefuseManualStop=no
 [Service]
 Type=forking
 User=neverwinterdp
-ExecStart={{ hadoop_home_dir }}/sbin/yarn-daemon.sh start resourcemanager
+ExecStart={{ hadoop_master.software.installation.hadoop_home_dir }}/sbin/yarn-daemon.sh start resourcemanager
+ExecStop={{ hadoop_master.software.installation.hadoop_home_dir }}/sbin/yarn-daemon.sh stop resourcemanager
 
 [Install]
 WantedBy=multi-user.target

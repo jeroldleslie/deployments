@@ -67,9 +67,17 @@
 - name: Stop Kafka Service
   service: name=kafka-broker state=stopped enabled=no
   sudo: true
+  when: ansible_virtualization_type != 'docker'
   tags:
     - stop
 
+- name: Stop Kafka Service on docker
+  shell: "{{ kafka_home_dir }}/bin/kafka-server-stop.sh"
+  when: ansible_virtualization_type == 'docker'
+  ignore_errors: yes
+  tags:
+    - stop
+    
 - name: Clean kafka logs and datas
   shell: "rm -rf {{ kafka_home_dir }}/data && rm -rf {{ kafka_home_dir }}/logs"
   sudo: yes 
@@ -79,11 +87,12 @@
 - name: Start Kafka Service
   service: name=kafka-broker state=started enabled=yes
   sudo: true
+  when: ansible_virtualization_type != 'docker'
   tags:
     - start
-  
-- name: Restart Kafka Service
-  service: name=kafka-broker state=restarted enabled=no
-  sudo: true
+
+- name: Start Kafka Service on docker
+  shell: "{{ kafka_home_dir }}/bin/kafka-server-start.sh -daemon {{ kafka_home_dir }}/config/server.properties"
+  when: ansible_virtualization_type == 'docker'
   tags:
-    - restart  
+    - start

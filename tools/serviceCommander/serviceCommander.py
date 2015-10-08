@@ -25,7 +25,7 @@ _start_string      = "start"
 #When the --cluster command is passed in, these are the roles that are executed
 #The order of this array DOES MATTER.  From left to right is the order in which the 
 #  cluster will be started.  To stop/force-stop, the array will be reversed
-_cluster_array     = ["elasticsearch", "zookeeper", "kafka", "hadoop", "scribengin", "kibana"]
+_cluster_array     = [ "zookeeper", "kafka", "hadoop", "scribengin" ]
 
 
 
@@ -75,8 +75,14 @@ def mastercommand(debug, logfile, services, subset, inventory_file, cluster, res
   
   
   #In case user passes in some services that aren't in _cluster_array, we don't want to omit them
-  nonClusterServices = list(set(services.split(","))-set(_cluster_array))
-  if nonClusterServices[0] == '':
+  print set(services.split(","))
+  services = filter(bool, services.split(","))
+  print services
+  nonClusterServices = list(set(services)-set(_cluster_array))
+  print "nonClusterServices>>>>>>"
+  print nonClusterServices
+  if not nonClusterServices:
+    print "getting inside" 
     nonClusterServices = None
 
   #_cluster_array is in order of which services to start first
@@ -85,18 +91,24 @@ def mastercommand(debug, logfile, services, subset, inventory_file, cluster, res
   if not cluster:
     index = 0
     while index < len(_cluster_array):
-      if _cluster_array[index] not in services.split(","):
+      if _cluster_array[index] not in services:
         del _cluster_array[index]
         index -=1
       index+=1
   
+  print _cluster_array
   
   servicesToRun = _cluster_array
+  print "before nonClusterServices"
+  print servicesToRun
+  print nonClusterServices
   if nonClusterServices:
     servicesToRun += nonClusterServices
   #The reversed list is the order to stop/force-stop
   servicesToRunReversed = list(reversed(servicesToRun))
-
+  print "after nonClusterServices"
+  print servicesToRun
+  
   extra_vars={}
   if (profile != ""):
     extra_vars['profile_type'] = profile
@@ -111,16 +123,19 @@ def mastercommand(debug, logfile, services, subset, inventory_file, cluster, res
     else:
       services = servicesToRun
 
+    print services
+    
     #Loop through each service/playbook
     for playbook in services :
+      print "playbook before: "+ playbook
       playbook = join(ansible_root_dir, playbook)+".yml"
+      print "playbook: " + playbook
       logging.debug("Running playbook: "+playbook)
       logging.debug("Tags: "+tag)
       logging.debug("Inventory: "+inventory_file)
       logging.debug("Max Retries: "+str(max_retries))
       logging.debug("Subset: "+str(subset))
       logging.debug("")
-      
 
       runner.deploy(playbook = playbook, 
                   inventory=inventory_file, 

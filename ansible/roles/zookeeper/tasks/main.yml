@@ -7,6 +7,12 @@
   file: path={{zookeeper_home_dir}} state=directory
   tags:
     - install
+
+- name: Create zookeeper data directory
+  file: path={{ zookeeper_data_dir }} state=directory mode=755 owner=neverwinterdp
+  sudo: yes
+  tags:
+    - install
     
 - name: Check if Zookeeper is already downloaded
   stat: path=/tmp/{{ zookeeper_tar }}
@@ -29,7 +35,7 @@
   command: tar xfz /tmp/{{ zookeeper_tar }} -C /opt/zookeeper --strip-components=1
   tags:
     - install
-
+  
 - name: Create zookeeper log directory
   file: path={{ zookeeper_log_dir }} state=directory mode=755 owner=neverwinterdp
   sudo: yes
@@ -48,7 +54,7 @@
   stat: path={{zookeeper_data_dir}}
   register: data_dir
   tags:
-  - configure
+   - configure
     
 - name: Create zookeeper data directory
   file: path={{ zookeeper_data_dir }} state=directory owner=neverwinterdp 
@@ -79,6 +85,13 @@
 - name: Stop Zookeeper Service
   service: name=zookeeper state=stopped enabled=no
   sudo: true
+  when: ansible_virtualization_type != 'docker'
+  tags:
+  - stop
+
+- name: Stop Zookeeper Service on docker container
+  command: "{{ zookeeper_home_dir }}/bin/zkServer.sh stop"
+  when: ansible_virtualization_type == 'docker'
   tags:
   - stop
 
@@ -91,12 +104,13 @@
 - name: Start Zookeeper Service
   service: name=zookeeper state=started enabled=yes
   sudo: true
+  when: ansible_virtualization_type != 'docker'
   tags:
   - start
-  
-- name: Restart Zookeeper Service
-  service: name=zookeeper state=restarted enabled=no
-  sudo: true
+
+- name: Start Zookeeper Service on docker container
+  command: "{{ zookeeper_home_dir }}/bin/zkServer.sh start"
+  when: ansible_virtualization_type == 'docker'
   tags:
-  - restart  
+  - start
   

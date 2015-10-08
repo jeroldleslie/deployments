@@ -1,17 +1,31 @@
+#Include variables from file
+- include_vars: "../../../profile/{{ profile_type | default('default') }}.yml"
+  tags: 
+    [ start, stop ]
+
 - name: Stop nodemanager Service
   service: name=hadoop-nodemanager state=stopped enabled=no
   sudo: true
+  when: ansible_virtualization_type != 'docker'
+  tags:
+  - stop
+
+- name: Stop nodemanager Service on docker
+  shell: "{{ hadoop_master.software.installation.hadoop_home_dir }}/sbin/yarn-daemon.sh stop nodemanager"
+  when: ansible_virtualization_type == 'docker'
   tags:
   - stop
   
 - name: Start nodemanager Service
   service: name=hadoop-nodemanager state=started enabled=yes
   sudo: true
+  when: ansible_virtualization_type != 'docker'
+  tags:
+  - start
+
+- name: Start nodemanager Service on docker
+  shell: "{{ hadoop_master.software.installation.hadoop_home_dir }}/sbin/yarn-daemon.sh start nodemanager"
+  when: ansible_virtualization_type == 'docker'
   tags:
   - start
   
-- name: Restart nodemanager Service
-  service: name=hadoop-nodemanager state=restarted enabled=no
-  sudo: true
-  tags:
-  - restart 
