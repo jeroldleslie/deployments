@@ -5,4 +5,5 @@
   remote_user: neverwinterdp
   roles:
     - common
+    - increase_open_file_limit
     - clustercommander
