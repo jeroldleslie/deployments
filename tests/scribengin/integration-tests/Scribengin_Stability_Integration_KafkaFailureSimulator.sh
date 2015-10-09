@@ -10,7 +10,7 @@ source $SCRIPT_DIR/setupEnvironment.sh $@
 ssh -o StrictHostKeyChecking=no neverwinterdp@hadoop-master "cd /opt/cluster && mkdir -p /opt/neverwinterdp/scribengin/tools/kafka/junit-reports"
 ssh -o StrictHostKeyChecking=no neverwinterdp@hadoop-master "cd /opt/cluster &&                                     \
                                   python clusterCommander.py --debug kafkafailure                                    \
-                                  --wait-before-start 30 --failure-interval 30 --kill-method shutdown                 \
+                                  --wait-before-start 90 --failure-interval 90 --kill-method shutdown                 \
                                   --servers-to-fail-simultaneously 1                                                 \
                                   --junit-report /opt/neverwinterdp/scribengin/tools/kafka/junit-reports/kafkaFailureReport.xml" &
 FAIL_SIM_PID=$!
