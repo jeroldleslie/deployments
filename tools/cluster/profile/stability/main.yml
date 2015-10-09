@@ -4,12 +4,12 @@ kafka:
     num: 3
   software:
     jvm:
-      KAFKA_HEAP_SIZE: 1500
+      KAFKA_HEAP_SIZE: 1536
     server-properties:
       num_partitions: 8
-      log_retention_hours: 1
-      log_retention_bytes: 250000000
+      log_retention_bytes: 524288000
       default_replication_factor: 2
+      log_segment_bytes: 26214400
 
 zookeeper:
   hardware:
@@ -17,9 +17,9 @@ zookeeper:
     num: 1
   software:
     jvm:
-      ZOOKEEPER_HEAP_SIZE: 1024
+      ZOOKEEPER_HEAP_SIZE: 1536
     zoo-cfg:
-      maxClientCnxns: 25
+      maxClientCnxns: 60
 
 hadoop-master:
   hardware:
@@ -54,12 +54,12 @@ hadoop-worker:
   
 elasticsearch:  
   hardware:
-    memory: 512mb
+    memory: 4gb
     num: 1
   software:
 
 monitoring:
   hardware:
-    memory: 512mb
+    memory: 2gb
     num: 1
   software:

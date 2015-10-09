@@ -6,6 +6,7 @@
   roles:
     - common
     - clustercommander
+    - increase_open_file_limit
 
 - name: Hadoop Master and Workers
   hosts: hadoop_master:hadoop_worker
