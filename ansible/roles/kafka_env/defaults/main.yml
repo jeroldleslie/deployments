@@ -25,7 +25,7 @@ log_retention_bytes: 1073741824
 log_flush_interval_messages: 10000
 log_flush_interval_ms: 1000
 
-zookeeper_connection_timeout_ms: 1000000
+zookeeper_connection_timeout_ms: 6000
 # NOTE: properties below are commented in template/server.properties.j2 
 # which kafka taking the default value. 
 # if you modify the below properties you need to uncomment 
@@ -35,7 +35,7 @@ advertised_host_name: <hostname routable by clients>
 advertised_port: <port accessible by clients>
 
 # CONSUMER PROPERTIES
-consumer_zookeeper_connection_timeout_ms: 1000000
+consumer_zookeeper_connection_timeout_ms: 6000
 group_id: neverwinterdp
 # NOTE: properties below are commented in template/consumer.properties.j2 
 # which kafka taking the default value. 
