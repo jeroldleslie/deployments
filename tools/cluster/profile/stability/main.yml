@@ -20,6 +20,9 @@ zookeeper:
     jvm:
       ZOOKEEPER_HEAP_SIZE: 1536
     zoo-cfg:
+      tickTime: 2000
+      initLimit: 10
+      syncLimit: 5
       maxClientCnxns: 60
 
 hadoop-master:
