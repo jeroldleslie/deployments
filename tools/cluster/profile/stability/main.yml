@@ -8,8 +8,9 @@ kafka:
     server-properties:
       num_partitions: 8
       default_replication_factor: 2
-      log_retention_bytes: 524288000
-      log_segment_bytes: 26214400
+      log_segment_bytes:    400000000
+      log_retention_bytes: 1200000000
+      log_retention_hours: 2
 
 zookeeper:
   hardware:
@@ -52,7 +53,7 @@ hadoop-worker:
   
 elasticsearch:  
   hardware:
-    memory: 4gb
+    memory: 2gb
     num: 1
   software:
 

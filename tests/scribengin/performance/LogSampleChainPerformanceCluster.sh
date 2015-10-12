@@ -5,11 +5,10 @@ SCRIPT_DIR=$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )
 source $SCRIPT_DIR/setupEnvironment.sh $@
 
 
-ssh -o "StrictHostKeyChecking no" neverwinterdp@hadoop-master "cd /opt/neverwinterdp && ./scribengin/bin/shell.sh scribengin info"
+ssh -o 'StrictHostKeyChecking no' neverwinterdp@hadoop-master 'cd /opt/neverwinterdp && ./scribengin/bin/shell.sh scribengin info'
 
 
-ssh -o "StrictHostKeyChecking no" neverwinterdp@hadoop-master "chmod +x /opt/neverwinterdp/dataflow/log-sample/bin/*.sh"
-
+ssh -o 'StrictHostKeyChecking no' neverwinterdp@hadoop-master 'chmod +x /opt/neverwinterdp/dataflow/log-sample/bin/*.sh'
 
 STORAGE_OPTS="--storage=hdfs"
 DATAFLOW_OPTS="--dedicated-executor=false --num-of-worker=2 --num-of-executor-per-worker=4 --num-of-stream=16 --num-of-message=25000000 --message-size=512"
