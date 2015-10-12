@@ -1,4 +1,5 @@
 #!/bin/bash
 
 ../../../docker/scribengin/docker.sh cluster --clean-containers --run-containers
-./LogSampleChainSmallCluster.sh  --stop --clean --build --deploy --start --profile-type=stability
+
+./LogSampleChainSmallCluster.sh --build --deploy --start --profile-type=stability
