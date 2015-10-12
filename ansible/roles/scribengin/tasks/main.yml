@@ -115,14 +115,18 @@
   
 - name: Stop VM Service
   #service: name=vm state=stopped enabled=no
-  command: "{{ remote_scribengin_home }}scribengin/bin/shell.sh vm shutdown"
+  #command: "{{ remote_scribengin_home }}scribengin/bin/shell.sh vm shutdown"
+  shell: kill -9 $(jps -m | grep 'vm-scribengin-master' | awk '{print $1}') && kill -9 $(jps -m | grep 'vm-master' | awk '{print $1}') && kill -9 $(jps -m | grep 'dataflow-master-*' | awk '{print $1}') && kill -9 $(jps -m | grep 'dataflow-worker-*' | awk '{print $1}') && kill -9 $(jps -m | grep 'vm-log-generator-*' | awk '{print $1}')
+  ignore_errors: yes
   sudo: true
   tags:
     - stop
 
 - name: Stop scribengin Service
   #service: name=scribengin state=stopped enabled=no
-  command: "{{ remote_scribengin_home }}scribengin/bin/shell.sh scribengin shutdown"
+  #command: "{{ remote_scribengin_home }}scribengin/bin/shell.sh scribengin shutdown"
+  shell: kill -9 $(jps -m | grep 'vm-scribengin-master' | awk '{print $1}') && kill -9 $(jps -m | grep 'vm-master' | awk '{print $1}') && kill -9 $(jps -m | grep 'dataflow-master-*' | awk '{print $1}') && kill -9 $(jps -m | grep 'dataflow-worker-*' | awk '{print $1}') && kill -9 $(jps -m | grep 'vm-log-generator-*' | awk '{print $1}')
+  ignore_errors: yes
   sudo: true
   tags:
     - stop

@@ -109,13 +109,14 @@
   - stop
 
 - name: Stop Elasticsearch Service on docker container
-  shell: "/opt/elasticsearch/bin/elasticsearch.sh"
+  shell: kill -9 $(jps -m | grep 'Main' | awk '{print $1}')
   when: ansible_virtualization_type == 'docker'
+  ignore_errors: yes
   tags:
   - stop
 
 - name: Clean Elasticsearch logs and datas
-  shell: "/opt/elasticsearch/data"
+  shell: "rm -rf /opt/elasticsearch/data"
   sudo: yes 
   tags:
   - clean

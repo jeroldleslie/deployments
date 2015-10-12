@@ -116,5 +116,6 @@ log.cleaner.enable={{ kafka.software.server_properties.log_cleaner_enable }}
 # You can also append an optional chroot string to the urls to specify the
 # root directory for all kafka znodes.
 zookeeper.connect={% for host in groups['zookeeper'] %}{{ host }}:{{ kafka.software.server_properties.zookeeper_clientport }}{% if not loop.last %},{% endif %}{% endfor %}
+
 # Timeout in ms for connecting to zookeeper
 zookeeper.connection.timeout.ms={{ kafka.software.server_properties.zookeeper_connection_timeout_ms }}

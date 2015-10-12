@@ -78,7 +78,7 @@
   tags:
     - start
        
-#- name: Start kibana service
+##- name: Start kibana service
 #  sudo: yes
 #  service: name=kibana4 state=started enabled=yes
 
