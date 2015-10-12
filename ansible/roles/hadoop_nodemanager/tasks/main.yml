@@ -16,6 +16,12 @@
   tags:
   - stop
   
+- name: Kill NodeManager
+  shell:  kill -9 $(jps -m | grep 'NodeManager' | awk '{print $1}')
+  ignore_errors: yes
+  tags:
+    - force-stop
+    
 - name: Start nodemanager Service
   service: name=hadoop-nodemanager state=started enabled=yes
   sudo: true

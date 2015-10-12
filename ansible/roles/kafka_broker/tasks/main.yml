@@ -77,6 +77,12 @@
   ignore_errors: yes
   tags:
     - stop
+
+- name: Kill Kafka
+  shell:  kill -9 $(jps -m | grep 'Kafka' | awk '{print $1}')
+  ignore_errors: yes
+  tags:
+    - force-stop    
     
 - name: Clean kafka logs and datas
   shell: "rm -rf {{ kafka_home_dir }}/data && rm -rf {{ kafka_home_dir }}/logs"

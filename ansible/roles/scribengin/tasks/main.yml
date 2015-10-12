@@ -113,35 +113,45 @@
   tags:
     - install
   
-- name: Stop VM Service
-  #service: name=vm state=stopped enabled=no
-  #command: "{{ remote_scribengin_home }}scribengin/bin/shell.sh vm shutdown"
-  shell: kill -9 $(jps -m | grep 'vm-scribengin-master' | awk '{print $1}') && kill -9 $(jps -m | grep 'vm-master' | awk '{print $1}') && kill -9 $(jps -m | grep 'dataflow-master-*' | awk '{print $1}') && kill -9 $(jps -m | grep 'dataflow-worker-*' | awk '{print $1}') && kill -9 $(jps -m | grep 'vm-log-generator-*' | awk '{print $1}')
+- name: Stop vm-scribengin-master-*
+  shell: kill -9 $(jps -m | grep 'vm-scribengin-master-*' | awk '{print $1}')
   ignore_errors: yes
-  sudo: true
   tags:
-    - stop
+    [ stop, force-stop ]
 
-- name: Stop scribengin Service
-  #service: name=scribengin state=stopped enabled=no
-  #command: "{{ remote_scribengin_home }}scribengin/bin/shell.sh scribengin shutdown"
-  shell: kill -9 $(jps -m | grep 'vm-scribengin-master' | awk '{print $1}') && kill -9 $(jps -m | grep 'vm-master' | awk '{print $1}') && kill -9 $(jps -m | grep 'dataflow-master-*' | awk '{print $1}') && kill -9 $(jps -m | grep 'dataflow-worker-*' | awk '{print $1}') && kill -9 $(jps -m | grep 'vm-log-generator-*' | awk '{print $1}')
+- name: Stop vm-master-*
+  shell: "kill -9 $(jps -m | grep 'vm-master-*' | awk '{print $1}')"
   ignore_errors: yes
-  sudo: true
   tags:
-    - stop
-  
+    [ stop, force-stop ]
+
+- name: Stop dataflow-master-*
+  shell: kill -9 $(jps -m | grep 'dataflow-master-*' | awk '{print $1}') 
+  ignore_errors: yes
+  tags:
+    [ stop,force-stop ]
+    
+- name: Stop dataflow-worker-*
+  shell: kill -9 $(jps -m | grep 'dataflow-worker-*' | awk '{print $1}') 
+  ignore_errors: yes
+  tags:
+    [ stop,force-stop ]
+
+- name: Stop vm-log-generator-*
+  shell: kill -9 $(jps -m | grep 'vm-log-generator-*' | awk '{print $1}') 
+  ignore_errors: yes
+  tags:
+    [ stop,force-stop ]
+        
 - name: Start VM Service
   #service: name=vm state=started enabled=yes
-  command: "{{ remote_scribengin_home }}scribengin/bin/shell.sh vm start"
-  sudo: true
+  shell: "{{ remote_scribengin_home }}scribengin/bin/shell.sh vm start"
   tags:
     - start
 
 - name: Start scribengin Service
   #service: name=scribengin state=started enabled=yes
-  command: "{{ remote_scribengin_home }}scribengin/bin/shell.sh scribengin start"
-  sudo: true
+  shell: "{{ remote_scribengin_home }}scribengin/bin/shell.sh scribengin start"
   tags:
     - start
 

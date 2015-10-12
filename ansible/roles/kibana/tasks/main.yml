@@ -56,13 +56,27 @@
   tags:
   - stop
 
-- name: Stop Kibana Service on docker container
-  shell: "/etc/init.d/kibana4 stop"
+#- name: Stop Kibana Service on docker container
+#  shell: "/etc/init.d/kibana4 stop"
+#  sudo: yes
+#  when: ansible_virtualization_type == 'docker'
+#  tags:
+#  - stop
+
+- name: Kill Kibana
+  shell: kill -9 $(ps -ef | grep kibana | grep -v grep | awk '{print $2}')
   sudo: yes
-  when: ansible_virtualization_type == 'docker'
+  ignore_errors: yes
   tags:
-  - stop
-  
+    [ stop, force-stop ]
+
+- name: Remove pid
+  shell: rm /opt/kibana/kibana.pid
+  sudo: yes
+  ignore_errors: yes
+  tags:
+    [ stop, force-stop ]
+     
 - name: Start Kibana Service
   service: name=kibana state=started enabled=yes
   sudo: true

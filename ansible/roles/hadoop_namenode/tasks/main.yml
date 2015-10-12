@@ -15,7 +15,13 @@
   when: ansible_virtualization_type == 'docker'
   tags:
     - stop
-  
+
+- name: Kill NameNode
+  shell:  kill -9 $(jps -m | grep 'NameNode' | awk '{print $1}')
+  ignore_errors: yes
+  tags:
+    - force-stop
+    
 - name: Start Namenode Service
   service: name=hadoop-namenode state=started enabled=yes
   sudo: true

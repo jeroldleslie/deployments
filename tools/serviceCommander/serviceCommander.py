@@ -114,7 +114,11 @@ def mastercommand(debug, logfile, services, subset, inventory_file, cluster, res
 
     #Loop through each service/playbook
     for playbook in services :
-      playbook = join(ansible_root_dir, playbook)+".yml"
+      if ( playbook == "scribengin" ) and ( tag == _force_stop_string or tag == _stop_string ):
+        playbook = join(ansible_root_dir, playbook)+"_kill.yml"
+      else:
+        playbook = join(ansible_root_dir, playbook)+".yml"
+        
       logging.debug("Running playbook: "+playbook)
       logging.debug("Tags: "+tag)
       logging.debug("Inventory: "+inventory_file)

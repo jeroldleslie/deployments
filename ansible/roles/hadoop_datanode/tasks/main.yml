@@ -16,6 +16,12 @@
   tags:
     - stop
 
+- name: Kill DataNode
+  shell:  kill -9 $(jps -m | grep 'DataNode' | awk '{print $1}')
+  ignore_errors: yes
+  tags:
+    - force-stop  
+    
 - name: Start datanode Service
   service: name=hadoop-datanode state=started enabled=yes
   sudo: true

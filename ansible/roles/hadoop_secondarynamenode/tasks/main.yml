@@ -15,7 +15,13 @@
   when: ansible_virtualization_type == 'docker'
   tags:
   - stop  
-  
+
+- name: Kill SecondaryNameNode
+  shell:  kill -9 $(jps -m | grep 'SecondaryNameNode' | awk '{print $1}')
+  ignore_errors: yes
+  tags:
+    - force-stop
+     
 - name: Start secondarynamenode Service
   service: name=hadoop-secondarynamenode state=started enabled=yes
   sudo: true
