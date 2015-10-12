@@ -9,7 +9,7 @@ source $SCRIPT_DIR/setupEnvironment.sh $@
 #Run failure simulator in the background
 ssh -o StrictHostKeyChecking=no neverwinterdp@hadoop-master "mkdir -p /opt/neverwinterdp/junit-reports"
 ssh -o StrictHostKeyChecking=no neverwinterdp@hadoop-master "cd /opt/cluster &&                                     \
-								  sleep 120 &&                                                                      \
+								  sleep 300 &&                                                                      \
                                   python clusterCommander.py --debug kafkafailure                                   \
                                   --wait-before-start 90 --failure-interval 90 --kill-method shutdown               \
                                   --servers-to-fail-simultaneously 1                                                \
