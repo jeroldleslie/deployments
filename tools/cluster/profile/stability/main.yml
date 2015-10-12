@@ -7,9 +7,10 @@ kafka:
       KAFKA_HEAP_SIZE: 1536
     server-properties:
       num_partitions: 8
-      log_retention_bytes: 524288000
       default_replication_factor: 2
-      log_segment_bytes: 26214400
+      log_segment_bytes:    400000000
+      log_retention_bytes: 1200000000
+      log_retention_hours: 2
 
 zookeeper:
   hardware:
@@ -37,8 +38,8 @@ hadoop-master:
 
       yarn_nodemanager_resource_cpu_vcores: 6
       yarn_nodemanager_resource_memory_mb:  3072
-      yarn_nodemanager_vmem_pmem_ratio:     2
-      yarn_nodemanager_vmem_check_enabled: false
+      yarn_nodemanager_vmem_pmem_ratio:     3
+      yarn_nodemanager_vmem_check_enabled:  true
 
       yarn_scheduler_minimum_allocation_mb: 512
       yarn_scheduler_minimum_allocation_vcores: 1
@@ -54,7 +55,7 @@ hadoop-worker:
   
 elasticsearch:  
   hardware:
-    memory: 4gb
+    memory: 2gb
     num: 1
   software:
 
