@@ -28,7 +28,7 @@ class ScribenginDigitalOcean():
                    "num" : 1,
                    "memory": "512mb",
                    "ssh_keys": manager.get_all_sshkeys(),
-                   "private_networking" : "false",
+                   "private_networking" : "true",
                   }
     
     self.hostsFileStartString="##SCRIBENGIN CLUSTER START##"
@@ -231,8 +231,9 @@ class ScribenginDigitalOcean():
           
           hostAndIPs.append(
                           {
-                           "name": dropletName,
-                           "ip"  : droplet.ip_address,
+                           "name"       : dropletName,
+                           "ip"         : droplet.ip_address,
+                           "private_ip" : str(droplet.private_ip_address)
                            })
     logging.debug("Host and Ips: "+str(hostAndIPs))
     return hostAndIPs
@@ -258,11 +259,37 @@ class ScribenginDigitalOcean():
     hostString +=self.hostsFileEndString+"\n"
     logging.debug("Hosts String: \n"+hostString)
     return hostString
+
+  def getHostsStringPrivateNetworking(self, subdomain=None):
+    """
+    Instead of using public IP, use the private IP addresses from digital digitalOcean
+    """
+    hostAndIps = self.getScribenginHostsAndIPs(subdomain)
+    hostString = self.hostsFileStartString+"\n"
+    for host in hostAndIps:
+      #Create default private entry
+      hostString += host["private_ip"]+" "+host["name"]
+      if subdomain is not None:
+        hostString += " "+host["name"]+"."+subdomain+" "+host["name"]+"."+subdomain+".private\n"
+      else:
+        hostString += "\n"
+
+      #Create public entry
+      hostString += host["ip"]+" "
+      if subdomain is not None:
+        hostString += " "+host["name"]+"."+subdomain+".public\n"
+      else:
+        hostString += ".public\n"
+
+
+    hostString +=self.hostsFileEndString+"\n"
+    logging.debug("Hosts String: \n"+hostString)
+    return hostString
     
     
   def updateRemoteHostsFile(self, subdomain=None, hostsFile='/etc/hosts', user="root", joinTimeout=60):
     cluster = Cluster()
-    hostString = self.getHostsString(subdomain)
+    hostString = self.getHostsStringPrivateNetworking(subdomain)
     
     threads = []
     for server in cluster.servers:

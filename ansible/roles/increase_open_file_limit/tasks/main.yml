@@ -1,0 +1,11 @@
+- name: Remove any previous open file limit lines (lineinfile removes one line at a time)
+  sudo: yes
+  lineinfile: dest={{ limits_file }} state=absent regexp="(.*\s*[hard|soft]\s*nofile\s*\d*\s*)+" 
+
+- name: Remove any previous open file limit lines (lineinfile removes one line at a time, 2nd run)
+  sudo: yes
+  lineinfile: dest={{ limits_file }} state=absent regexp="(.*\s*[hard|soft]\s*nofile\s*\d*\s*)+" 
+
+- name: Increase open file limit
+  sudo: yes
+  lineinfile: dest={{ limits_file }} state=present regexp="(.*\s*[hard|soft]\s*nofile\s*\d*\s*)+" line="{{ ndp_user }}   hard    nofile      {{ num_open_files }}\n{{ ndp_user }}   soft    nofile      {{num_open_files}}"
