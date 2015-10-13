@@ -11,7 +11,7 @@ ssh -o StrictHostKeyChecking=no neverwinterdp@hadoop-master "mkdir -p /opt/never
 ssh -o StrictHostKeyChecking=no neverwinterdp@hadoop-master "cd /opt/cluster &&                                     \
 								  sleep 300 &&                                                                      \
                                   python clusterCommander.py --debug kafkafailure                                   \
-                                  --wait-before-start 90 --failure-interval 90 --kill-method shutdown               \
+                                  --wait-before-start 120 --failure-interval 120 --kill-method shutdown               \
                                   --servers-to-fail-simultaneously 1                                                \
                                   --junit-report /opt/neverwinterdp/junit-reports/kafkaFailureReport.xml" &
 FAIL_SIM_PID=$!
