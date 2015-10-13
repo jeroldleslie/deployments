@@ -1,6 +1,6 @@
 ---
 
-- name: Deploy Kibana Charts
+- name: Kibana
   hosts: monitoring
   remote_user: neverwinterdp
   roles:
