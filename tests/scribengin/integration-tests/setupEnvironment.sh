@@ -110,7 +110,7 @@ if [ $CLEAN == "true" ] ; then
   $clusterCommander cluster --clean
 fi
 if [ $START == "true" ] ; then
-  $clusterCommander cluster --start --profile-type=$PROFILE_TYPE
+  $clusterCommander cluster --start --profile-type $PROFILE_TYPE
   #Give everything time to come up
   sleep 5
 fi
