@@ -47,6 +47,15 @@ zookeeper:
     memory: 2gb
     num: 1
   software:
+    installation:
+      zookeeper_home_dir: /opt/zookeeper
+      zookeeper_log_dir: /opt/zookeeper/logs
+      zookeeper_data_dir: /opt/zookeeper/data
+      zookeeper_clientport: 2181 
+      zookeeper_leader_port: 2888
+      zookeeper_election_port: 3888
+      zookeeper_tar: zookeeper-3.4.6.tar.gz
+      zookeeper_url: http://jenkinsdp.do.demandcube.com/{{zookeeper_tar}}
     jvm:
       ZOOKEEPER_HEAP_SIZE: 1536
     zoo_cfg:

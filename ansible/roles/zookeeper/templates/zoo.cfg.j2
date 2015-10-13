@@ -9,9 +9,9 @@ syncLimit={{ zookeeper.software.zoo_cfg.syncLimit }}
 # the directory where the snapshot is stored.
 # do not use /tmp for storage, /tmp here is just 
 # example sakes.
-dataDir={{ zookeeper_data_dir }}
+dataDir={{ zookeeper.software.installation.zookeeper_data_dir }}
 # the port at which the clients will connect
-clientPort={{ zookeeper_clientport }}
+clientPort={{ zookeeper.software.installation.zookeeper_clientport }}
 # the maximum number of client connections.
 # increase this if you need to handle more clients
 #maxClientCnxns={{ zookeeper.software.zoo_cfg.maxClientCnxns }}
@@ -28,5 +28,5 @@ clientPort={{ zookeeper_clientport }}
 #autopurge.purgeInterval={{ zookeeper.software.zoo_cfg.autopurge_purgeInterval }}
 
 {% for host in groups['zookeeper'] %}
-server.{{ host | regex_replace('.*?([0-9]+)$', '\\1') }}={{ host }}:{{zookeeper_leader_port}}:{{zookeeper_election_port}}
+server.{{ host | regex_replace('.*?([0-9]+)$', '\\1') }}={{ host }}:{{zookeeper.software.installation.zookeeper_leader_port}}:{{zookeeper.software.installation.zookeeper_election_port}}
 {% endfor %}

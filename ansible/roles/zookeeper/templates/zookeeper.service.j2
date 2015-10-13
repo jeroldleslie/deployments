@@ -10,7 +10,7 @@ RefuseManualStop=no
 [Service]
 Type=forking
 User=neverwinterdp
-ExecStart={{ zookeeper_home_dir }}/bin/zkServer.sh start
+ExecStart={{ zookeeper.software.installation.zookeeper_home_dir }}/bin/zkServer.sh start
 
 [Install]
 WantedBy=multi-user.target
