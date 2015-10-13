@@ -8,15 +8,19 @@
 - include: ../../../programs/epel.yml
   tags:
     - install
+
 - include: ../../../programs/rsync.yml
   tags:
     - install
+
 - include: ../../../programs/pip.yml
   tags:
     - install
+
 - include: ../../../programs/openjdk7_java.yml
   tags:
     - install
+
 - include: ../../../programs/sshkeys.yml
   tags:
     - install
@@ -28,9 +32,11 @@
 - include: ../../aws_credentials/tasks/main.yml
   tags:
     - install
+
 - include: ../../../programs/libffi.yml
   tags:
     - install
+
 - include: ../../../programs/npm.yml
   tags:
     - install
