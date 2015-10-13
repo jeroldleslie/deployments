@@ -25,6 +25,8 @@ MONITOR_PID=$!
 ssh -o "StrictHostKeyChecking no" neverwinterdp@hadoop-master "cd /opt/neverwinterdp/ &&  ./dataflow/log-sample/bin/run-dataflow-chain.sh   \
 														--num-of-message=1000000  --generator-max-wait-time=10000 --generator-send-period=1 \
 														--max-monitor-run-time=604800000 --max-run-time=604800000                           \
+														--dedicated-executor=false --num-of-worker=2 --num-of-executor-per-worker=2         \
+														--num-of-stream=8 --message-size=512                                                \
 														--junit-report junit-reports/ScribenginKafkaFailureStability.xml"
 
 
