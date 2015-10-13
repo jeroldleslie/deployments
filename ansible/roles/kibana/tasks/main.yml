@@ -77,18 +77,18 @@
   tags:
     [ stop, force-stop ]
      
-- name: Start Kibana Service
-  service: name=kibana state=started enabled=yes
-  sudo: true
-  when: ansible_virtualization_type != 'docker'
-  tags:
-    - start
+#- name: Start Kibana Service
+#  service: name=kibana state=started enabled=yes
+#  sudo: true
+#  when: ansible_virtualization_type != 'docker'
+#  tags:
+#    - start
 
 - name: Start Kibana Service on docker container
   shell: "/etc/init.d/kibana4 start"
   async: 50
   sudo: yes
-  when: ansible_virtualization_type == 'docker'
+  #when: ansible_virtualization_type == 'docker'
   tags:
     - start
        

@@ -8,10 +8,8 @@ Before=sysinit.target shutdown.target
 RefuseManualStop=no
 
 [Service]
-Type=forking
 User=neverwinterdp
-ExecStart=/etc/init.d/kibana4 start
-ExecStart=/etc/init.d/kibana4 stop
+ExecStart=/opt/kibana/bin/kibana
 
 [Install]
 WantedBy=multi-user.target
