@@ -6,7 +6,8 @@ ROOT=$SCRIPT_DIR/../../..
 
 clusterCommander="$ROOT/tools/cluster/clusterCommander.py"
 
-$clusterCommander cluster --force-stop --clean status
+$clusterCommander cluster --execute "pkill -9 java" status
+$clusterCommander cluster --clean status
 $clusterCommander ansible --write-inventory-file --deploy-scribengin
 $clusterCommander cluster --start --profile-type=stability status
 
@@ -25,7 +26,7 @@ $SHELL scribengin info
 
 GENERATOR_OPTS="--generator-max-wait-time=60000 --generator-send-period=1"
 
-VALIDATOR_OPTS='--validator-disable'
+#VALIDATOR_OPTS='--validator-disable'
 
 STORAGE_OPTS="--storage=kafka"
 #KILL_WORKER_OPTS='--kill-worker-random=true --kill-worker-period=120000 --kill-worker-max=30'
