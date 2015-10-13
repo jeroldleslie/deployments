@@ -1,3 +1,5 @@
+#!/bin/bash
+
 #SCRIPT_DIR is the directory this script is in.  Allows us to execute without relative paths
 SCRIPT_DIR=$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )
 
