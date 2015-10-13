@@ -2,27 +2,31 @@
 #Include variables from file
 - include_vars: "../../../profile/{{ profile_type | default('default') }}.yml"
   tags: 
+    [ configure, install, clean, start, stop, force-stop ]
+
+- debug: msg="{{kafka}}"
+  tags: 
     [ configure, install ]
-    
+
 - name: Create kafka directory
-  file: path={{ kafka_home_dir }} state=directory
+  file: path={{ kafka.software.installation.kafka_home_dir }} state=directory
   tags:
     - install
 
 - name: Check if Kafka is already downloaded
-  stat: path=/tmp/{{ kafka_tgz }}
+  stat: path=/tmp/{{ kafka.software.installation.kafka_tgz }}
   register: downloaded
   tags:
     - install
   
 - name: Downloading Kafka 
-  get_url: url={{ kafka_tgz_url  }} dest=/tmp/{{ kafka_tgz }}
+  get_url: url={{ kafka.software.installation.kafka_tgz_url  }} dest=/tmp/{{ kafka.software.installation.kafka_tgz }}
   when: downloaded.stat.exists == false
   tags:
     - install
 
 - name: Decompress tar
-  command: tar xfz /tmp/{{ kafka_tgz }} -C {{ kafka_home_dir }} --strip-components=1
+  command: tar xfz /tmp/{{ kafka.software.installation.kafka_tgz }} -C {{ kafka.software.installation.kafka_home_dir }} --strip-components=1
   tags:
     - install
   
@@ -35,7 +39,7 @@
   - install
   
 - name: Add configurations file
-  template: src={{ item }}.j2 dest={{ kafka_home_dir }}/config/{{ item }}
+  template: src={{ item }}.j2 dest={{ kafka.software.installation.kafka_home_dir }}/config/{{ item }}
   sudo: yes
   with_items:
     - server.properties
@@ -45,7 +49,7 @@
     - configure
         
 - name: Add kafka-server-start.sh file
-  template: src={{ item }}.j2 dest={{ kafka_home_dir }}/bin/{{ item }}
+  template: src={{ item }}.j2 dest={{ kafka.software.installation.kafka_home_dir }}/bin/{{ item }}
   sudo: yes
   with_items:
     - kafka-server-start.sh
@@ -53,14 +57,14 @@
     - configure
 
 - name: Make kafka-server-start.sh executable
-  file: mode=u+rxw path={{ kafka_home_dir }}/bin/{{ item }}
+  file: mode=u+rxw path={{ kafka.software.installation.kafka_home_dir }}/bin/{{ item }}
   with_items:
     - kafka-server-start.sh
   tags:
     - configure
     
 - name: Move configuration files to container
-  copy: src=config/ dest={{ kafka_home_dir }}/config/
+  copy: src=config/ dest={{ kafka.software.installation.kafka_home_dir }}/config/
   tags:
     - configure
 
@@ -72,7 +76,7 @@
     - stop
 
 - name: Stop Kafka Service on docker
-  shell: "{{ kafka_home_dir }}/bin/kafka-server-stop.sh"
+  shell: "{{ kafka.software.installation.kafka_home_dir }}/bin/kafka-server-stop.sh"
   when: ansible_virtualization_type == 'docker'
   ignore_errors: yes
   tags:
@@ -85,7 +89,7 @@
     - force-stop    
     
 - name: Clean kafka logs and datas
-  shell: "rm -rf {{ kafka_home_dir }}/data && rm -rf {{ kafka_home_dir }}/logs"
+  shell: "rm -rf {{ kafka.software.installation.kafka_home_dir }}/data && rm -rf {{ kafka.software.installation.kafka_home_dir }}/logs"
   sudo: yes 
   tags:
     - clean
@@ -98,7 +102,7 @@
     - start
 
 - name: Start Kafka Service on docker
-  shell: "{{ kafka_home_dir }}/bin/kafka-server-start.sh -daemon {{ kafka_home_dir }}/config/server.properties"
+  shell: "{{ kafka.software.installation.kafka_home_dir }}/bin/kafka-server-start.sh -daemon {{ kafka.software.installation.kafka_home_dir }}/config/server.properties"
   when: ansible_virtualization_type == 'docker'
   tags:
     - start

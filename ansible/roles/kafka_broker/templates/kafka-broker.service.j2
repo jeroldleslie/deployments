@@ -10,7 +10,7 @@ RefuseManualStop=no
 [Service]
 Type=simple
 User=neverwinterdp
-ExecStart={{ kafka_home_dir }}/bin/kafka-server-start.sh {{ kafka_home_dir }}/config/server.properties
+ExecStart={{ kafka.software.installation.kafka_home_dir }}/bin/kafka-server-start.sh {{ kafka.software.installation.kafka_home_dir }}/config/server.properties
 
 [Install]
 WantedBy=multi-user.target

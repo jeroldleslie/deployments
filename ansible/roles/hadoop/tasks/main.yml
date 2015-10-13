@@ -1,7 +1,7 @@
 #Include variables from file
 - include_vars: "../../../profile/{{ profile_type | default('default') }}.yml"
   tags: 
-    [ configure, install, clean ]
+    [ configure, install, clean, start, stop, force-stop ]
     
 - name: Create hadoop directory
   file: path=/opt/hadoop state=directory
