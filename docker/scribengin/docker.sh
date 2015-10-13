@@ -195,7 +195,7 @@ function launch_intermediate_containers() {
   #container_update_hosts $@
   ansible_inventory $@ 
   
-  deploy_all $@
+  #deploy_all $@
   
   #Create base images for each container
   containers=( $(docker ps -a | grep scribengin | awk '{print $1 " " $NF}') )

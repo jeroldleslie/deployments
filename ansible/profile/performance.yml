@@ -60,7 +60,7 @@ zookeeper:
       zookeeper_leader_port: 2888
       zookeeper_election_port: 3888
       zookeeper_tar: zookeeper-3.4.6.tar.gz
-      zookeeper_url: http://jenkinsdp.do.demandcube.com/{{zookeeper_tar}}
+      zookeeper_url: http://jenkinsdp.do.demandcube.com/zookeeper-3.4.6.tar.gz
     jvm:
       ZOOKEEPER_HEAP_SIZE: 1536
     zoo_cfg:
@@ -121,9 +121,14 @@ elasticsearch:
     memory: 8gb
     num: 1
   software:
+    installation:
+      elasticsearch_home_dir: /opt/elasticsearch
 
 monitoring:
   hardware:
     memory: 2gb
     num: 1
   software:
+    installation:
+      kibana_url: https://download.elastic.co/kibana/kibana/kibana-4.1.1-linux-x64.tar.gz
+

@@ -7,6 +7,11 @@
 #  Or pass in path to neverwinterdp on the command line:
 #    #> ansible-playbook playbooks/scribenginCluster.yml -i scribengininventory --extra-vars "neverwinterdp_home_override=/path/to/NeverwinterDP"
 #############################################################################################################################################################
+#Include variables from file
+- include_vars: "../../../profile/{{ profile_type | default('default') }}.yml"
+  tags: 
+    [ install, clean, start, stop, force-stop ]
+
 - include: ../../../programs/npm.yml
   tags:
     - install
@@ -78,7 +83,7 @@
     - install
     
 - name: Make elasticsearch.sh executable
-  file: mode=u+rxw path=/opt/elasticsearch/bin/elasticsearch.sh
+  file: mode=u+rxw path="{{ elasticsearch.software.installation.elasticsearch_home_dir }}/bin/elasticsearch.sh"
   tags:
     - install
       
@@ -97,7 +102,7 @@
     - install
      
 #- name: Start elasticsearch
-#  shell: /opt/elasticsearch/bin/elasticsearch.sh
+#  shell: {{ elasticsearch.software.installation.elasticsearch_home_dir }}/bin/elasticsearch.sh
 #  tags:
 #    - install
 
@@ -115,7 +120,7 @@
     [ stop, force-stop ] 
 
 - name: Clean Elasticsearch logs and datas
-  shell: "rm -rf /opt/elasticsearch/data"
+  shell: "rm -rf {{ elasticsearch.software.installation.elasticsearch_home_dir }}/data"
   sudo: yes 
   tags:
   - clean
@@ -128,7 +133,7 @@
     - start
 
 - name: Start Elasticsearch
-  shell: "/opt/elasticsearch/bin/elasticsearch.sh"
+  shell: "{{ elasticsearch.software.installation.elasticsearch_home_dir }}/bin/elasticsearch.sh"
   when: ansible_virtualization_type == 'docker'
   tags:
     - start

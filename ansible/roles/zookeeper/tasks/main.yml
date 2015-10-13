@@ -19,7 +19,11 @@
   register: downloaded
   tags:
     - install
-  
+
+- debug: msg="{{zookeeper.software.installation.zookeeper_url}}"
+  tags:
+    - install
+
 - name: Downloading Zookeeper tgz
   get_url: url={{ zookeeper.software.installation.zookeeper_url  }} dest={{ zookeeper.software.installation.zookeeper_home_dir }}
   when: downloaded.stat.exists == false

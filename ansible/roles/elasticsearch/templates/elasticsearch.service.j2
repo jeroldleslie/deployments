@@ -10,7 +10,7 @@ RefuseManualStop=no
 [Service]
 Type=forking
 User=neverwinterdp
-ExecStart=/opt/elasticsearch/bin/elasticsearch.sh
+ExecStart={{ elasticsearch.software.installation.elasticsearch_home_dir}}/bin/elasticsearch.sh
 
 [Install]
 WantedBy=multi-user.target

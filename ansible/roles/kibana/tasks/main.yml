@@ -1,6 +1,10 @@
-
-- name: download kibana url = {{kibana_url}}
-  get_url: url={{kibana_url}} dest=/tmp/kibana.tar.gz
+#Include variables from file
+- include_vars: "../../../profile/{{ profile_type | default('default') }}.yml"
+  tags: 
+    [ install ]
+    
+- name: download kibana
+  get_url: url={{monitoring.software.installation.kibana_url}} dest=/tmp/kibana.tar.gz
   tags:
     - install
 
