@@ -7,7 +7,7 @@
   file: path=/opt/hadoop state=directory
   tags:
     - install
-    
+   
 - name: Check if Hadoop is already downloaded
   stat: path=/tmp/{{ hadoop_master.software.installation.hadoop_tar }}
   register: downloaded
