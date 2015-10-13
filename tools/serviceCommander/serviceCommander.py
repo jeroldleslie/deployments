@@ -38,7 +38,6 @@ _cluster_array     = [ "elasticsearch","zookeeper", "kafka", "hadoop", "scribeng
 @click.option('--inventory-file',  '-i', default='inventory', help="Ansible inventory file to use")
 @click.option('--cluster',         '-u', is_flag=True, help="Alternative to --services option, runs for entire cluster")
 
-@click.option('--restart',         '-r', is_flag=True, help="restart services")
 @click.option('--start',           '-s', is_flag=True, help="start services")
 @click.option('--stop',            '-t', is_flag=True, help="stop services")
 @click.option('--force-stop',      '-f', is_flag=True, help="kill services")
@@ -48,7 +47,7 @@ _cluster_array     = [ "elasticsearch","zookeeper", "kafka", "hadoop", "scribeng
 @click.option('--profile',         '-p', default='',   help="profile type for service configuration" )
 @click.option('--ansible-root-dir',      default=dirname(dirname(dirname(abspath(__file__))))+"/ansible", help="Root directory for Ansible")
 @click.option('--max-retries',     '-m', default=5, help="Max retries for running the playbook")
-def mastercommand(debug, logfile, services, subset, inventory_file, cluster, restart, start, stop, force_stop, clean, install, configure, profile, ansible_root_dir, max_retries):
+def mastercommand(debug, logfile, services, subset, inventory_file, cluster, start, stop, force_stop, clean, install, configure, profile, ansible_root_dir, max_retries):
   if debug:
     #Set logging file, overwrite file, set logging level to DEBUG
     logging.basicConfig(filename=logfile, filemode="w", level=logging.DEBUG)
@@ -60,17 +59,17 @@ def mastercommand(debug, logfile, services, subset, inventory_file, cluster, res
   
   
   tagsToRun=[]
+  if force_stop:
+    tagsToRun.append(_force_stop_string)
+  if stop:
+    tagsToRun.append(_stop_string)
   if install:
     tagsToRun.append(_install_string)
   if configure:
     tagsToRun.append(_configure_string)
-  if stop or restart:
-    tagsToRun.append(_stop_string)
-  if force_stop:
-    tagsToRun.append(_force_stop_string)
   if clean:
     tagsToRun.append(_clean_string)
-  if start or restart:
+  if start:
     tagsToRun.append(_start_string)
   
   
