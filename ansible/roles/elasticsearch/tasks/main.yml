@@ -108,9 +108,8 @@
   tags:
   - stop
 
-- name: Kill Elasticsearch Service on docker container
+- name: Kill Elasticsearch
   shell: kill -9 $(jps -m | grep 'Main' | awk '{print $1}')
-  when: ansible_virtualization_type == 'docker'
   ignore_errors: yes
   tags:
     [ stop, force-stop ] 
