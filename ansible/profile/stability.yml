@@ -4,14 +4,10 @@ kafka:
     num: 3
   software:
     installation:
-      zookeeper_home_dir: /opt/zookeeper
-      zookeeper_log_dir: /opt/zookeeper/logs
-      zookeeper_data_dir: /opt/zookeeper/data
-      zookeeper_clientport: 2181 
-      zookeeper_leader_port: 2888
-      zookeeper_election_port: 3888
-      zookeeper_tar: zookeeper-3.4.6.tar.gz
-      zookeeper_url: http://jenkinsdp.do.demandcube.com/{{zookeeper_tar}}
+      kafka_home_dir: /opt/kafka
+      kafka_conf_dir: /opt/kafka/config
+      kafka_tgz: kafka_2.10-0.8.2.0.tgz
+      kafka_tgz_url: http://jenkinsdp.do.demandcube.com/kafka_2.10-0.8.2.0.tgz
     jvm:
       KAFKA_HEAP_SIZE: 1500
     server_properties:
@@ -56,6 +52,15 @@ zookeeper:
     memory: 512mb
     num: 1
   software:
+    installation:
+      zookeeper_home_dir: /opt/zookeeper
+      zookeeper_log_dir: /opt/zookeeper/logs
+      zookeeper_data_dir: /opt/zookeeper/data
+      zookeeper_clientport: 2181 
+      zookeeper_leader_port: 2888
+      zookeeper_election_port: 3888
+      zookeeper_tar: zookeeper-3.4.6.tar.gz
+      zookeeper_url: http://jenkinsdp.do.demandcube.com/zookeeper_tar
     jvm:
       ZOOKEEPER_HEAP_SIZE: 256
     zoo_cfg:
