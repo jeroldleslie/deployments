@@ -39,33 +39,34 @@ class Cluster(ServerSet):
     hadoopMasters = []
     elasticsearchServers = []
     genericServers = []
-    
     f = open(path, 'r')
     for line in f:
       if any(regex.match(line) for regex in self.serverRegexes):
         hostname = line.rstrip().split()[1]
-        if re.match("kafka.*", hostname, re.IGNORECASE) is not None:
-          self.addServer(KafkaServer(hostname, "kafka"))
-          kafkaServers.append(hostname)
-        if re.match("zookeeper.*", hostname, re.IGNORECASE) is not None:
-          zkList.append(hostname)
-          self.addServer(ZookeeperServer(hostname, "zookeeper"))
-        if re.match("hadoop-master.*", hostname, re.IGNORECASE) is not None:
-          hadoopMasters.append(hostname)
-          self.addServer(HadoopMasterServer(hostname))
-        if re.match("hadoop-worker.*", hostname, re.IGNORECASE) is not None :
-          hadoopWorkers.append(hostname)
-          self.addServer(HadoopWorkerServer(hostname, "hadoop-worker"))
-        if re.match("elasticsearch.*", hostname, re.IGNORECASE) is not None:
-          self.addServer(ElasticSearchServer(hostname, "elasticsearch"))
-          elasticsearchServers.append(hostname)
-        if re.match("generic.*", hostname, re.IGNORECASE) is not None:
-          self.addServer(GenericServer(hostname, "generic"))
-          genericServers.append(hostname)
-        #TODO Make/refactor monitoring server 
-        if re.match("monitoring.*", hostname, re.IGNORECASE) is not None:
-          self.addServer(GenericServer(hostname, "generic"))
-          genericServers.append(hostname)
+        #So we don't double parse the hosts when we have .private and .public hostnames (digital ocean)
+        if not  re.search("public", hostname, re.IGNORECASE):
+          if re.match("kafka.*", hostname, re.IGNORECASE) is not None:
+            self.addServer(KafkaServer(hostname, "kafka"))
+            kafkaServers.append(hostname)
+          if re.match("zookeeper.*", hostname, re.IGNORECASE) is not None:
+            zkList.append(hostname)
+            self.addServer(ZookeeperServer(hostname, "zookeeper"))
+          if re.match("hadoop-master.*", hostname, re.IGNORECASE) is not None:
+            hadoopMasters.append(hostname)
+            self.addServer(HadoopMasterServer(hostname))
+          if re.match("hadoop-worker.*", hostname, re.IGNORECASE) is not None :
+            hadoopWorkers.append(hostname)
+            self.addServer(HadoopWorkerServer(hostname, "hadoop-worker"))
+          if re.match("elasticsearch.*", hostname, re.IGNORECASE) is not None:
+            self.addServer(ElasticSearchServer(hostname, "elasticsearch"))
+            elasticsearchServers.append(hostname)
+          if re.match("generic.*", hostname, re.IGNORECASE) is not None:
+            self.addServer(GenericServer(hostname, "generic"))
+            genericServers.append(hostname)
+          #TODO Make/refactor monitoring server
+          if re.match("monitoring.*", hostname, re.IGNORECASE) is not None:
+            self.addServer(GenericServer(hostname, "generic"))
+            genericServers.append(hostname)
           
     self.paramDict["kafkaServers"] = kafkaServers
     self.paramDict["zkList"] = zkList
