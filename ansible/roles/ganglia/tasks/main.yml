@@ -1,4 +1,9 @@
 ---
+- name: Install epel-release
+  sudo: yes
+  yum: name=epel-release state=installed
+  when: ansible_distribution == 'CentOS' or ansible_distribution == 'Red Hat Enterprise Linux'
+
 - name: install ganglia client (Ubuntu)
   apt: pkg='ganglia-monitor' state=latest
   sudo: yes
@@ -27,11 +32,21 @@
 - name: Configure gmond (cluster name)
   sudo: yes
   replace: dest=/etc/ganglia/gmond.conf regexp='cluster\s*{\s*name\s*=\s*\"\unspecified\"' replace='cluster {\n  name = "{{ cluster }}"'
-
+  
 - name: Configure gmond (ganglia master url)
   sudo: yes
-  replace: dest=/etc/ganglia/gmond.conf regexp='udp_send_channel\s*{\s*"' replace='udp_send_channel {\n  host = {{ ganglia_url }}\n'
+  replace: dest=/etc/ganglia/gmond.conf regexp='udp_send_channel\s*{\s*' replace='udp_send_channel {\n  host = {{ ganglia_url }}\n'
+  
 
+- name: Configure gmond (remove multicast)
+  sudo: yes
+  replace: dest=/etc/ganglia/gmond.conf regexp='.*{{ item }}.*' replace=''
+  with_items:
+    - mcast_join
+    - mcast_join
+    - bind\s*=\s*\d*
+    - retry_bind
+  
 
 - name: Restart ganglia client service (Ubuntu)
   #command: /etc/init.d/ganglia-monitor restart
@@ -44,6 +59,7 @@
   sudo: yes
   when: ansible_distribution == 'CentOS' or ansible_distribution == 'Red Hat Enterprise Linux'
   when: ansible_virtualization_type != 'docker'
+  
 
 - name: Start gmond manually
   shell: "/usr/sbin/gmond"
