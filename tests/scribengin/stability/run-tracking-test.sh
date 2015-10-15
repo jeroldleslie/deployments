@@ -25,7 +25,7 @@ chmod +x $NEVERWINTERDP_BUILD/dataflow/log-sample/bin/*.sh
 $SHELL scribengin info
 
 GENERATOR_OPTS="\
-  --generator-num-of-chunk=30 --generator-num-of-message-per-chunk=10000000 --generator-num-of-writer=1 --generator-break-in-period=60 \
+  --generator-num-of-chunk=30 --generator-num-of-message-per-chunk=10000000 --generator-num-of-writer=1 --generator-break-in-period=70 \
   --generator-num-of-kafka-partition=8 --generator-num-of-kafka-replication=2 \
   --generator-max-wait-time=15000"
 
