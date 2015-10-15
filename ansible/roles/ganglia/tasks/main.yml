@@ -91,16 +91,12 @@
   sudo: yes
   with_items:
     - lsof_counter
-  tags:
-    - temp
 
 - name: Move ganglia python plugins configs
   template: src=../templates/{{ item }}.pyconf.j2  dest=/etc/ganglia/conf.d/{{ item }}.pyconf
   sudo: yes
   with_items:
     - lsof_counter
-  tags:
-    - temp
 
 - name: Get current crontab 
   shell: crontab -l
