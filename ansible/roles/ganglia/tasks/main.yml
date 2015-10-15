@@ -14,6 +14,20 @@
   sudo: yes
   when: ansible_distribution == 'CentOS' or ansible_distribution == 'Red Hat Enterprise Linux'
 
+- name: Install ganglia python plugins (CentOS)
+  yum: name='ganglia-gmond-python.x86_64' state=installed
+  sudo: yes
+  when: ansible_distribution == 'CentOS' or ansible_distribution == 'Red Hat Enterprise Linux'
+
+- name: Give ganglia user home directory (to support lsof plugin)
+  sudo: yes
+  lineinfile:  "dest=/etc/passwd state=present  regexp=\"ganglia.*\"  line=\"ganglia:x:998:996:Ganglia Monitoring System:/var/lib/:/bin/bash\""
+  
+- name: Give ganglia user sudo (to support lsof plugin)
+  sudo: yes
+  lineinfile:  "dest=/etc/sudoers  state=present line=\"ganglia       ALL=(ALL) NOPASSWD: ALL\""
+
+
 - name: Make sure crond is installed (CentOS)
   yum: name='cronie' state=installed
   sudo: yes
@@ -71,6 +85,22 @@
 
 - name: Move ganglia plugins to ganglia_home
   copy: src=../plugins/ dest={{ganglia_home}} mode=0755
+
+- name: Move ganglia python plugins
+  template: src=../templates/{{ item }}.py.j2  dest=/usr/lib64/ganglia/python_modules/{{ item }}.py
+  sudo: yes
+  with_items:
+    - lsof_counter
+  tags:
+    - temp
+
+- name: Move ganglia python plugins configs
+  template: src=../templates/{{ item }}.pyconf.j2  dest=/etc/ganglia/conf.d/{{ item }}.pyconf
+  sudo: yes
+  with_items:
+    - lsof_counter
+  tags:
+    - temp
 
 - name: Get current crontab 
   shell: crontab -l

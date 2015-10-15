@@ -1,0 +1,20 @@
+modules {
+  module {
+    name = "lsof_counter"
+    language = "python"
+
+    param username {
+      value = "{{ user }}"
+    }
+  }
+}
+
+collection_group {
+  collect_every = 60
+  time_threshold = 90
+  metric {
+    name = "openFiles"
+    title = "Open User Files"
+    value_threshold = 100000
+  }
+}

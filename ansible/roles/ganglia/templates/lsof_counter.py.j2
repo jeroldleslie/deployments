@@ -1,0 +1,47 @@
+#Instructions on how to write a ganglia module
+#https://github.com/ganglia/monitor-core/wiki/Ganglia-GMond-Python-Modules
+
+import subprocess
+
+#set default username, should get passed in by lsof_counter.pyconf
+username = 'neverwinterdp'
+
+def lsof_handler(name):
+    global username
+    #Need to run sudo to use lsof, otherwise number is wrong
+    return int(subprocess.Popen("sudo lsof -u "+username+" | wc -l", stdout=subprocess.PIPE, shell=True).stdout.read().strip())
+
+def metric_init(params):
+    """
+    Iniitalize metrics
+    """
+
+    global username
+
+    if 'username' in params:
+        username = params['username']
+
+    d1 = {'name': 'openFiles',
+        'call_back': lsof_handler,
+        'time_max': 90,
+        'value_type': 'uint',
+        'units': 'num',
+        'slope': 'both',
+        'format': '%u',
+        'description': 'Number of open files',
+        'groups': 'file metrics'}
+
+    descriptors = [d1]
+
+    return descriptors
+
+def metric_cleanup():
+    '''Clean up the metric module.'''
+    pass
+
+#This code is for debugging and unit testing
+if __name__ == '__main__':
+    metric_init({})
+    for d in descriptors:
+        v = d['call_back'](d['name'])
+        print 'value for %s is %u' % (d['name'],  v)
