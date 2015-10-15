@@ -1,8 +1,12 @@
+- name: Install epel-release
+  sudo: yes
+  yum: name=epel-release state=installed
+  when: ansible_distribution == 'CentOS' or ansible_distribution == 'Red Hat Enterprise Linux'
+  
 - name: Install Ganglia
   sudo: yes
   yum: name={{ item }} state=installed
   with_items:
-    - epel-release
     - ganglia
     - ganglia-gmetad
     - ganglia-gmond
@@ -22,6 +26,18 @@
   sudo: yes
   replace: dest=/etc/ganglia/gmond.conf regexp='udp_send_channel\s{\s*' replace='udp_send_channel {\n  host = {{ ganglia_url }}\n'
 
+- name: Configure gmond (remove multicast)
+  sudo: yes
+  replace: dest=/etc/ganglia/gmond.conf regexp='.*{{ item }}.*' replace=''
+  with_items:
+    - mcast_join
+    - mcast_join
+    - bind\s*=\s*\d*
+    - retry_bind
+
+- name: Configure gmetad
+  sudo: yes
+  lineinfile: dest=/etc/ganglia/gmetad.conf state=present line='data_source "{{ cluster }}" 60 {{ ganglia_url }}'
 
 
 - name: Configure httpd

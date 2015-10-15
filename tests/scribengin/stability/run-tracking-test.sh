@@ -24,14 +24,18 @@ chmod +x $NEVERWINTERDP_BUILD/dataflow/log-sample/bin/*.sh
 
 $SHELL scribengin info
 
-GENERATOR_OPTS="--generator-max-wait-time=60000 --generator-send-period=1"
+GENERATOR_OPTS="\
+  --generator-num-of-chunk=30 --generator-num-of-message-per-chunk=10000000 --generator-num-of-writer=1 --generator-break-in-period=70 \
+  --generator-num-of-kafka-partition=8 --generator-num-of-kafka-replication=2 \
+  --generator-max-wait-time=15000"
 
 #VALIDATOR_OPTS='--validator-disable'
+VALIDATOR_OPTS='--validator-num-of-reader=2'
 
-STORAGE_OPTS="--storage=kafka"
+STORAGE_OPTS="--dataflow-storage=kafka"
 #KILL_WORKER_OPTS='--kill-worker-random=true --kill-worker-period=120000 --kill-worker-max=30'
-DATAFLOW_OPTS="--dedicated-executor=false --num-of-worker=2 --num-of-executor-per-worker=2 --num-of-stream=8 --num-of-message=500000000 --message-size=512 --dump-period=30000"
+DATAFLOW_OPTS="--dataflow-num-of-worker=2 --dataflow-num-of-executor-per-worker=2"
 DATAFLOW_OPTS="$STORAGE_OPTS $DATAFLOW_OPTS $KILL_WORKER_OPTS"
 
-time $NEVERWINTERDP_BUILD/dataflow/log-sample/bin/run-dataflow-chain.sh $GENERATOR_OPTS $DATAFLOW_OPTS $VALIDATOR_OPTS
+time $NEVERWINTERDP_BUILD/dataflow/log-sample/bin/run-tracking.sh $GENERATOR_OPTS $DATAFLOW_OPTS $VALIDATOR_OPTS
 
