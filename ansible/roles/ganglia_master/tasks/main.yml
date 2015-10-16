@@ -3,7 +3,7 @@
   yum: name=epel-release state=installed
   when: ansible_distribution == 'CentOS' or ansible_distribution == 'Red Hat Enterprise Linux'
   
-- name: Install Ganglia
+- name: Install Ganglia Monitor
   sudo: yes
   yum: name={{ item }} state=installed
   with_items:
@@ -12,28 +12,6 @@
     - ganglia-gmond
     - ganglia-web
   
-#- name: Add ganglia config 
-#  template: src={{ item }}.j2 dest=/etc/ganglia/{{ item }}
-#  sudo: yes
-#  with_items:
-#    - gmond.conf
-
-- name: Configure gmond (cluster name)
-  sudo: yes
-  replace: dest=/etc/ganglia/gmond.conf regexp='cluster\s{\s*name\s*=\s*\"\unspecified\"' replace='cluster {\n  name = "{{ cluster }}"'
-
-- name: Configure gmond (ganglia master url)
-  sudo: yes
-  replace: dest=/etc/ganglia/gmond.conf regexp='udp_send_channel\s{\s*' replace='udp_send_channel {\n  host = {{ ganglia_url }}\n'
-
-- name: Configure gmond (remove multicast)
-  sudo: yes
-  replace: dest=/etc/ganglia/gmond.conf regexp='.*{{ item }}.*' replace=''
-  with_items:
-    - mcast_join
-    - mcast_join
-    - bind\s*=\s*\d*
-    - retry_bind
 
 - name: Configure gmetad
   sudo: yes
