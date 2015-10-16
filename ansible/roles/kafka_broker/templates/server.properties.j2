@@ -83,6 +83,8 @@ num.recovery.threads.per.data.dir={{ kafka.software.server_properties.num_recove
 # The maximum amount of time a message can sit in a log before we force a flush
 #log.flush.interval.ms={{ kafka.software.server_properties.log_flush_interval_ms }}
 
+default.replication.factor={{ kafka.software.server_properties.default_replication_factor }}
+
 ############################# Log Retention Policy #############################
 
 # The following configurations control the disposal of log segments. The policy can
@@ -90,15 +92,15 @@ num.recovery.threads.per.data.dir={{ kafka.software.server_properties.num_recove
 # A segment will be deleted whenever *either* of these criteria are met. Deletion always happens
 # from the end of the log.
 
+# The maximum size of a log segment file. When this size is reached a new log segment will be created.
+log.segment.bytes={{ kafka.software.server_properties.log_segment_bytes }}
+
 # The minimum age of a log file to be eligible for deletion
 log.retention.hours={{ kafka.software.server_properties.log_retention_hours }}
 
 # A size-based retention policy for logs. Segments are pruned from the log as long as the remaining
 # segments don't drop below log.retention.bytes.
 log.retention.bytes={{ kafka.software.server_properties.log_retention_bytes }}
-
-# The maximum size of a log segment file. When this size is reached a new log segment will be created.
-log.segment.bytes={{ kafka.software.server_properties.log_segment_bytes }}
 
 # The interval at which log segments are checked to see if they can be deleted according 
 # to the retention policies
@@ -108,6 +110,7 @@ log.retention.check.interval.ms={{ kafka.software.server_properties.log_retentio
 # If log.cleaner.enable=true is set the cleaner will be enabled and individual logs can then be marked for log compaction.
 log.cleaner.enable={{ kafka.software.server_properties.log_cleaner_enable }}
 
+log.cleanup.policy=delete
 ############################# Zookeeper #############################
 
 # Zookeeper connection string (see zookeeper docs for details).

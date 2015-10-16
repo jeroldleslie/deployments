@@ -27,6 +27,7 @@ kafka:
       log_retention_check_interval_ms: 60000
       log_cleaner_enable: 'false'
       zookeeper_connection_timeout_ms: 1000000
+      default_replication_factor: 3
       host_name: localhost
       advertised_host_name: <hostname routable by clients>
       advertised_port: <port accessible by clients>
