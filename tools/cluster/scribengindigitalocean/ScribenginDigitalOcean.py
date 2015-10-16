@@ -157,16 +157,23 @@ class ScribenginDigitalOcean():
       
   def loadMachineConfig(self, configLocation):
     config = yaml.load(open(configLocation, "r"))
+    machines_list=[]
+    for role in config:
+      machine_dist={}
+      machine_dist["role"]=role.replace("_","-")
+      machine_dist.update(config[role]['hardware'])
+      machines_list.append(machine_dist)
     
     #Set default configuration params
-    for machine in config:
+    for machine in machines_list:
       for key,value in self.defaultDropletConfig.items():
         machine.setdefault(key, value)
     logging.debug("DO Config: "+str(config))
-    return config
+    return machines_list
   
   def launchContainers(self, configLocation, region=None, subdomain=None):
     config = self.loadMachineConfig(configLocation)
+    
     droplets = []
     for machine in config:
       for i in range(1, machine["num"]+1):
@@ -199,6 +206,8 @@ class ScribenginDigitalOcean():
                                  private_networking=machine['private_networking'],))
     self.createDropletSet(droplets)
     return droplets
+    
+    return ""
   
   def getDropletIp(self, dropletName):
     hostAndIP = {}

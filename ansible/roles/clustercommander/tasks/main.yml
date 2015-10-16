@@ -2,19 +2,29 @@
 - name: Check if remote cluster directory exists
   stat: path=/opt/cluster
   register: cluster_home_status
+  tags:
+    - install
 
 - name: Delete remote cluster directory home if it exists
   command: rm -rf /opt/cluster
   when: cluster_home_status.stat.exists
+  tags:
+    - install
   
 - name: copy clustercommander 
   synchronize: src={{ playbook_dir }}/../tools/cluster dest=/opt/
+  tags:
+    - install
   
 - name: make clustercommander setup executable
   file: path=/opt/cluster/setup.sh mode=0777
+  tags:
+    - install
     
 - name: make clustercommander executable
   file: path=/opt/cluster/clusterCommander.py mode=0777
+  tags:
+    - install
     
 #- name: run setup script for clusterCommander
 #  sudo: yes

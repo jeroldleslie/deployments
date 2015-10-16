@@ -44,10 +44,11 @@ _cluster_array     = [ "elasticsearch","zookeeper", "kafka", "hadoop", "scribeng
 @click.option('--clean',           '-a', is_flag=True, help="clean services")
 @click.option('--install',         '-n', is_flag=True, help="install services")
 @click.option('--configure',       '-c', is_flag=True, help="configure services")
-@click.option('--profile',         '-p', default='',   help="profile type for service configuration" )
+@click.option('--profile-type',         '-p', default='',   help="profile type for service configuration" )
 @click.option('--ansible-root-dir',      default=dirname(dirname(dirname(abspath(__file__))))+"/ansible", help="Root directory for Ansible")
 @click.option('--max-retries',     '-m', default=5, help="Max retries for running the playbook")
-def mastercommand(debug, logfile, services, subset, inventory_file, cluster, start, stop, force_stop, clean, install, configure, profile, ansible_root_dir, max_retries):
+@click.option('--extra-vars',      '-v', default='', help='Extra variable for the playbook')
+def mastercommand(debug, logfile, services, subset, inventory_file, cluster, start, stop, force_stop, clean, install, configure, profile_type, ansible_root_dir, max_retries, extra_vars):
   if debug:
     #Set logging file, overwrite file, set logging level to DEBUG
     logging.basicConfig(filename=logfile, filemode="w", level=logging.DEBUG)
@@ -97,9 +98,15 @@ def mastercommand(debug, logfile, services, subset, inventory_file, cluster, sta
   #The reversed list is the order to stop/force-stop
   servicesToRunReversed = list(reversed(servicesToRun))
   
-  extra_vars={}
-  if (profile != ""):
-    extra_vars['profile_type'] = profile
+  extra_vars_dict={}
+  
+  if extra_vars != "":
+    for item in extra_vars.split(","):
+      key_val=item.split("=");
+      extra_vars_dict[key_val[0]]=key_val[1]
+      
+  if (profile_type != ""):
+    extra_vars_dict['profile_type'] = profile_type
   
   runner = ansibleRunner()
 
@@ -130,7 +137,7 @@ def mastercommand(debug, logfile, services, subset, inventory_file, cluster, sta
                   outputToStdout=True, 
                   maxRetries=max_retries,
                   tags=tag,
-                  extra_vars=extra_vars,
+                  extra_vars=extra_vars_dict,
                   limit=subset,)
    
 

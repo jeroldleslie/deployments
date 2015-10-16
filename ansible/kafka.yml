@@ -4,4 +4,4 @@
   hosts: kafka
   remote_user: neverwinterdp
   roles:
-   - role: kafka_broker
+    - kafka_broker
