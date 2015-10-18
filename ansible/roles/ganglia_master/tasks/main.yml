@@ -1,20 +1,12 @@
-- name: Install epel-release
-  sudo: yes
-  yum: name=epel-release state=installed
-  when: ansible_distribution == 'CentOS' or ansible_distribution == 'Red Hat Enterprise Linux'
-  tags:
-    - install
-    
 - name: Install Ganglia
   sudo: yes
   yum: name={{ item }} state=installed
   with_items:
+    - epel-release
     - ganglia
     - ganglia-gmetad
     - ganglia-gmond
     - ganglia-web
-  tags:
-    - install
   
 #- name: Add ganglia config 
 #  template: src={{ item }}.j2 dest=/etc/ganglia/{{ item }}
@@ -25,44 +17,20 @@
 - name: Configure gmond (cluster name)
   sudo: yes
   replace: dest=/etc/ganglia/gmond.conf regexp='cluster\s{\s*name\s*=\s*\"\unspecified\"' replace='cluster {\n  name = "{{ cluster }}"'
-  tags:
-    - install
 
 - name: Configure gmond (ganglia master url)
   sudo: yes
   replace: dest=/etc/ganglia/gmond.conf regexp='udp_send_channel\s{\s*' replace='udp_send_channel {\n  host = {{ ganglia_url }}\n'
-  tags:
-    - install
 
-- name: Configure gmond (remove multicast)
-  sudo: yes
-  replace: dest=/etc/ganglia/gmond.conf regexp='.*{{ item }}.*' replace=''
-  with_items:
-    - mcast_join
-    - mcast_join
-    - bind\s*=\s*\d*
-    - retry_bind
-  tags:
-    - install
-
-- name: Configure gmetad
-  sudo: yes
-  lineinfile: dest=/etc/ganglia/gmetad.conf state=present line='data_source "{{ cluster }}" 60 {{ ganglia_url }}'
-  tags:
-    - install
 
 
 - name: Configure httpd
   sudo: yes
   lineinfile: dest=/etc/httpd/conf/httpd.conf line="<Directory \"/usr/share/ganglia\">\n    Options Indexes FollowSymLinks\n    AllowOverride None\n    Require all granted\n</Directory>\n"
-  tags:
-    - install
   
 - name: Add alias to httpd ganglia.conf 
   sudo: yes
   shell: echo "Alias /ganglia /usr/share/ganglia" > /etc/httpd/conf.d/ganglia.conf 
-  tags:
-    - install
 
 - name: Start ganglia master services (CentOS)
   service: name={{ item }} state=restarted
@@ -73,31 +41,19 @@
     - gmetad
     - httpd
   when: ansible_virtualization_type != 'docker'
-  tags:
-    - start
+  
 
 - name: Start gmond manually
-  shell: "/usr/sbin/{{ item }}"
+  shell: "/usr/sbin/gmond"
   sudo: yes
   when: ansible_virtualization_type == 'docker'
-  with_items:
-    - gmond
-    - gmetad
-    - httpd
-  tags:
-    - start
   
-#- name: Start gmetad manually
-#  shell: "/usr/sbin/gmetad"
-#  sudo: yes
-#  when: ansible_virtualization_type == 'docker'
-#  tags:
-    - start
+- name: Start gmetad manually
+  shell: "/usr/sbin/gmetad"
+  sudo: yes
+  when: ansible_virtualization_type == 'docker'
   
-#- name: Start httpd manually
-#  shell: "/usr/sbin/httpd"
-#  sudo: yes
-#  when: ansible_virtualization_type == 'docker'
-#  tags:
-#    - start
-  
+- name: Start httpd manually
+  shell: "/usr/sbin/httpd"
+  sudo: yes
+  when: ansible_virtualization_type == 'docker'

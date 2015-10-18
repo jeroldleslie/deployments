@@ -8,8 +8,7 @@
 
 
 - name: Ganglia
-  #Exclude monitoring machine 
-  hosts: all:!monitoring
+  hosts: all
   remote_user: neverwinterdp
   roles:
     - ganglia
