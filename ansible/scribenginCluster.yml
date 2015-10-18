@@ -8,37 +8,55 @@
     - clustercommander
     - increase_open_file_limit
 
-- name: Hadoop Master and Workers
+- name: Hadoop
   hosts: hadoop_master:hadoop_worker
   remote_user: neverwinterdp
   roles:
     - hadoop
+
+- name: Hadoop Masters
+  hosts: hadoop_master
+  remote_user: neverwinterdp
+  roles:
+   - hadoop_namenode
+   - hadoop_secondarynamenode
+   - hadoop_resourcemanager
+
+- name: Hadoop Workers
+  hosts: hadoop_worker
+  remote_user: neverwinterdp
+  roles:
+   - hadoop_datanode
+   - hadoop_nodemanager
+
+- name: Scribengin
+  hosts: hadoop_master
+  remote_user: neverwinterdp
+  roles:
     - scribengin
 
 - name: Zookeeper
   hosts: zookeeper
   remote_user: neverwinterdp
   roles:
-    - zookeeper
+   - zookeeper
     
 - name: Kafka
   hosts: kafka
   remote_user: neverwinterdp
   roles:
-    - kafka_broker
+   - kafka_broker
 
 - name: Elasticsearch
   hosts: elasticsearch
   remote_user: neverwinterdp
   roles:
     - elasticsearch
-#    - kibana_charts
+    - kibana_charts
 
-#- name: Monitoring
-#  hosts: monitoring
-#  remote_user: neverwinterdp
-#  roles:
-#    - kibana
-
-
+- name: Kibana
+  hosts: monitoring
+  remote_user: neverwinterdp
+  roles:
+    - kibana
 

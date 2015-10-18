@@ -100,17 +100,20 @@ if [ ! -d $TEST_RESULTS_LOCATION ] ; then
 fi
 
 clusterCommander="$ROOT/tools/cluster/clusterCommander.py"
+serviceCommander="$ROOT/tools/serviceCommander/serviceCommander.py"
+inventoryFile="/tmp/scribengininventory"
 if [ $STOP == "true" ] ; then
-  $clusterCommander cluster --force-stop
+  $serviceCommander --cluster --force-stop -i $inventoryFile
 fi
 if [ $DEPLOY == "true" ] ; then
-  $clusterCommander ansible --write-inventory-file --deploy-scribengin
+  $clusterCommander ansible --write-inventory-file --inventory-file $inventoryFile
+  $serviceCommander -i $inventoryFile -e "scribengin" --install --configure
 fi
 if [ $CLEAN == "true" ] ; then
-  $clusterCommander cluster --clean
+  $serviceCommander --cluster --clean -i $inventoryFile
 fi
 if [ $START == "true" ] ; then
-  $clusterCommander cluster --start --profile-type $PROFILE_TYPE
+  $serviceCommander --cluster --start -i $inventoryFile  --profile-type $PROFILE_TYPE
   #Give everything time to come up
   sleep 5
 fi

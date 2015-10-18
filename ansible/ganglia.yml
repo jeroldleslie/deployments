@@ -6,7 +6,6 @@
   roles:
     - ganglia_master
 
-
 - name: Ganglia
   hosts: all
   remote_user: neverwinterdp

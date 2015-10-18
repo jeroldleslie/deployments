@@ -4,10 +4,6 @@
   tags: 
     [ configure, install, clean, start, stop, force-stop ]
 
-- debug: msg="{{kafka}}"
-  tags: 
-    [ configure, install ]
-
 - name: Create kafka directory
   file: path={{ kafka.software.installation.kafka_home_dir }} state=directory
   tags:

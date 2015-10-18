@@ -132,4 +132,8 @@ monitoring:
   software:
     installation:
       kibana_url: https://download.elastic.co/kibana/kibana/kibana-4.1.1-linux-x64.tar.gz
+      ganglia_url: monitoring-1
+      cluster: scribengin
+      ganglia_home: /opt/ganglia
+      user: neverwinterdp
 
