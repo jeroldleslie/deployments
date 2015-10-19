@@ -15,6 +15,26 @@
   synchronize: src={{ playbook_dir }}/../tools/cluster dest=/opt/
   tags:
     - install
+
+- name: Check if remote ansible/profile directory exists
+  stat: path=/ansible/profile
+  register: profile_home_status
+  sudo: yes
+  tags:
+    - install
+
+- name: Delete remote ansible/profile directory home if it exists
+  command: rm -rf /ansible/profile
+  when: profile_home_status.stat.exists
+  sudo: yes
+  tags:
+    - install
+  
+- name: copy clustercommander 
+  synchronize: src={{ playbook_dir }}/profile dest=/ansible
+  sudo: yes
+  tags:
+    - install
   
 - name: make clustercommander setup executable
   file: path=/opt/cluster/setup.sh mode=0777

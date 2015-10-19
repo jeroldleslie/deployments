@@ -109,6 +109,7 @@ class ServerSet(object):
   
   def setProfile(self, profile_type):
     profilePath = join(self.module_path(),"..","..","..","ansible","profile", profile_type+".yml")
+    
     if os.path.isfile(profilePath):
       with open(profilePath, 'r') as f:
         self.configurations = yaml.load(f)
