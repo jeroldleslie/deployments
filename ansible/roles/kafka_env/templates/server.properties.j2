@@ -66,6 +66,10 @@ num.partitions={{ num_partitions }}
 # This value is recommended to be increased for installations with data dirs located in RAID array.
 num.recovery.threads.per.data.dir={{ num_recovery_threads_per_data_dir }}
 
+
+
+replica.fetch.max.bytes={{ replica_fetch_max_bytes }} 
+
 ############################# Log Flush Policy #############################
 
 # Messages are immediately written to the filesystem but by default we only fsync() to sync
