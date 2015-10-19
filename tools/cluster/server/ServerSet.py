@@ -108,17 +108,7 @@ class ServerSet(object):
     print "***********************************************************************"  
   
   def setProfile(self, profile_type):
-    profilePath = join(self.module_path(),"..", "profile", profile_type, "main.yml")
-    
-    profilePath = join(self.module_path(),"..","..","..","ansible","profile", profile_type, ".yml")
-    print self.module_path()
-    print self.module_path()
-    print self.module_path()
-    print self.module_path()
-    print self.module_path()
-    print self.module_path()
-    print profilePath
-    
+    profilePath = join(self.module_path(),"..","..","..","ansible","profile", profile_type+".yml")
     if os.path.isfile(profilePath):
       with open(profilePath, 'r') as f:
         self.configurations = yaml.load(f)
