@@ -4,7 +4,7 @@
 SCRIPT_DIR=$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )
 
 #This Script will set root directory and Neverwinter_home
-source $SCRIPT_DIR/setupEnvironment.sh $@
+source $SCRIPT_DIR/../setupEnvironment.sh $@
 
 
 
