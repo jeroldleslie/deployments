@@ -1,6 +1,6 @@
 ---
 - name: Scribengin
-  hosts: hadoop_master
+  hosts: monitoring
   remote_user: neverwinterdp
   roles:
     - scribengin

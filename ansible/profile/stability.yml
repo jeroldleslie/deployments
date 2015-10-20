@@ -21,7 +21,7 @@ kafka:
       log_dirs: /opt/kafka/data
       num_partitions: 8
       num_recovery_threads_per_data_dir: 1
-      replica_fetch_max_bytes: 1048576
+      replica_fetch_max_bytes: 2500000
       log_segment_bytes: 400000000
       log_retention_hours: 2
       log_retention_bytes: 1200000000
@@ -35,7 +35,7 @@ kafka:
       log_flush_interval_messages: 10000
       log_flush_interval_ms: 1000
       message_max_bytes: 2500000
-      auto_create_topics_enable: true
+      auto_create_topics_enable: 'true'
     consumer_properties:
       group_id: neverwinterdp
       consumer_zookeeper_connection_timeout_ms: 1000000

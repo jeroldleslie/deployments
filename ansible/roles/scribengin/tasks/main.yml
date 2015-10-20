@@ -149,11 +149,11 @@
   tags:
     - start
 
-- name: Start scribengin Service
-  #service: name=scribengin state=started enabled=yes
-  shell: "{{ remote_scribengin_home }}scribengin/bin/shell.sh scribengin start"
-  tags:
-    - start
+#- name: Start scribengin Service
+#  #service: name=scribengin state=started enabled=yes
+#  shell: "{{ remote_scribengin_home }}scribengin/bin/shell.sh scribengin start"
+#  tags:
+#    - start
 
 - name: Start scribengin Service
   debug: msg="Cleaning hadoop datas is enough"
