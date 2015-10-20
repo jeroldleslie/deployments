@@ -5,7 +5,7 @@
   remote_user: neverwinterdp
   roles:
     - common
-    - clustercommander
+    - neverwinterdp_deployments
     - increase_open_file_limit
 
 - name: Hadoop

@@ -1,0 +1,22 @@
+---
+- name: Check if remote tools directory exists
+  stat: path={{ monitoring.software.installation.neverwinterdp_deployments_path }}
+  register: tools_home_status
+  tags:
+    - install
+
+- name: Delete remote cluster directory home if it exists
+  command: rm -rf {{ monitoring.software.installation.neverwinterdp_deployments_path }}
+  when: tools_home_status.stat.exists
+  tags:
+    - install
+  
+- name: Copy neverwinterdp_deployments
+  synchronize: src={{ playbook_dir }}/../ dest={{ monitoring.software.installation.neverwinterdp_deployments_path }}  recursive=yes
+  tags:
+    - install
+
+- name: Copy inventory file
+  synchronize: src={{ inventory_file }} dest={{ monitoring.software.installation.neverwinterdp_deployments_path }}/inventory
+  tags:
+    - install

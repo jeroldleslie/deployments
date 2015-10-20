@@ -34,6 +34,8 @@ kafka:
       advertised_port: <port accessible by clients>
       log_flush_interval_messages: 10000
       log_flush_interval_ms: 1000
+      message_max_bytes: 2500000
+      auto_create_topics_enable: true
     consumer_properties:
       group_id: neverwinterdp
       consumer_zookeeper_connection_timeout_ms: 1000000
@@ -137,4 +139,5 @@ monitoring:
       cluster: scribengin
       ganglia_home: /opt/ganglia
       user: neverwinterdp
+      neverwinterdp_deployments_path: /opt/neverwinterdp_deployments
 

@@ -400,13 +400,9 @@ function cluster(){
   fi  
   
   if [ $DEPLOY_TOOLS == "true" ] || [ $LAUNCH == "true" ] ; then
-    $SCRIPT_DIR/../../tools/serviceCommander/serviceCommander.py -e "clustercommander" --install -i $INVENTORY_FILE_LOCATION
+    $SCRIPT_DIR/../../tools/serviceCommander/serviceCommander.py -e "neverwinterdp_deployments" --install -i $INVENTORY_FILE_LOCATION
   fi
   
-  #if [ $DEPLOY_KIBANA == "true" ] ; then
-  #  ssh -o StrictHostKeyChecking=no neverwinterdp@monitoring-1 "cd /opt/cluster && python clusterCommander.py kibana --import-kibana"
-  #fi
- 
   if [ $STOP_CLUSTER == "true" ] ; then
     $SCRIPT_DIR/../../tools/serviceCommander/serviceCommander.py --cluster --stop -i $INVENTORY_FILE_LOCATION
   fi

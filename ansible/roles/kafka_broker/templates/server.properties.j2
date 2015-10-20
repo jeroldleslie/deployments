@@ -70,6 +70,10 @@ num.recovery.threads.per.data.dir={{ kafka.software.server_properties.num_recove
 
 replica.fetch.max.bytes={{ kafka.software.server_properties.replica_fetch_max_bytes }}
 
+message.max.bytes={{ kafka.software.server_properties.message_max_bytes }}
+
+auto.create.topics.enable={{ kafka.software.server_properties.auto_create_topics_enable }}
+
 ############################# Log Flush Policy #############################
 
 # Messages are immediately written to the filesystem but by default we only fsync() to sync

@@ -1,7 +1,0 @@
----
-
-- name: Cluster Commander
-  hosts: all
-  remote_user: neverwinterdp
-  roles:
-    - clustercommander
