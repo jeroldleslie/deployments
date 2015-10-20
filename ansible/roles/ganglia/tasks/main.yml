@@ -7,12 +7,35 @@
 - name: install ganglia client (Ubuntu)
   apt: pkg='ganglia-monitor' state=latest
   sudo: yes
-  when: ansible_distribution == 'Debian' or ansible_distribution == 'Ubuntu'  
+  when: ansible_distribution == 'Debian' or ansible_distribution == 'Ubuntu' 
 
-- name: Install ganglia client (CentOS)
-  yum: name='ganglia-gmond' state=installed
+- name: Install ganglia client packages (CentOS)
+  yum: name={{ item }} state=installed
   sudo: yes
   when: ansible_distribution == 'CentOS' or ansible_distribution == 'Red Hat Enterprise Linux'
+  with_items:
+    - ganglia-gmond
+    - ganglia-gmond-python.x86_64
+    - lsof
+
+
+- name: Give ganglia user home directory (to support lsof plugin)
+  sudo: yes
+  lineinfile:  "dest=/etc/passwd state=present  regexp=\"ganglia.*\"  line=\"ganglia:x:998:996:Ganglia Monitoring System:/var/lib/:/bin/bash\""
+  
+- name: Give ganglia user sudo (to support lsof plugin)
+  sudo: yes
+  lineinfile:  "dest=/etc/sudoers  state=present line=\"ganglia       ALL=(ALL) NOPASSWD: ALL\""
+
+#http://unix.stackexchange.com/questions/122616/why-do-i-need-a-tty-to-run-sudo-if-i-can-sudo-without-a-password
+#- name: Remove requiretty (to support lsof plugin)
+#  sudo: yes
+#  lineinfile: dest=/etc/sudoers  state=absent regexp="Defaults\s*requiretty"
+
+- name: Remove requiretty (to support lsof plugin)
+  sudo: yes
+  lineinfile: "dest=/etc/sudoers state=present line=\"Defaults:ganglia !requiretty\""
+
 
 - name: Make sure crond is installed (CentOS)
   yum: name='cronie' state=installed
@@ -29,48 +52,27 @@
   sudo: yes
   when: ansible_virtualization_type == 'docker' and crond_running.stdout == "0"
 
-- name: Configure gmond (cluster name)
+- name: Move gmond config
+  template: src=../templates/gmond.conf.j2  dest=/etc/ganglia/gmond.conf
   sudo: yes
-  replace: dest=/etc/ganglia/gmond.conf regexp='cluster\s*{\s*name\s*=\s*\"\unspecified\"' replace='cluster {\n  name = "{{ cluster }}"'
-  
-- name: Configure gmond (ganglia master url)
-  sudo: yes
-  replace: dest=/etc/ganglia/gmond.conf regexp='udp_send_channel\s*{\s*' replace='udp_send_channel {\n  host = {{ ganglia_url }}\n'
-  
 
-- name: Configure gmond (remove multicast)
-  sudo: yes
-  replace: dest=/etc/ganglia/gmond.conf regexp='.*{{ item }}.*' replace=''
-  with_items:
-    - mcast_join
-    - mcast_join
-    - bind\s*=\s*\d*
-    - retry_bind
-  
-
-- name: Restart ganglia client service (Ubuntu)
-  #command: /etc/init.d/ganglia-monitor restart
-  service: name=ganglia-monitor state=restarted
-  sudo: yes
-  when: ansible_distribution == 'Debian' or ansible_distribution == 'Ubuntu'
-  
-- name: Restart ganglia client service (CentOS)
-  service: name=gmond state=restarted
-  sudo: yes
-  when: ansible_distribution == 'CentOS' or ansible_distribution == 'Red Hat Enterprise Linux'
-  when: ansible_virtualization_type != 'docker'
-  
-
-- name: Start gmond manually
-  shell: "/usr/sbin/gmond"
-  sudo: yes
-  when: ansible_virtualization_type == 'docker'
-
-- name: Create ganglia home for custom scripts
+- name: Create ganglia home for custom perl scripts
   file: path={{ganglia_home}} state=directory mode=0755
 
-- name: Move ganglia plugins to ganglia_home
+- name: Move ganglia perl plugins to ganglia_home
   copy: src=../plugins/ dest={{ganglia_home}} mode=0755
+
+- name: Move ganglia python plugins
+  template: src=../templates/{{ item }}.py.j2  dest=/usr/lib64/ganglia/python_modules/{{ item }}.py
+  sudo: yes
+  with_items:
+    - lsof_counter
+
+- name: Move ganglia python plugins configs
+  template: src=../templates/{{ item }}.pyconf.j2  dest=/etc/ganglia/conf.d/{{ item }}.pyconf
+  sudo: yes
+  with_items:
+    - lsof_counter
 
 - name: Get current crontab 
   shell: crontab -l
@@ -79,7 +81,7 @@
   ignore_errors: yes
 
 - name: Write current crontab to temp file
-  shell: "printf \"\n{{crontab_out.stdout}}\" > /tmp/cron "
+  shell: "printf \"\n{{crontab_out.stdout}}\n\" > /tmp/cron "
   sudo: yes
 
 - name: Get disk partitions
@@ -93,7 +95,31 @@
     - "{{ disk_partitions.stdout_lines }}"
 
 
-- name: Write cronjob
+- name: Write cronjob for ganglia perl plugins
   shell: crontab /tmp/cron
   sudo: yes
 
+
+- name: Restart ganglia client service (Ubuntu)
+  #command: /etc/init.d/ganglia-monitor restart
+  service: name=ganglia-monitor state=restarted
+  sudo: yes
+  when: ansible_distribution == 'Debian' or ansible_distribution == 'Ubuntu'
+  
+- name: Restart ganglia client service (CentOS)
+  service: name=gmond state=stopped
+  sudo: yes
+  when: ansible_distribution == 'CentOS' or ansible_distribution == 'Red Hat Enterprise Linux'
+  when: ansible_virtualization_type != 'docker'
+
+- name: Restart ganglia client service (CentOS)
+  service: name=gmond state=started enabled=yes
+  sudo: yes
+  when: ansible_distribution == 'CentOS' or ansible_distribution == 'Red Hat Enterprise Linux'
+  when: ansible_virtualization_type != 'docker'
+  
+
+- name: Start gmond manually
+  shell: "/usr/sbin/gmond"
+  sudo: yes
+  when: ansible_virtualization_type == 'docker'
