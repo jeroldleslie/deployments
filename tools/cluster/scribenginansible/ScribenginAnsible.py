@@ -23,7 +23,10 @@ class ScribenginAnsible():
       inventory += "\n["+group.replace("-","_")+"]\n"
       for host in hostsAndIps:
         if group in host["name"]:
-          inventory += host["name"]+" ansible_ssh_user="+ansibleSshUser+" ansible_ssh_private_key_file="+ansibleSshKey+"\n"
+          if "ip" in host:
+            inventory += host["ip"]+" ansible_ssh_user="+ansibleSshUser+" ansible_ssh_private_key_file="+ansibleSshKey+"\n"
+          else:  
+            inventory += host["name"]+" ansible_ssh_user="+ansibleSshUser+" ansible_ssh_private_key_file="+ansibleSshKey+"\n"
     
     f = open(inventoryFileLocation,'w')
     f.write(inventory)

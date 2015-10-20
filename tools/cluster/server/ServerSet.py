@@ -304,7 +304,7 @@ class ServerSet(object):
     self.cleanHadoopDataAtFirst()
     self.startHadoop()
     self.startVmMaster()
-    self.startScribengin()
+    #self.startScribengin()
     self.startGeneric()
     
   def shutdownVmMaster(self):
@@ -389,7 +389,7 @@ class ServerSet(object):
     return self.killProcess("kibana")
   
   def killCluster(self):
-    self.shutdownScribengin()
+    #self.shutdownScribengin()
     self.shutdownVmMaster()
     self.killKafka()
     self.killZookeeper()
