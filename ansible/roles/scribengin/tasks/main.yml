@@ -155,7 +155,7 @@
 #  tags:
 #    - start
 
-- name: Start scribengin Service
+- name: Clean scribengin Service
   debug: msg="Cleaning hadoop datas is enough"
   tags:
     - clean

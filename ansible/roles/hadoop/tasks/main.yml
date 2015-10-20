@@ -13,7 +13,11 @@
   register: downloaded
   tags:
     - install
-  
+    
+- debug: msg="Downloading hadoop from {{ hadoop_master.software.installation.hadoop_url }}"
+  tags:
+    - install
+     
 - name: Downloading Hadoop 
   get_url: url={{ hadoop_master.software.installation.hadoop_url  }} dest=/tmp/{{ hadoop_master.software.installation.hadoop_tar }}
   when: downloaded.stat.exists == false

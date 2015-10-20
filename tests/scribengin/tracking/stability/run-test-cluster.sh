@@ -1,20 +1,18 @@
 #!/bin/bash
 
 SCRIPT_DIR=$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )
-
 ROOT=$SCRIPT_DIR/../../../..
-INVENTORY=/tmp/scribengininventory
+INVENTORY=/tmp/scribengininventoryDO
+SUBDOMAIN=stability
 
 clusterCommander="$ROOT/tools/cluster/clusterCommander.py"
 serviceCommander="$ROOT/tools/serviceCommander/serviceCommander.py"
 statusCommander="$ROOT/tools/statusCommander/statusCommander.py"
 
-$clusterCommander ansible --write-inventory-file --inventory-file $INVENTORY
+$clusterCommander digitalocean --ansible-inventory --ansible-inventory-location $INVENTORY --subdomain $SUBDOMAIN
 $serviceCommander -e "scribengin" --install -i $INVENTORY
 $serviceCommander --cluster --force-stop --clean --configure --start --profile-type=stability -i $INVENTORY
 $statusCommander -i $INVENTORY
-
-
 
 #################################################################################################################################
 #Launch Dataflow                                                                                                                #
