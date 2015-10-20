@@ -1,10 +1,126 @@
-- name: download zookeeper tar
-  get_url: url={{ zookeeper_url }} dest=/tmp/zookeeper.tar.gz
-
+#Include variables from file
+- include_vars: "../../../profile/{{ profile_type | default('default') }}.yml"
+  tags: 
+    [ configure, install, clean, start, stop, force-stop ]
 
 - name: Create zookeeper directory
-  file: path=/opt/zookeeper state=directory
+  file: path={{zookeeper.software.installation.zookeeper_home_dir}} state=directory
+  tags:
+    - install
 
+- name: Create zookeeper data directory
+  file: path={{ zookeeper.software.installation.zookeeper_data_dir }} state=directory mode=755 owner=neverwinterdp
+  sudo: yes
+  tags:
+    - install
+    
+- name: Check if Zookeeper is already downloaded
+  stat: path=/tmp/{{ zookeeper.software.installation.zookeeper_tar }}
+  register: downloaded
+  tags:
+    - install
+
+- debug: msg="{{zookeeper.software.installation.zookeeper_url}}"
+  tags:
+    - install
+
+- name: Downloading Zookeeper tgz
+  get_url: url={{ zookeeper.software.installation.zookeeper_url  }} dest={{ zookeeper.software.installation.zookeeper_home_dir }}
+  when: downloaded.stat.exists == false
+  tags:
+    - install
+  
+- name: download zookeeper tar
+  get_url: url={{ zookeeper.software.installation.zookeeper_url }} dest=/tmp/{{ zookeeper.software.installation.zookeeper_tar }}
+  tags:
+    - install
+  
 - name: Decompress zookeeper tar
-  command: tar xfz /tmp/zookeeper.tar.gz -C /opt/zookeeper --strip-components=1
+  command: tar xfz /tmp/{{ zookeeper.software.installation.zookeeper_tar }} -C /opt/zookeeper --strip-components=1
+  tags:
+    - install
+  
+- name: Create zookeeper log directory
+  file: path={{ zookeeper.software.installation.zookeeper_log_dir }} state=directory mode=755 owner=neverwinterdp
+  sudo: yes
+  tags:
+  - install
+  
+- name: Rendering zookeeper.service
+  template: src={{ item }}.j2 dest=/lib/systemd/system/{{ item }}
+  sudo: yes
+  with_items:
+    - zookeeper.service
+  tags:
+  - install
+
+- name: Check if zookeeper data directory exists
+  stat: path={{zookeeper.software.installation.zookeeper_data_dir}}
+  register: data_dir
+  tags:
+   - configure
+    
+- name: Create zookeeper data directory
+  file: path={{ zookeeper.software.installation.zookeeper_data_dir }} state=directory owner=neverwinterdp 
+  when: not data_dir.stat.exists
+  tags:
+    - configure
+  
+- name: Create myid file  
+  template: src={{ item }}.j2 dest={{ zookeeper.software.installation.zookeeper_data_dir }}/{{ item }} owner=neverwinterdp
+  with_items:
+    - myid
+  tags:
+    - configure
+
+- name: Add zoo.cfg file
+  template: src={{ item }}.j2 dest={{ zookeeper.software.installation.zookeeper_home_dir }}/conf/{{ item }}
+  with_items:
+    - zoo.cfg
+    - java.env
+  tags:
+  - configure
+    
+- name: Move configuration files to container
+  copy: src=conf/ dest={{ zookeeper.software.installation.zookeeper_home_dir }}/conf/
+  tags:
+  - configure
+
+- name: Stop Zookeeper Service
+  service: name=zookeeper state=stopped enabled=no
+  sudo: true
+  when: ansible_virtualization_type != 'docker'
+  tags:
+  - stop
+
+- name: Stop Zookeeper Service on docker container
+  command: "{{ zookeeper.software.installation.zookeeper_home_dir }}/bin/zkServer.sh stop"
+  when: ansible_virtualization_type == 'docker'
+  tags:
+  - stop
+
+- name: Kill Zookeeper
+  shell:  kill -9 $(jps -m | grep 'QuorumPeerMain' | awk '{print $1}')
+  ignore_errors: yes
+  tags:
+    - force-stop  
+    
+- name: Clean zookeeper logs and datas
+  shell: "cd {{ zookeeper.software.installation.zookeeper_home_dir }}/data && ls | grep -v 'myid' | xargs rm -rf && rm -rf {{ zookeeper.software.installation.zookeeper_home_dir }}/logs && rm -rf {{ zookeeper.software.installation.zookeeper_log_dir }}/zookeeper.out"
+  sudo: yes 
+  tags:
+  - clean
+  
+- name: Start Zookeeper Service
+  service: name=zookeeper state=started enabled=yes
+  sudo: true
+  when: ansible_virtualization_type != 'docker'
+  tags:
+  - start
+
+- name: Start Zookeeper Service on docker container
+  command: "{{ zookeeper.software.installation.zookeeper_home_dir }}/bin/zkServer.sh start"
+  when: ansible_virtualization_type == 'docker'
+  tags:
+  - start
   

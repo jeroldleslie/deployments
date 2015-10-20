@@ -1,3 +1,1 @@
-{% if groups['Zookeepers'] is defined %}{{ groups['Zookeepers'].index(inventory_hostname)}}{% else %}0{% endif %}
-
-
+{{ inventory_hostname | regex_replace('.*?([0-9]+)$', '\\1') }}

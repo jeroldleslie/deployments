@@ -450,9 +450,9 @@ def digitalocean(launch, create_containers, update_local_host_file, update_host_
     click.echo("Writing ansible inventory file")
     digitalOcean.writeAnsibleInventory(inventoryFileLocation=ansible_inventory_location, subdomain=subdomain)
   
-  if deploy or launch:
-    click.echo("Running ansible")
-    digitalOcean.deploy(neverwinterdp_home)
+  #if deploy or launch:
+  #  click.echo("Running ansible")
+  #  digitalOcean.deploy(neverwinterdp_home)
   
   if reboot:
     click.echo("Rebooting Scribengin droplets")

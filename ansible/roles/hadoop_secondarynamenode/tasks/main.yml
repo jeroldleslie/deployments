@@ -1,0 +1,37 @@
+#Include variables from file
+- include_vars: "../../../profile/{{ profile_type | default('default') }}.yml"
+  tags: 
+    [ start, stop ]
+
+- name: Stop secondarynamenode Service
+  service: name=hadoop-secondarynamenode state=stopped enabled=no
+  sudo: true
+  when: ansible_virtualization_type != 'docker'
+  tags:
+  - stop
+
+- name: Stop secondarynamenode Service on docker
+  shell: "{{ hadoop_master.software.installation.hadoop_home_dir }}/sbin/hadoop-daemon.sh stop secondarynamenode"
+  when: ansible_virtualization_type == 'docker'
+  tags:
+  - stop  
+
+- name: Kill SecondaryNameNode
+  shell:  kill -9 $(jps -m | grep 'SecondaryNameNode' | awk '{print $1}')
+  ignore_errors: yes
+  tags:
+    - force-stop
+     
+- name: Start secondarynamenode Service
+  service: name=hadoop-secondarynamenode state=started enabled=yes
+  sudo: true
+  when: ansible_virtualization_type != 'docker'
+  tags:
+  - start
+  
+- name: Start secondarynamenode Service on docker
+  shell: "{{ hadoop_master.software.installation.hadoop_home_dir }}/sbin/hadoop-daemon.sh start secondarynamenode"
+  when: ansible_virtualization_type == 'docker'
+  tags:
+  - start
+  

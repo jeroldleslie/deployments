@@ -1,33 +1,102 @@
-
-- name: download kibana url = {{kibana_url}}
-  get_url: url={{kibana_url}} dest=/tmp/kibana.tar.gz
+#Include variables from file
+- include_vars: "../../../profile/{{ profile_type | default('default') }}.yml"
+  tags: 
+    [ install ]
+    
+- name: download kibana
+  get_url: url={{monitoring.software.installation.kibana_url}} dest=/tmp/kibana.tar.gz
+  tags:
+    - install
 
 - name: Copy kibana4
   sudo: yes
   copy: src=kibana4 dest=/etc/init.d/kibana4
+  tags:
+    - install
 
 - name: Make kibana4 executable
   sudo: yes
   file: mode=u+rxw path=/etc/init.d/kibana4
+  tags:
+    - install
 
 - name: initialize kibana4 service (Ubuntu)
   command: update-rc.d kibana4 defaults 96 9
   sudo: yes
   when: ansible_distribution == 'Debian' or ansible_distribution == 'Ubuntu'
+  tags:
+    - install
   
 - name: creating /opt/kibana directory
   sudo: yes
   file: path=/opt/kibana state=directory mode=0755
+  tags:
+    - install
 
 - name: uncompress tar
   sudo: yes
   command: tar xf /tmp/kibana.tar.gz -C /opt/kibana --strip 1
+  tags:
+    - install
 
 - name: set location of elasticsearch
   sudo: yes
   lineinfile: 'dest=/opt/kibana/config/kibana.yml regexp="elasticsearch_url.*9200" line="elasticsearch_url: \"http://elasticsearch-1:9200\""'
+  tags:
+    - install
 
-#- name: Start kibana service
+- name: Rendering kibana.service
+  template: src={{ item }}.j2 dest=/lib/systemd/system/{{ item }}
+  sudo: yes
+  with_items:
+    - kibana.service
+  tags:
+    - install
+    
+- name: Stop Kibana Service
+  service: name=kibana state=stopped enabled=no
+  sudo: true
+  when: ansible_virtualization_type != 'docker'
+  tags:
+  - stop
+
+#- name: Stop Kibana Service on docker container
+#  shell: "/etc/init.d/kibana4 stop"
+#  sudo: yes
+#  when: ansible_virtualization_type == 'docker'
+#  tags:
+#  - stop
+
+- name: Kill Kibana
+  shell: kill -9 $(ps -ef | grep kibana | grep -v grep | awk '{print $2}')
+  sudo: yes
+  ignore_errors: yes
+  tags:
+    [ stop, force-stop ]
+
+- name: Remove pid
+  shell: rm /opt/kibana/kibana.pid
+  sudo: yes
+  ignore_errors: yes
+  tags:
+    [ stop, force-stop ]
+     
+#- name: Start Kibana Service
+#  service: name=kibana state=started enabled=yes
+#  sudo: true
+#  when: ansible_virtualization_type != 'docker'
+#  tags:
+#    - start
+
+- name: Start Kibana Service on docker container
+  shell: "/etc/init.d/kibana4 start"
+  async: 50
+  sudo: yes
+  #when: ansible_virtualization_type == 'docker'
+  tags:
+    - start
+       
+##- name: Start kibana service
 #  sudo: yes
 #  service: name=kibana4 state=started enabled=yes
 

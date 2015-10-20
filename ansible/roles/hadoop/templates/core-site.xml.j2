@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<?xml-stylesheet type="text/xsl" href="configuration.xsl"?>
+
+<configuration>
+  <property>
+    <name>hadoop.tmp.dir</name>
+    <value>{{ hadoop_master.software.core_site.hadoop_tmp_dir }}</value>
+  </property>
+
+  <property>
+    <name>fs.default.name</name>
+    <value>{{ hadoop_master.software.core_site.fs_default_name }}</value>
+  </property>
+  
+  <property>
+    <name>hadoop.http.staticuser.user</name>
+    <value>{{ hadoop_master.software.core_site.hadoop_http_staticuser_user }}</value>
+  </property>
+</configuration>

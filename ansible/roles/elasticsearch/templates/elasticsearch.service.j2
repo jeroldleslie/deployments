@@ -1,0 +1,16 @@
+#/lib/systemd/system/elasticsearch.service
+[Unit]
+Description=elasticsearch Service
+DefaultDependencies=no
+After=local-fs.target systemd-tmpfiles-setup.service
+Conflicts=shutdown.target
+Before=sysinit.target shutdown.target
+RefuseManualStop=no
+
+[Service]
+Type=forking
+User=neverwinterdp
+ExecStart={{ elasticsearch.software.installation.elasticsearch_home_dir}}/bin/elasticsearch.sh
+
+[Install]
+WantedBy=multi-user.target

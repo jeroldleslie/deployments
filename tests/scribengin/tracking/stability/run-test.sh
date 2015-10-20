@@ -3,13 +3,18 @@
 SCRIPT_DIR=$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )
 
 ROOT=$SCRIPT_DIR/../../../..
+INVENTORY=/tmp/scribengininventory
 
 clusterCommander="$ROOT/tools/cluster/clusterCommander.py"
+serviceCommander="$ROOT/tools/serviceCommander/serviceCommander.py"
+statusCommander="$ROOT/tools/statusCommander/statusCommander.py"
 
-$clusterCommander cluster --execute "pkill -9 java" status
-$clusterCommander cluster --clean status
-$clusterCommander ansible --write-inventory-file --deploy-scribengin
-$clusterCommander cluster --start --profile-type=stability status
+$clusterCommander ansible --write-inventory-file --inventory-file $INVENTORY
+$serviceCommander -e "scribengin" --install -i $INVENTORY
+$serviceCommander --cluster --force-stop --clean --configure --start --profile-type=stability -i $INVENTORY
+$statusCommander -i $INVENTORY
+
+
 
 #################################################################################################################################
 #Launch Dataflow                                                                                                                #

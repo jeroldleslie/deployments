@@ -1,32 +1,52 @@
-- name: Install epel-release
-  sudo: yes
-  yum: name=epel-release state=installed
-  when: ansible_distribution == 'CentOS' or ansible_distribution == 'Red Hat Enterprise Linux'
-  
-- name: Install Ganglia Monitor
+---
+#Include variables from file
+- include_vars: "../../../profile/{{ profile_type | default('default') }}.yml"
+  tags: 
+    [ configure, install, start, stop, force-stop ]
+
+- name: Install Ganglia
   sudo: yes
   yum: name={{ item }} state=installed
   with_items:
+    - epel-release
     - ganglia
     - ganglia-gmetad
     - ganglia-gmond
     - ganglia-web
-  
+  tags:
+    - install
+      
+#- name: Add ganglia config 
+#  template: src={{ item }}.j2 dest=/etc/ganglia/{{ item }}
+#  sudo: yes
+#  with_items:
+#    - gmond.conf
 
-- name: Configure gmetad
+- name: Configure gmond (cluster name)
   sudo: yes
-  lineinfile: dest=/etc/ganglia/gmetad.conf state=present line='data_source "{{ cluster }}" 60 {{ ganglia_url }}'
-
+  replace: dest=/etc/ganglia/gmond.conf regexp='cluster\s{\s*name\s*=\s*\"\unspecified\"' replace='cluster {\n  name = "{{  monitoring.software.installation.cluster }}"'
+  tags:
+    [ install, confugure ]
+    
+- name: Configure gmond (ganglia master url)
+  sudo: yes
+  replace: dest=/etc/ganglia/gmond.conf regexp='udp_send_channel\s{\s*' replace='udp_send_channel {\n  host = {{ monitoring.software.installation.ganglia_url }}\n'
+  tags:
+    [ install, confugure ]    
 
 - name: Configure httpd
   sudo: yes
   lineinfile: dest=/etc/httpd/conf/httpd.conf line="<Directory \"/usr/share/ganglia\">\n    Options Indexes FollowSymLinks\n    AllowOverride None\n    Require all granted\n</Directory>\n"
+  tags:
+    [ install, confugure ]    
   
 - name: Add alias to httpd ganglia.conf 
   sudo: yes
   shell: echo "Alias /ganglia /usr/share/ganglia" > /etc/httpd/conf.d/ganglia.conf 
+  tags:
+    [ install, confugure ]    
 
-- name: Start ganglia master services (CentOS)
+- name: Restart ganglia master services on installation (CentOS)
   service: name={{ item }} state=restarted
   sudo: yes
   when: ansible_distribution == 'CentOS' or ansible_distribution == 'Red Hat Enterprise Linux'
@@ -35,19 +55,63 @@
     - gmetad
     - httpd
   when: ansible_virtualization_type != 'docker'
-  
+  tags:
+    - install    
 
+- name: Kill ganglia services
+  shell: kill -9 $(ps -ef | grep {{ item }} | grep -v grep | awk '{print $2}')
+  sudo: yes
+  with_items:
+    - gmond
+    - gmetad
+    - httpd
+  ignore_errors: yes
+  tags:
+    - force-stop
+
+    
+- name: Stop ganglia master services (CentOS)
+  service: name={{ item }} state=stopped
+  sudo: yes
+  when: ansible_distribution == 'CentOS' or ansible_distribution == 'Red Hat Enterprise Linux'
+  with_items:
+    - gmond
+    - gmetad
+    - httpd
+  when: ansible_virtualization_type != 'docker'
+  tags:
+    - stop
+
+- name: Start ganglia master services (CentOS)
+  service: name={{ item }} state=started
+  sudo: yes
+  when: ansible_distribution == 'CentOS' or ansible_distribution == 'Red Hat Enterprise Linux'
+  with_items:
+    - gmond
+    - gmetad
+    - httpd
+  when: ansible_virtualization_type != 'docker'
+  tags:
+    - start 
+ 
 - name: Start gmond manually
   shell: "/usr/sbin/gmond"
   sudo: yes
   when: ansible_virtualization_type == 'docker'
+  tags:
+    - start    
   
 - name: Start gmetad manually
   shell: "/usr/sbin/gmetad"
   sudo: yes
   when: ansible_virtualization_type == 'docker'
+  tags:
+    - start    
   
 - name: Start httpd manually
   shell: "/usr/sbin/httpd"
   sudo: yes
   when: ansible_virtualization_type == 'docker'
+  tags:
+    - start    
+  

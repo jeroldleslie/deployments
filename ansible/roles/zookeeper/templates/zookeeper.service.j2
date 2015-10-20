@@ -1,0 +1,16 @@
+#/lib/systemd/system/zookeeper.service
+[Unit]
+Description=zookeeper Service
+DefaultDependencies=no
+After=local-fs.target systemd-tmpfiles-setup.service
+Conflicts=shutdown.target
+Before=sysinit.target shutdown.target
+RefuseManualStop=no
+
+[Service]
+Type=forking
+User=neverwinterdp
+ExecStart={{ zookeeper.software.installation.zookeeper_home_dir }}/bin/zkServer.sh start
+
+[Install]
+WantedBy=multi-user.target

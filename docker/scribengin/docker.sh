@@ -151,6 +151,18 @@ function build_images() {
   mkdir $DOCKERSCRIBEDIR/tmp
   cp ~/.ssh/id_rsa.pub $DOCKERSCRIBEDIR/tmp/authorized_keys
   docker build -t $OS_TYPE:scribengin $DOCKERSCRIBEDIR
+
+
+  #Install common dependencies  
+  docker run -d -p 22 --privileged -h scribengincommon --name scribengincommon  $OS_TYPE:scribengin
+  SCRIPT_DIR=$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )
+  TMP_INVENTORY=/tmp/commoninventory
+  echo $(docker inspect -f "{{ .NetworkSettings.IPAddress }}" scribengincommon) > $TMP_INVENTORY
+  $SCRIPT_DIR/../../tools/serviceCommander/serviceCommander.py -e "common" --install -i $TMP_INVENTORY
+  containerID=$(docker ps -a | grep scribengincommon | awk '{print $1}')
+  docker commit $containerID $OS_TYPE:scribengin
+  docker rm -f $containerID
+  rm /tmp/commoninventory
   
   rm -rf $DOCKERSCRIBEDIR/tmp
   
@@ -195,7 +207,7 @@ function launch_intermediate_containers() {
   #container_update_hosts $@
   ansible_inventory $@ 
   
-  deploy_all $@
+  deploy_all $@ 
   
   #Create base images for each container
   containers=( $(docker ps -a | grep scribengin | awk '{print $1 " " $NF}') )
@@ -321,72 +333,20 @@ function ansible_inventory(){
   echo -e $filecontents
 }
 
-function deploy_scribengin(){
-  SCRIPT_DIR=$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )
-  PLAYBOOK_FILE_LOCATION="$(get_opt --playbook-file-location "$SCRIPT_DIR/../../ansible/scribengin.yml" $@)"
-  deploy $PLAYBOOK_FILE_LOCATION $@
-}
-
-function deploy_tools(){
-  SCRIPT_DIR=$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )
-  PLAYBOOK_FILE_LOCATION="$(get_opt --playbook-file-location "$SCRIPT_DIR/../../ansible/scribenginTools.yml" $@)"
-  deploy $PLAYBOOK_FILE_LOCATION $@
-}
-
 function deploy_all(){
+  NEVERWINTERDP_HOME_OVERRIDE=$(get_opt --neverwinterdp-home '' $@)
   SCRIPT_DIR=$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )
-  PLAYBOOK_FILE_LOCATION="$(get_opt --playbook-file-location "$SCRIPT_DIR/../../ansible/scribenginCluster.yml" $@)"
-  deploy $PLAYBOOK_FILE_LOCATION $@
-}
-
-function deploy_kibana_charts(){
-  SCRIPT_DIR=$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )
-  PLAYBOOK_FILE_LOCATION="$(get_opt --playbook-file-location "$SCRIPT_DIR/../../ansible/kibana.yml" $@)"
-  deploy $PLAYBOOK_FILE_LOCATION $@
-}
-
-function deploy(){
-  h1 "Provisioning with Ansible"
-  
-  PLAYBOOK_FILE_LOCATION=$1
-  shift
-  
-  INVENTORY_FILE_LOCATION=$(get_opt --inventory-file-location '/tmp/scribengininventory' $@)
-  ANSIBLE_FORKS=$(get_opt --ansible-forks 10 $@)
-  NEVERWINTERDP_HOME_OVERRIDE=$(get_opt --neverwinterdp-home $NEVERWINTERDP_HOME $@)
-  
   
   if [[ $NEVERWINTERDP_HOME_OVERRIDE == "" ]] ; then
-    ansible-playbook $PLAYBOOK_FILE_LOCATION -i $INVENTORY_FILE_LOCATION -f $ANSIBLE_FORKS
+    $SCRIPT_DIR/../../tools/serviceCommander/serviceCommander.py --cluster --install --configure --clean -i $INVENTORY_FILE_LOCATION
   else
-    ansible-playbook $PLAYBOOK_FILE_LOCATION -i $INVENTORY_FILE_LOCATION -f $ANSIBLE_FORKS --extra-vars "neverwinterdp_home_override=$NEVERWINTERDP_HOME_OVERRIDE"
+    $SCRIPT_DIR/../../tools/serviceCommander/serviceCommander.py --cluster --install --configure --clean -i $INVENTORY_FILE_LOCATION --extra-vars "neverwinterdp_home_override=$NEVERWINTERDP_HOME_OVERRIDE"
   fi
 }
 
-function setup_cluster_env(){
-  h1 "Setup cluster environment"
-  SCRIPT_DIR=$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )
-  PLAYBOOK_FILE_LOCATION="$(get_opt --playbook-file-location "$SCRIPT_DIR/../../ansible/cluster_env.yml" $@)"
-  deploy $PLAYBOOK_FILE_LOCATION $@
-}
-
-function startCluster(){
-
-  h1 "Starting cluster"
-  
-  IDLE_KAFKA_SERVER=$(get_opt --idle-kafka-brokers 0 $@)
-  SCRIPT_DIR=$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )
-  #command='ssh -o StrictHostKeyChecking=no neverwinterdp@hadoop-master "cd /opt/cluster && python clusterCommander.py cluster --clean --start --idle-kafka-brokers $IDLE_KAFKA_SERVER status'
-  #command="$command\""
-  
-  #eval $command
-  $SCRIPT_DIR/../../tools/cluster/clusterCommander.py cluster --clean --start --idle-kafka-brokers $IDLE_KAFKA_SERVER status
-
-  #h1 "Deploy kibana charts"
-  #deploy_kibana_charts $@
-}
-
 function cluster(){
+  SCRIPT_DIR=$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )
+  
   CLEAN_IMAGE=$(has_opt "--clean-image" $@ )
   BUILD_IMAGE=$(has_opt "--build-image" $@ )
   CLEAN_CONTAINERS=$(has_opt "--clean-containers" $@ )
@@ -395,12 +355,14 @@ function cluster(){
   DEPLOY=$(has_opt "--deploy" $@)
   DEPLOY_SCRIBENGIN=$(has_opt "--deploy-scribengin" $@)
   DEPLOY_TOOLS=$(has_opt "--deploy-tools" $@)
+  CLEAN_CLUSTER=$(has_opt "--clean-cluster" $@ )
   STOP_CLUSTER=$(has_opt "--stop-cluster" $@ )
   FORCE_STOP_CLUSTER=$(has_opt "--force-stop-cluster" $@ )
   START=$(has_opt "--start" $@)
   LAUNCH=$(has_opt "--launch" $@ )
   #DEPLOY_KIBANA=$(has_opt "--deploy-kibana" $@)
-  
+  INVENTORY_FILE_LOCATION=$(get_opt --inventory-file-location '/tmp/scribengininventory' $@)
+  NEVERWINTERDP_HOME_OVERRIDE=$(get_opt --neverwinterdp-home '' $@)
   
   if [ $CLEAN_CONTAINERS == "true" ] || [ $LAUNCH == "true" ] ; then
     clean_containers $@
@@ -430,27 +392,31 @@ function cluster(){
   fi
   
   if [ $DEPLOY_SCRIBENGIN == "true" ] || [ $LAUNCH == "true" ] ; then
-    deploy_scribengin $@
+    if [[ $NEVERWINTERDP_HOME_OVERRIDE == "" ]] ; then
+      $SCRIPT_DIR/../../tools/serviceCommander/serviceCommander.py -e "scribengin" --install -i $INVENTORY_FILE_LOCATION
+    else
+      $SCRIPT_DIR/../../tools/serviceCommander/serviceCommander.py -e "scribengin" --install -i $INVENTORY_FILE_LOCATION --extra-vars "neverwinterdp_home_override=$NEVERWINTERDP_HOME_OVERRIDE"
+    fi
   fi  
   
   if [ $DEPLOY_TOOLS == "true" ] || [ $LAUNCH == "true" ] ; then
-    deploy_tools $@
+    $SCRIPT_DIR/../../tools/serviceCommander/serviceCommander.py -e "neverwinterdp_deployments" --install -i $INVENTORY_FILE_LOCATION
   fi
   
-  if [ $START == "true" ] || [ $LAUNCH == "true" ] ; then
-    startCluster $@
-  fi
-  
-  #if [ $DEPLOY_KIBANA == "true" ] ; then
-  #  ssh -o StrictHostKeyChecking=no neverwinterdp@monitoring-1 "cd /opt/cluster && python clusterCommander.py kibana --import-kibana"
-  #fi
- 
   if [ $STOP_CLUSTER == "true" ] ; then
-    ssh -o StrictHostKeyChecking=no neverwinterdp@hadoop-master "cd /opt/cluster && python clusterCommander.py cluster --stop status"
+    $SCRIPT_DIR/../../tools/serviceCommander/serviceCommander.py --cluster --stop -i $INVENTORY_FILE_LOCATION
   fi
   
   if [ $FORCE_STOP_CLUSTER == "true" ] ; then
-    ssh -o StrictHostKeyChecking=no neverwinterdp@hadoop-master "cd /opt/cluster && python clusterCommander.py cluster --force-stop status"
+    $SCRIPT_DIR/../../tools/serviceCommander/serviceCommander.py --cluster --force-stop -i $INVENTORY_FILE_LOCATION
+  fi
+  
+  if [ $CLEAN_CLUSTER == "true" ] || [ $LAUNCH == "true" ] ; then
+    $SCRIPT_DIR/../../tools/serviceCommander/serviceCommander.py --cluster --clean -i $INVENTORY_FILE_LOCATION
+  fi
+  
+  if [ $START == "true" ] || [ $LAUNCH == "true" ] ; then
+    $SCRIPT_DIR/../../tools/serviceCommander/serviceCommander.py --cluster --configure --start -i $INVENTORY_FILE_LOCATION
   fi
 }
 

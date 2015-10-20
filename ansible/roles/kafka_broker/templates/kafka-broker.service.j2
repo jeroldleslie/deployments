@@ -5,10 +5,12 @@ DefaultDependencies=no
 After=local-fs.target systemd-tmpfiles-setup.service
 Conflicts=shutdown.target
 Before=sysinit.target shutdown.target
-RefuseManualStop=yes
+RefuseManualStop=no
 
 [Service]
-ExecStart=/opt/kafka/bin/kafka-server-start.sh /opt/kafka/config/server.properties
+Type=simple
+User=neverwinterdp
+ExecStart={{ kafka.software.installation.kafka_home_dir }}/bin/kafka-server-start.sh {{ kafka.software.installation.kafka_home_dir }}/config/server.properties
 
 [Install]
 WantedBy=multi-user.target

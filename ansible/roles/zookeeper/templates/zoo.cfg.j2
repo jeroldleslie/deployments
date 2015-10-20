@@ -1,13 +1,32 @@
-tickTime=2000
-dataDir={{ zookeeper_data_dir }}
-clientPort={{ zookeeper_clientport }}
-initLimit=5
-syncLimit=2
-{% if groups['Zookeepers'] is defined %}
-{% for host in groups['Zookeepers'] %}
-server.{% if groups['Zookeepers'] is defined %}{{ groups['Zookeepers'].index(host)}}{% else %}0{% endif %}={{ host }}:{{ zookeeper_leader_port }}:{{ zookeeper_election_port }}
-{% endfor %}
-{% else %}
-server.0={{ inventory_hostname }}:{{ zookeeper_leader_port }}:{{ zookeeper_election_port }}
-{% endif %}
+# The number of milliseconds of each tick
+tickTime={{ zookeeper.software.zoo_cfg.tickTime }}
+# The number of ticks that the initial 
+# synchronization phase can take
+initLimit={{ zookeeper.software.zoo_cfg.initLimit }}
+# The number of ticks that can pass between 
+# sending a request and getting an acknowledgement
+syncLimit={{ zookeeper.software.zoo_cfg.syncLimit }}
+# the directory where the snapshot is stored.
+# do not use /tmp for storage, /tmp here is just 
+# example sakes.
+dataDir={{ zookeeper.software.installation.zookeeper_data_dir }}
+# the port at which the clients will connect
+clientPort={{ zookeeper.software.installation.zookeeper_clientport }}
+# the maximum number of client connections.
+# increase this if you need to handle more clients
+#maxClientCnxns={{ zookeeper.software.zoo_cfg.maxClientCnxns }}
+#
+# Be sure to read the maintenance section of the 
+# administrator guide before turning on autopurge.
+#
+# http://zookeeper.apache.org/doc/current/zookeeperAdmin.html#sc_maintenance
+#
+# The number of snapshots to retain in dataDir
+#autopurge.snapRetainCount={{ zookeeper.software.zoo_cfg.autopurge_snapRetainCount }}
+# Purge task interval in hours
+# Set to 0 to disable auto purge feature
+#autopurge.purgeInterval={{ zookeeper.software.zoo_cfg.autopurge_purgeInterval }}
 
+{% for host in groups['zookeeper'] %}
+server.{{ host | regex_replace('.*?([0-9]+)$', '\\1') }}={{ host }}:{{zookeeper.software.installation.zookeeper_leader_port}}:{{zookeeper.software.installation.zookeeper_election_port}}
+{% endfor %}

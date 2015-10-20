@@ -1,5 +1,3 @@
 ---
 neverwinterdp_home: "{{ lookup('env','NEVERWINTERDP_HOME') }}"
-local_elasticsearch_folder: "{{neverwinterdp_home}}/module/elasticsearch/"
-local_elasticsearch_release_folder: "{{neverwinterdp_home}}/module/elasticsearch/build/release/"
 

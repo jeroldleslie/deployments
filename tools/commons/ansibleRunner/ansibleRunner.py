@@ -83,7 +83,7 @@ class ansibleRunner():
     if(toRetry and retry < maxRetries):
       print "Retrying Ansible"
       logging.info("Retrying Ansible")
-      self.deploy(playbook, inventory, neverwinterdpHome, outputToStdout, retry+1, retryLine)
+      self.deploy(playbook=playbook, inventory=inventory, neverwinterdpHome=neverwinterdpHome, outputToStdout=outputToStdout, retry=retry+1, retryLine=retryLine, extra_vars=extra_vars)
 
 
 if __name__ == "__main__":
