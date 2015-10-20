@@ -1,7 +1,7 @@
 ---
 
 - name: NeverwinterDP Deployments
-  hosts: monitoring
+  hosts: all
   remote_user: neverwinterdp
   roles:
     - neverwinterdp_deployments
