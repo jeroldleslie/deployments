@@ -1,5 +1,22 @@
 #!/bin/bash
 
+function get_opt() {
+  OPT_NAME=$1
+  DEFAULT_VALUE=$2
+  shift
+  
+  #Par the parameters
+  for i in "$@"; do
+    index=$(($index+1))
+    if [[ $i == $OPT_NAME* ]] ; then
+      value="${i#*=}"
+      echo "$value"
+      return
+    fi
+  done
+  echo $DEFAULT_VALUE
+}
+
 SCRIPT_DIR=$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )
 
 ROOT=$SCRIPT_DIR/../../../..
@@ -8,6 +25,8 @@ INVENTORY=/tmp/scribengininventory
 clusterCommander="$ROOT/tools/cluster/clusterCommander.py"
 serviceCommander="$ROOT/tools/serviceCommander/serviceCommander.py"
 statusCommander="$ROOT/tools/statusCommander/statusCommander.py"
+MONITOR_MAX_RUNTIME=$(get_opt --monitor-max-runtime '0' $@)
+
 
 $serviceCommander -e "scribengin" --install -i $INVENTORY
 $serviceCommander --cluster --force-stop --clean --configure --start --profile-type=stability -i $INVENTORY
@@ -39,5 +58,13 @@ STORAGE_OPTS="--dataflow-storage=kafka"
 DATAFLOW_OPTS="--dataflow-num-of-worker=8 --dataflow-num-of-executor-per-worker=2"
 DATAFLOW_OPTS="$STORAGE_OPTS $DATAFLOW_OPTS $KILL_WORKER_OPTS"
 
-time $NEVERWINTERDP_BUILD/dataflow/tracking-sample/bin/run-tracking.sh $GENERATOR_OPTS $DATAFLOW_OPTS $VALIDATOR_OPTS
+MONITOR_OPTS="--monitor-max-runtime=MONITOR_MAX_RUNTIME"
+
+time $NEVERWINTERDP_BUILD/dataflow/tracking-sample/bin/run-tracking.sh $GENERATOR_OPTS $DATAFLOW_OPTS $VALIDATOR_OPTS $MONITOR_OPTS
+
+
+
+
+
+
 
