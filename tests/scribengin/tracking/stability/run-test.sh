@@ -23,7 +23,7 @@ NEVERWINTERDP_BUILD=$NEVERWINTERDP_HOME/release/build/release/neverwinterdp
 SHELL=$NEVERWINTERDP_BUILD/scribengin/bin/shell.sh
   
 
-chmod +x $NEVERWINTERDP_BUILD/dataflow/log-sample/bin/*.sh
+chmod +x $NEVERWINTERDP_BUILD/dataflow/*/bin/*.sh
 
 $SHELL vm info
 
