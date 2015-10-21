@@ -1,3 +1,0 @@
-- name: install the basho_bench rpm from a remote repo
-  yum: name=https://s3-us-west-2.amazonaws.com/nvent-repo/rpm/basho_bench/0.10.0/basho-bench-0.10.0-1.el6.x86_64.rpm state=present
-  sudo: yes
