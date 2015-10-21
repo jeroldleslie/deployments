@@ -3,6 +3,10 @@
   tags: 
     [ configure, install, clean, start, stop, force-stop ]
 
+- debug: msg="Profile type is {{ profile_type | default('default') }}.yml"
+  tags: 
+    [ configure, install, clean, start, stop, force-stop ]
+
 - name: Create zookeeper directory
   file: path={{zookeeper.software.installation.zookeeper_home_dir}} state=directory
   tags:

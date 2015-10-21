@@ -1,7 +1,0 @@
-- name: Install openssl
-  yum: name='openssl-1.0.1e-30.el6_6.5' state=installed
-  sudo: yes
-
-- name: collect blueprint info
-  local_action: blueprint_collect_facts hostname="{{inventory_hostname}}" groupname="{{groupname}}" components="{{hdp}}"
-

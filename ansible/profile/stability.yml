@@ -9,11 +9,11 @@ kafka:
       kafka_tgz: kafka_2.10-0.8.2.0.tgz
       kafka_tgz_url: http://jenkinsdp.do.demandcube.com/kafka_2.10-0.8.2.0.tgz
     jvm:
-      KAFKA_HEAP_SIZE: 1500
+      KAFKA_HEAP_SIZE: 1536
     server_properties:
       zookeeper_clientport: 2181 
       port: 9092
-      num_network_threads: 3
+      num_network_threads: 8
       num_io_threads: 8
       socket_send_buffer_bytes: 1048576
       socket_receive_buffer_bytes: 1048576
