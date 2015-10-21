@@ -58,7 +58,7 @@ STORAGE_OPTS="--dataflow-storage=kafka"
 DATAFLOW_OPTS="--dataflow-num-of-worker=8 --dataflow-num-of-executor-per-worker=2"
 DATAFLOW_OPTS="$STORAGE_OPTS $DATAFLOW_OPTS $KILL_WORKER_OPTS"
 
-MONITOR_OPTS="--monitor-max-runtime=MONITOR_MAX_RUNTIME"
+MONITOR_OPTS="--monitor-max-runtime=$MONITOR_MAX_RUNTIME"
 
 time $NEVERWINTERDP_BUILD/dataflow/tracking-sample/bin/run-tracking.sh $GENERATOR_OPTS $DATAFLOW_OPTS $VALIDATOR_OPTS $MONITOR_OPTS
 
