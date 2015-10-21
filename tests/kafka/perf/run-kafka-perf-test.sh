@@ -3,12 +3,14 @@
 SCRIPT_DIR=$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )
 
 ROOT=$SCRIPT_DIR/../../..
+INVENTORY=/tmp/scribengininventory
 
-clusterCommander="$ROOT/tools/cluster/clusterCommander.py"
+serviceCommander="$ROOT/tools/serviceCommander/serviceCommander.py"
+statusCommander="$ROOT/tools/statusCommander/statusCommander.py"
 
-$clusterCommander cluster --execute "pkill -9 java" status
-$clusterCommander cluster --clean status
-$clusterCommander zookeeper --start kafka --start  --profile-type=stability status
+$serviceCommander --cluster --force-stop -i $INVENTORY
+$serviceCommander --services "zookeeper,kafka" --force-stop --clean --configure --start --profile-type=stability -i $INVENTORY
+$statusCommander -i $INVENTORY
 
 #################################################################################################################################
 #Launch Dataflow                                                                                                                #
