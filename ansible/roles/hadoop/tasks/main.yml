@@ -2,6 +2,10 @@
 - include_vars: "../../../profile/{{ profile_type | default('default') }}.yml"
   tags: 
     [ configure, install, clean, start, stop, force-stop ]
+
+- debug: msg="Profile type is {{ profile_type | default('default') }}.yml"
+  tags: 
+    [ configure, install, clean, start, stop, force-stop ]
     
 - name: Create hadoop directory
   file: path=/opt/hadoop state=directory
