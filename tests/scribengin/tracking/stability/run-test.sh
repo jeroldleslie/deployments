@@ -9,11 +9,9 @@ clusterCommander="$ROOT/tools/cluster/clusterCommander.py"
 serviceCommander="$ROOT/tools/serviceCommander/serviceCommander.py"
 statusCommander="$ROOT/tools/statusCommander/statusCommander.py"
 
-$clusterCommander ansible --write-inventory-file --inventory-file $INVENTORY
 $serviceCommander -e "scribengin" --install -i $INVENTORY
 $serviceCommander --cluster --force-stop --clean --configure --start --profile-type=stability -i $INVENTORY
 $statusCommander -i $INVENTORY
-
 
 
 #################################################################################################################################
