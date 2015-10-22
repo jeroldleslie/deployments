@@ -20,8 +20,12 @@
   synchronize: src={{ playbook_dir }}/../ dest={{ monitoring.software.installation.neverwinterdp_deployments_path }}  recursive=yes
   tags:
     - install
-
+    
+- debug: msg="Inventory file location {{ inventory_file }}"
+  tags:
+    - install
+    
 - name: Copy inventory file
-  synchronize: src={{ inventory_file }} dest={{ monitoring.software.installation.neverwinterdp_deployments_path }}/inventory
+  copy: src={{ inventory_file }} dest={{ monitoring.software.installation.neverwinterdp_deployments_path }}/inventory
   tags:
     - install
