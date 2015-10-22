@@ -50,9 +50,9 @@ DATAFLOW_KILL_WORKER_PERIOD=$(get_opt --dataflow-kill-worker-period '60000' $@)
 
 $serviceCommander -e "scribengin" --install -i $INVENTORY
 if [ $STOP_CLEAN_DISABLE == "false" ] ; then
-	$serviceCommander --cluster --force-stop --clean --configure --start --profile-type=stability -i $INVENTORY
+  $serviceCommander --cluster --force-stop --clean --configure --start --profile-type=stability -i $INVENTORY
 else
-	$serviceCommander --cluster --configure --start --profile-type=stability -i $INVENTORY
+  $serviceCommander --cluster --configure --start --profile-type=stability -i $INVENTORY
 fi
 $statusCommander -i $INVENTORY
 
