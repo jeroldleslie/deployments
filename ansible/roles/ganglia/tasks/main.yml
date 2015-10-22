@@ -75,7 +75,22 @@
   sudo: yes
   tags:
     [ install,configure ]
-    
+
+- name: Move ganglia python plugins
+  template: src=../templates/{{ item }}.py.j2  dest=/usr/lib64/ganglia/python_modules/{{ item }}.py
+  sudo: yes
+  with_items:
+    - lsof_counter
+  tags:
+    - install
+
+- name: Move ganglia python plugins configs
+  template: src=../templates/{{ item }}.pyconf.j2  dest=/etc/ganglia/conf.d/{{ item }}.pyconf
+  sudo: yes
+  with_items:
+    - lsof_counter
+  tags:
+    - install
 
 - name: Restart ganglia client service (Ubuntu)
   #command: /etc/init.d/ganglia-monitor restart
