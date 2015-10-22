@@ -42,7 +42,9 @@ statusCommander="$ROOT/tools/statusCommander/statusCommander.py"
 
 MONITOR_MAX_RUNTIME=$(get_opt --monitor-max-runtime '0' $@)
 INVENTORY=$(get_opt --inventory '/tmp/scribengininventory' $@)
+
 JUNIT_REPORT_FILE=$(get_opt --junit-report-file '' $@)
+JUNIT_PRE_SLEEP=$(get_opt --junit-pre-sleep '0' $@)
 
 DATAFLOW_KILL_WORKER_RANDOM=$(get_opt --dataflow-kill-worker-random 'false' $@)
 DATAFLOW_KILL_WORKER_MAX=$(get_opt --dataflow-kill-worker-max '5' $@)
@@ -84,7 +86,7 @@ DATAFLOW_OPTS="$STORAGE_OPTS $DATAFLOW_OPTS $KILL_WORKER_OPTS"
 
 MONITOR_OPTS="--monitor-max-runtime=$MONITOR_MAX_RUNTIME"
 
-JUNIT_OPTS="--junit-report-file=$JUNIT_REPORT_FILE"
+JUNIT_OPTS="--junit-report-file=$JUNIT_REPORT_FILE --junit-pre-sleep $JUNIT_PRE_SLEEP"
 
 DATAFLOW_KILL_OPTS="--dataflow-kill-worker-random=$DATAFLOW_KILL_WORKER_RANDOM \
   --dataflow-kill-worker-max=$DATAFLOW_KILL_WORKER_MAX --dataflow-kill-worker-period=$DATAFLOW_KILL_WORKER_PERIOD"
