@@ -26,7 +26,7 @@ serviceCommander="$ROOT/tools/serviceCommander/serviceCommander.py"
 statusCommander="$ROOT/tools/statusCommander/statusCommander.py"
 MONITOR_MAX_RUNTIME=$(get_opt --monitor-max-runtime '0' $@)
 INVENTORY=$(get_opt --inventory '/tmp/scribengininventory' $@)
-
+JUNIT_REPORT_FILE=$(get_opt --junit-report-file '' $@)
 
 $serviceCommander -e "scribengin" --install -i $INVENTORY
 $serviceCommander --cluster --force-stop --clean --configure --start --profile-type=stability -i $INVENTORY
@@ -60,7 +60,9 @@ DATAFLOW_OPTS="$STORAGE_OPTS $DATAFLOW_OPTS $KILL_WORKER_OPTS"
 
 MONITOR_OPTS="--monitor-max-runtime=$MONITOR_MAX_RUNTIME"
 
-time $NEVERWINTERDP_BUILD/dataflow/tracking-sample/bin/run-tracking.sh $GENERATOR_OPTS $DATAFLOW_OPTS $VALIDATOR_OPTS $MONITOR_OPTS
+JUNIT_OPTS="--junit-report-file=$JUNIT_REPORT_FILE"
+
+time $NEVERWINTERDP_BUILD/dataflow/tracking-sample/bin/run-tracking.sh $GENERATOR_OPTS $DATAFLOW_OPTS $VALIDATOR_OPTS $MONITOR_OPTS JUNIT_OPTS
 
 
 
