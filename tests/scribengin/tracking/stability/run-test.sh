@@ -46,6 +46,8 @@ INVENTORY=$(get_opt --inventory '/tmp/scribengininventory' $@)
 JUNIT_REPORT_FILE=$(get_opt --junit-report-file '' $@)
 JUNIT_PRE_SLEEP=$(get_opt --junit-pre-sleep '0' $@)
 
+DATAFLOW_STORAGE=$(get_opt --dataflow-storage 'kafka' $@)
+
 DATAFLOW_KILL_WORKER_RANDOM=$(get_opt --dataflow-kill-worker-random 'false' $@)
 DATAFLOW_KILL_WORKER_MAX=$(get_opt --dataflow-kill-worker-max '5' $@)
 DATAFLOW_KILL_WORKER_PERIOD=$(get_opt --dataflow-kill-worker-period '60000' $@)
@@ -79,10 +81,9 @@ GENERATOR_OPTS="\
 
 VALIDATOR_OPTS='--validator-num-of-reader=1'
 
-STORAGE_OPTS="--dataflow-storage=kafka"
-#KILL_WORKER_OPTS='--dataflow-kill-worker-random=true --dataflow-kill-worker-period=300000 --dataflow-kill-worker-max=500'
+STORAGE_OPTS="--dataflow-storage=$DATAFLOW_STORAGE"
+
 DATAFLOW_OPTS="--dataflow-num-of-worker=8 --dataflow-num-of-executor-per-worker=2"
-DATAFLOW_OPTS="$STORAGE_OPTS $DATAFLOW_OPTS $KILL_WORKER_OPTS"
 
 MONITOR_OPTS="--monitor-max-runtime=$MONITOR_MAX_RUNTIME"
 
@@ -91,7 +92,7 @@ JUNIT_OPTS="--junit-report-file=$JUNIT_REPORT_FILE --junit-pre-sleep $JUNIT_PRE_
 DATAFLOW_KILL_OPTS="--dataflow-kill-worker-random=$DATAFLOW_KILL_WORKER_RANDOM \
   --dataflow-kill-worker-max=$DATAFLOW_KILL_WORKER_MAX --dataflow-kill-worker-period=$DATAFLOW_KILL_WORKER_PERIOD"
 
-time $NEVERWINTERDP_BUILD/dataflow/tracking-sample/bin/run-tracking.sh $GENERATOR_OPTS $DATAFLOW_OPTS $VALIDATOR_OPTS $MONITOR_OPTS $JUNIT_OPTS $DATAFLOW_KILL_OPTS
+time $NEVERWINTERDP_BUILD/dataflow/tracking-sample/bin/run-tracking.sh $GENERATOR_OPTS $STORAGE_OPTS $DATAFLOW_OPTS $VALIDATOR_OPTS $MONITOR_OPTS $JUNIT_OPTS $DATAFLOW_KILL_OPTS
 
 
 
