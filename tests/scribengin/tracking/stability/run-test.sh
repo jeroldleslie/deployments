@@ -20,12 +20,12 @@ function get_opt() {
 SCRIPT_DIR=$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )
 
 ROOT=$SCRIPT_DIR/../../../..
-INVENTORY=/tmp/scribengininventory
 
 clusterCommander="$ROOT/tools/cluster/clusterCommander.py"
 serviceCommander="$ROOT/tools/serviceCommander/serviceCommander.py"
 statusCommander="$ROOT/tools/statusCommander/statusCommander.py"
 MONITOR_MAX_RUNTIME=$(get_opt --monitor-max-runtime '0' $@)
+INVENTORY=$(get_opt --inventory '/tmp/scribengininventory' $@)
 
 
 $serviceCommander -e "scribengin" --install -i $INVENTORY
