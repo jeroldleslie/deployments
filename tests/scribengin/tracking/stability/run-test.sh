@@ -17,19 +17,43 @@ function get_opt() {
   echo $DEFAULT_VALUE
 }
 
+function has_opt() {
+  OPT_NAME=$1
+  shift
+  #Par the parameters
+  for i in "$@"; do
+    if [[ $i == $OPT_NAME ]] ; then
+      echo "true"
+      return
+    fi
+  done
+  echo "false"
+}
+
 SCRIPT_DIR=$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )
 
 ROOT=$SCRIPT_DIR/../../../..
 
+STOP_CLEAN_DISABLE=$(has_opt "--stop-clean-disable" $@ )
+
 clusterCommander="$ROOT/tools/cluster/clusterCommander.py"
 serviceCommander="$ROOT/tools/serviceCommander/serviceCommander.py"
 statusCommander="$ROOT/tools/statusCommander/statusCommander.py"
+
 MONITOR_MAX_RUNTIME=$(get_opt --monitor-max-runtime '0' $@)
 INVENTORY=$(get_opt --inventory '/tmp/scribengininventory' $@)
 JUNIT_REPORT_FILE=$(get_opt --junit-report-file '' $@)
 
+DATAFLOW_KILL_WORKER_RANDOM=$(get_opt --dataflow-kill-worker-random 'false' $@)
+DATAFLOW_KILL_WORKER_MAX=$(get_opt --dataflow-kill-worker-max '5' $@)
+DATAFLOW_KILL_WORKER_PERIOD=$(get_opt --dataflow-kill-worker-period '60000' $@)
+
 $serviceCommander -e "scribengin" --install -i $INVENTORY
-$serviceCommander --cluster --force-stop --clean --configure --start --profile-type=stability -i $INVENTORY
+if [ $STOP_CLEAN_DISABLE == "false" ] ; then
+	$serviceCommander --cluster --force-stop --clean --configure --start --profile-type=stability -i $INVENTORY
+else
+	$serviceCommander --cluster --configure --start --profile-type=stability -i $INVENTORY
+fi
 $statusCommander -i $INVENTORY
 
 
@@ -62,7 +86,10 @@ MONITOR_OPTS="--monitor-max-runtime=$MONITOR_MAX_RUNTIME"
 
 JUNIT_OPTS="--junit-report-file=$JUNIT_REPORT_FILE"
 
-time $NEVERWINTERDP_BUILD/dataflow/tracking-sample/bin/run-tracking.sh $GENERATOR_OPTS $DATAFLOW_OPTS $VALIDATOR_OPTS $MONITOR_OPTS JUNIT_OPTS
+DATAFLOW_KILL_OPTS="--dataflow-kill-worker-random=$DATAFLOW_KILL_WORKER_RANDOM \
+  --dataflow-kill-worker-max=$DATAFLOW_KILL_WORKER_MAX --dataflow-kill-worker-period=$DATAFLOW_KILL_WORKER_PERIOD"
+
+time $NEVERWINTERDP_BUILD/dataflow/tracking-sample/bin/run-tracking.sh $GENERATOR_OPTS $DATAFLOW_OPTS $VALIDATOR_OPTS $MONITOR_OPTS $JUNIT_OPTS $DATAFLOW_KILL_OPTS
 
 
 
