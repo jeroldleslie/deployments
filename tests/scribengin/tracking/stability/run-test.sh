@@ -87,7 +87,7 @@ DATAFLOW_OPTS="--dataflow-num-of-worker=8 --dataflow-num-of-executor-per-worker=
 
 MONITOR_OPTS="--monitor-max-runtime=$MONITOR_MAX_RUNTIME"
 
-JUNIT_OPTS="--junit-report-file=$JUNIT_REPORT_FILE --junit-pre-sleep $JUNIT_PRE_SLEEP"
+JUNIT_OPTS="--junit-report-file=$JUNIT_REPORT_FILE --junit-pre-sleep=$JUNIT_PRE_SLEEP"
 
 DATAFLOW_KILL_OPTS="--dataflow-kill-worker-random=$DATAFLOW_KILL_WORKER_RANDOM \
   --dataflow-kill-worker-max=$DATAFLOW_KILL_WORKER_MAX --dataflow-kill-worker-period=$DATAFLOW_KILL_WORKER_PERIOD"
