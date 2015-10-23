@@ -1,6 +1,0 @@
-storm_code_jar_url: 'https://s3-us-west-2.amazonaws.com/nvent-repo/jar/odyssey-movers/1.0.0/movers-1.0.0.jar'
-storm_code_jar_file: 'movers-1.0.0.jar'
-storm_code_home_dir: '/opt/odyssey-movers/'
-storm_code_version: '1.0.0'
-storm_code_user: 'centos'
-storm_code_group: 'centos'

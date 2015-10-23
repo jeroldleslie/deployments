@@ -1,0 +1,17 @@
+#/lib/systemd/system/hadoop-nodemanager.service
+[Unit]
+Description=Hadoop nodemanager Service
+DefaultDependencies=no
+After=local-fs.target systemd-tmpfiles-setup.service
+Conflicts=shutdown.target
+Before=sysinit.target shutdown.target
+RefuseManualStop=no
+
+[Service]
+Type=forking
+User=neverwinterdp
+ExecStart={{ hadoop_master.software.installation.hadoop_home_dir }}/sbin/yarn-daemon.sh start nodemanager
+ExecStop={{ hadoop_master.software.installation.hadoop_home_dir }}/sbin/yarn-daemon.sh stop nodemanager
+
+[Install]
+WantedBy=multi-user.target

@@ -1,0 +1,22 @@
+---
+      
+- name: Hadoop
+  hosts: hadoop_master:hadoop_worker
+  remote_user: neverwinterdp
+  roles:
+    - hadoop
+
+- name: Hadoop Masters
+  hosts: hadoop_master
+  remote_user: neverwinterdp
+  roles:
+   - hadoop_namenode
+   - hadoop_secondarynamenode
+   - hadoop_resourcemanager
+
+- name: Hadoop Workers
+  hosts: hadoop_worker
+  remote_user: neverwinterdp
+  roles:
+   - hadoop_datanode
+   - hadoop_nodemanager

@@ -59,7 +59,8 @@ scribeJpsCommand = "jps -m | grep '"+statusCommandParams.defaultReplacementStrin
 
 #Each key corresponds to an ansible group read in from your ansible inventory
 statusCommands = {
-  "monitoring"   : [ statusCommandParams(identifiers = ["kibana"]) ],
+  "monitoring"   : [ statusCommandParams(identifiers = ["kibana"],
+                                         command="ps ax | grep -w 'kibana' | awk '{print $1 \" \" $5}' | grep kibana | sed -e 's@/opt/kibana/bin/../node/bin/node@/opt/kibana/bin/kibana@'") ],
   "elasticsearch": [ statusCommandParams(identifiers = ["Main"]) ],
   "hadoop_master": [ statusCommandParams(identifiers = ["SecondaryNameNode", "ResourceManager", "NameNode"]) ],
   "zookeeper"    : [ statusCommandParams(identifiers = ["QuorumPeerMain"]) ],

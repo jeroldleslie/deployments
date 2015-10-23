@@ -1,0 +1,17 @@
+#/lib/systemd/system/hadoop-datanode.service
+[Unit]
+Description=Hadoop datanode Service
+DefaultDependencies=no
+After=local-fs.target systemd-tmpfiles-setup.service
+Conflicts=shutdown.target
+Before=sysinit.target shutdown.target
+RefuseManualStop=no
+
+[Service]
+Type=forking
+User=neverwinterdp
+ExecStart={{ hadoop_master.software.installation.hadoop_home_dir }}/sbin/hadoop-daemon.sh start datanode
+ExecStop={{ hadoop_master.software.installation.hadoop_home_dir }}/sbin/hadoop-daemon.sh stop datanode
+
+[Install]
+WantedBy=multi-user.target

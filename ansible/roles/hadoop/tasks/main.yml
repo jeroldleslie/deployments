@@ -1,24 +1,111 @@
-- name: download hadoop tar
-  get_url: url={{ hadoop_url }} dest=/tmp/hadoop.tar.gz
+#Include variables from file
+- include_vars: "../../../profile/{{ profile_type | default('default') }}.yml"
+  tags: 
+    [ configure, install, clean, start, stop, force-stop ]
 
-
+- debug: msg="Profile type is {{ profile_type | default('default') }}.yml"
+  tags: 
+    [ configure, install, clean, start, stop, force-stop ]
+    
 - name: Create hadoop directory
   file: path=/opt/hadoop state=directory
-
+  tags:
+    - install
+   
+- name: Check if Hadoop is already downloaded
+  stat: path=/tmp/{{ hadoop_master.software.installation.hadoop_tar }}
+  register: downloaded
+  tags:
+    - install
+    
+- debug: msg="Downloading hadoop from {{ hadoop_master.software.installation.hadoop_url }}"
+  tags:
+    - install
+     
+- name: Downloading Hadoop 
+  get_url: url={{ hadoop_master.software.installation.hadoop_url  }} dest=/tmp/{{ hadoop_master.software.installation.hadoop_tar }}
+  when: downloaded.stat.exists == false
+  tags:
+    - install
 
 - name: Decompress hadoop tar
-  command: tar xfz /tmp/hadoop.tar.gz -C /opt/hadoop --strip-components=1
-  
+  command: tar xfz /tmp/{{ hadoop_master.software.installation.hadoop_tar }} -C {{ hadoop_master.software.installation.hadoop_home_dir }} --strip-components=1
+  tags:
+    - install  
   
 - name: set HADOOP_COMMON_LIB_NATIVE_DIR
   sudo: yes
   sudo_user: root
-  lineinfile: dest=/etc/environment line="HADOOP_COMMON_LIB_NATIVE_DIR=/opt/hadoop/lib/native"
-
+  lineinfile: dest=/etc/environment line="HADOOP_COMMON_LIB_NATIVE_DIR={{ hadoop_master.software.installation.hadoop_home_dir }}/lib/native"
+  tags:
+    - install
+    
 - name: set HADOOP_OPTS
   sudo: yes
   sudo_user: root
-  lineinfile: dest=/etc/environment line="HADOOP_OPTS=-Djava.library.path=/opt/hadoop/lib"
+  lineinfile: dest=/etc/environment line="HADOOP_OPTS=-Djava.library.path={{ hadoop_master.software.installation.hadoop_home_dir }}/lib"
+  tags:
+    - install
   
-- name: move configuration files to container
-  copy: src=../config/ dest=/opt/hadoop/etc/hadoop/
+- name: Rendering hadoop services
+  template: src={{ item }}.j2 dest=/lib/systemd/system/{{ item }}
+  sudo: yes
+  with_items:
+    - hadoop-namenode.service
+    - hadoop-datanode.service
+    - hadoop-nodemanager.service
+    - hadoop-resourcemanager.service
+    - hadoop-secondarynamenode.service
+  tags:
+  - install
+  
+- name: Move configuration files to container
+  copy: src=config/ dest={{ hadoop_master.software.installation.hadoop_home_dir }}/etc/hadoop/
+  tags:
+    - configure
+
+- name: Add masters and slaves file
+  template: src={{ item }}.j2 dest={{ hadoop_master.software.installation.hadoop_home_dir }}/etc/hadoop/{{ item }}
+  sudo: yes
+  with_items:
+    - slaves
+    - masters
+    - hadoop-env.sh
+    - yarn-env.sh
+    - core-site.xml
+    - hdfs-site.xml
+    - yarn-site.xml
+    - capacity-scheduler.xml
+  tags:
+    - configure
+    
+- name: Add hdfs
+  template: src={{ item }}.j2 dest={{ hadoop_master.software.installation.hadoop_home_dir }}/bin/{{ item }}
+  sudo: yes
+  with_items:
+    - hdfs
+  tags:
+    - configure
+
+- name: Clean Hadoop datas
+  shell: "rm -rf {{ hadoop_master.software.installation.hadoop_home_dir }}/data"
+  sudo: yes
+  tags:
+  - clean
+
+- name: Clean Hadoop logs
+  shell: "rm -rf {{ hadoop_master.software.installation.hadoop_home_dir }}/logs"
+  sudo: yes
+  tags:
+  - clean
+
+- name: Clean vm directory
+  shell: "rm -rf {{ hadoop_master.software.installation.hadoop_home_dir }}/vm"
+  sudo: yes
+  tags:
+  - clean
+
+- name: Format Hadoop 
+  shell: "{{ hadoop_master.software.installation.hadoop_home_dir }}/bin/hdfs namenode -format"
+  tags:
+  - clean

@@ -1,13 +1,23 @@
 ---
+
+#Include variables from file
+- include_vars: "../../../profile/{{ profile_type | default('default') }}.yml"
+  tags: 
+    [ configure, install, start, stop, force-stop ]
+    
+- name: install ganglia client (Ubuntu)
+  apt: pkg='ganglia-monitor' state=latest
+  sudo: yes
+  when: ansible_distribution == 'Debian' or ansible_distribution == 'Ubuntu'  
+  tags:
+    - install
+
 - name: Install epel-release
   sudo: yes
   yum: name=epel-release state=installed
   when: ansible_distribution == 'CentOS' or ansible_distribution == 'Red Hat Enterprise Linux'
-
-- name: install ganglia client (Ubuntu)
-  apt: pkg='ganglia-monitor' state=latest
-  sudo: yes
-  when: ansible_distribution == 'Debian' or ansible_distribution == 'Ubuntu' 
+  tags:
+    - install
 
 - name: Install ganglia client packages (CentOS)
   yum: name={{ item }} state=installed
@@ -17,109 +27,156 @@
     - ganglia-gmond
     - ganglia-gmond-python.x86_64
     - lsof
-
+  tags:
+    - install
 
 - name: Give ganglia user home directory (to support lsof plugin)
   sudo: yes
   lineinfile:  "dest=/etc/passwd state=present  regexp=\"ganglia.*\"  line=\"ganglia:x:998:996:Ganglia Monitoring System:/var/lib/:/bin/bash\""
+  tags:
+    - install
   
 - name: Give ganglia user sudo (to support lsof plugin)
   sudo: yes
   lineinfile:  "dest=/etc/sudoers  state=present line=\"ganglia       ALL=(ALL) NOPASSWD: ALL\""
-
-#http://unix.stackexchange.com/questions/122616/why-do-i-need-a-tty-to-run-sudo-if-i-can-sudo-without-a-password
-#- name: Remove requiretty (to support lsof plugin)
-#  sudo: yes
-#  lineinfile: dest=/etc/sudoers  state=absent regexp="Defaults\s*requiretty"
+  tags:
+    - install
 
 - name: Remove requiretty (to support lsof plugin)
   sudo: yes
   lineinfile: "dest=/etc/sudoers state=present line=\"Defaults:ganglia !requiretty\""
+  tags:
+    - install
 
 
 - name: Make sure crond is installed (CentOS)
   yum: name='cronie' state=installed
   sudo: yes
   when: ansible_distribution == 'CentOS' or ansible_distribution == 'Red Hat Enterprise Linux'
+  tags:
+    - install
 
 - name: Check if crond is running (Docker)
   shell: ps -ax | grep crond | grep -v grep | wc -l
   register: crond_running
   when: ansible_virtualization_type == 'docker'
+  tags:
+    - install
 
 - name: Make sure crond is started (Docker)
   shell: crond
   sudo: yes
   when: ansible_virtualization_type == 'docker' and crond_running.stdout == "0"
-
+  tags:
+    - install
+    
 - name: Move gmond config
   template: src=../templates/gmond.conf.j2  dest=/etc/ganglia/gmond.conf
   sudo: yes
-
-- name: Create ganglia home for custom perl scripts
-  file: path={{ganglia_home}} state=directory mode=0755
-
-- name: Move ganglia perl plugins to ganglia_home
-  copy: src=../plugins/ dest={{ganglia_home}} mode=0755
+  tags:
+    [ install,configure ]
 
 - name: Move ganglia python plugins
   template: src=../templates/{{ item }}.py.j2  dest=/usr/lib64/ganglia/python_modules/{{ item }}.py
   sudo: yes
   with_items:
     - lsof_counter
+  tags:
+    - install
 
 - name: Move ganglia python plugins configs
   template: src=../templates/{{ item }}.pyconf.j2  dest=/etc/ganglia/conf.d/{{ item }}.pyconf
   sudo: yes
   with_items:
     - lsof_counter
-
-- name: Get current crontab 
-  shell: crontab -l
-  register: crontab_out
-  sudo: yes
-  ignore_errors: yes
-
-- name: Write current crontab to temp file
-  shell: "printf \"\n{{crontab_out.stdout}}\n\" > /tmp/cron "
-  sudo: yes
-
-- name: Get disk partitions
-  shell: cat /proc/partitions | awk '{print $4}' | grep -E "(vda|sda)"
-  register: disk_partitions
-
-- name: Add all cronjobs to temp file (non-Docker)
-  shell: "echo \"* * * * * $(which perl) {{ganglia_home}}/diskio.pl {{ item }}\" >> /tmp/cron"
-  sudo: yes
-  with_items:
-    - "{{ disk_partitions.stdout_lines }}"
-
-
-- name: Write cronjob for ganglia perl plugins
-  shell: crontab /tmp/cron
-  sudo: yes
-
+  tags:
+    - install
 
 - name: Restart ganglia client service (Ubuntu)
   #command: /etc/init.d/ganglia-monitor restart
   service: name=ganglia-monitor state=restarted
   sudo: yes
   when: ansible_distribution == 'Debian' or ansible_distribution == 'Ubuntu'
-  
+  tags:
+    [ install, start ]
+      
 - name: Restart ganglia client service (CentOS)
+  service: name=gmond state=restarted
+  sudo: yes
+  when: ansible_distribution == 'CentOS' or ansible_distribution == 'Red Hat Enterprise Linux'
+  when: ansible_virtualization_type != 'docker'
+  tags:
+    - install
+
+- name: Stop ganglia client service (CentOS)
   service: name=gmond state=stopped
   sudo: yes
   when: ansible_distribution == 'CentOS' or ansible_distribution == 'Red Hat Enterprise Linux'
   when: ansible_virtualization_type != 'docker'
+  tags:
+    - stop
 
-- name: Restart ganglia client service (CentOS)
-  service: name=gmond state=started enabled=yes
+- name: Kill ganglia client
+  shell: kill -9 $(ps -ef | grep gmond | grep -v grep | awk '{print $2}')
+  sudo: yes
+  ignore_errors: yes
+  tags:
+    - force-stop
+    
+- name: Start ganglia client service (CentOS)
+  service: name=gmond state=started
   sudo: yes
   when: ansible_distribution == 'CentOS' or ansible_distribution == 'Red Hat Enterprise Linux'
   when: ansible_virtualization_type != 'docker'
-  
-
+  tags:
+    - start
+    
 - name: Start gmond manually
   shell: "/usr/sbin/gmond"
   sudo: yes
   when: ansible_virtualization_type == 'docker'
+  tags:
+    - start
+
+# - name: Create ganglia home for custom scripts
+#   file: path={{monitoring.software.installation.ganglia_home}} state=directory mode=0755
+#   tags:
+#     - install
+# - name: Move ganglia plugins to ganglia_home
+#   copy: src=../plugins/ dest={{monitoring.software.installation.ganglia_home}} mode=0755
+#   tags:
+#     - install
+    
+# - name: Get current crontab 
+#   shell: crontab -l
+#   register: crontab_out
+#   sudo: yes
+#   ignore_errors: yes
+#   tags:
+#     - install
+    
+# - name: Write current crontab to temp file
+#   shell: "printf \"\n{{crontab_out.stdout}}\" > /tmp/cron "
+#   sudo: yes
+#   tags:
+#     - install
+    
+# - name: Get disk partitions
+#   shell: cat /proc/partitions | awk '{print $4}' | grep -E "(vda|sda)"
+#   register: disk_partitions
+#   tags:
+#     - install
+    
+# - name: Add all cronjobs to temp file (non-Docker)
+#   shell: "echo \"* * * * * $(which perl) {{monitoring.software.installation.ganglia_home}}/diskio.pl {{ item }}\" >> /tmp/cron"
+#   sudo: yes
+#   with_items:
+#     - "{{ disk_partitions.stdout_lines }}"
+#   tags:
+#     - install
+    
+# - name: Write cronjob
+#   shell: crontab /tmp/cron
+#   sudo: yes
+#   tags:
+#     - install

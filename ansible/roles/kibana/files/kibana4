@@ -5,7 +5,7 @@ DESC="Kibana 4"
 NAME=kibana
 DAEMON=$KIBANA_BIN/$NAME
 DAEMON_ARGS=""
-PIDFILE=/var/run/$NAME.pid
+PIDFILE=/opt/kibana/$NAME.pid
 SCRIPTNAME=/etc/init.d/$NAME
 LOG=$KIBANA_BIN/kibana.log
  
@@ -18,6 +18,16 @@ do_start()      {
         if pid_file_exists
         then
                         echo "Kibana is already running"
+                        rm $PIDFILE
+                        $DAEMON $DAEMON_ARGS 1>"$LOG" 2>&1 &
+                        echo $! > "$PIDFILE"
+                        PID=$!
+                        if [ "$PID" > 0 ]
+                        then
+                                echo "Kibana started with pid $!"
+                        else
+                                echo "Kibana could not be started"
+                        fi 
         else
                         $DAEMON $DAEMON_ARGS 1>"$LOG" 2>&1 &
                         echo $! > "$PIDFILE"

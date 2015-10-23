@@ -1,5 +1,0 @@
-gripper_home_dir: /opt/gripper/
-gripper_user: centos
-gripper_group: centos
-gripper_tgz_url: 'https://s3-us-west-2.amazonaws.com/nvent-repo/tgz/gripper/0.1.0/gripper-0.1.0.tgz'
-gripper_tgz: gripper-0.1.0.tgz
