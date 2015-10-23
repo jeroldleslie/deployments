@@ -7,5 +7,5 @@ clusterCommander="$ROOT/tools/cluster/clusterCommander.py"
 
 $clusterCommander digitalocean \
   --launch --neverwinterdp-home $NEVERWINTERDP_HOME \
-  --create-containers $NEVERWINTERDP_DEPLOYMENTS_HOME/tools/cluster/digitalOceanConfigs/scribenginStability.yml --subdomain stability
+  --create-containers $ROOT/tools/cluster/digitalOceanConfigs/scribenginStability.yml --subdomain stability
 
