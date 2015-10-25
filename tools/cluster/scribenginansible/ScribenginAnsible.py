@@ -21,13 +21,15 @@ class ScribenginAnsible():
     for group in groupList:
       #Replace - with _ to differentiate groups from hostnames
       inventory += "\n["+group.replace("-","_")+"]\n"
+      id=0
       for host in hostsAndIps:
         if group in host["name"]:
+          id+=1
           if "ip" in host:
-            inventory += host["ip"]+" ansible_ssh_user="+ansibleSshUser+" ansible_ssh_private_key_file="+ansibleSshKey+"\n"
+            inventory += host["ip"]+" ansible_ssh_user="+ansibleSshUser+" ansible_ssh_private_key_file="+ansibleSshKey+" id="+str(id)+"\n"
           else:  
-            inventory += host["name"]+" ansible_ssh_user="+ansibleSshUser+" ansible_ssh_private_key_file="+ansibleSshKey+"\n"
-    
+            inventory += host["name"]+" ansible_ssh_user="+ansibleSshUser+" ansible_ssh_private_key_file="+ansibleSshKey+" id="+str(id)+"\n"
+      
     f = open(inventoryFileLocation,'w')
     f.write(inventory)
     f.close()

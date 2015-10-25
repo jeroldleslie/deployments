@@ -1,22 +1,16 @@
-#Cluster Execute Tool#
+#clusterExec
 
 Execute arbitrary commands based on your ansible inventory file!
 
 Tell this tool which group to execute on, and it will execute the command passed in on all machines in that group
 
-##Installation##
 
-```
-user@machine: $ sudo pip install ansible click paramiko
-```
-
-
-##Usage##
+###Usage
 
 ```
 Usage: clusterExec.py [OPTIONS]
 
-  Get your cluster's status based on your ansible inventory file!
+  Run arbitrary commands in group of cluster machines based on your ansible inventory file!
 
 Options:
   --debug / --no-debug       Turn debugging on
@@ -30,7 +24,7 @@ Options:
 ```
 
 
-##Examples##
+###Examples
 ```
 #See below for sample inventory file
 
@@ -53,27 +47,28 @@ Options:
 ```
 
 Based on an inventory file that looks like the following:
+
 ```
 [monitoring]
-monitoring-1 ansible_ssh_user=neverwinterdp ansible_ssh_private_key_file=~/.ssh/id_rsa
+178.62.107.245 ansible_ssh_user=neverwinterdp ansible_ssh_private_key_file=~/.ssh/id_rsa
 
 [kafka]
-kafka-2 ansible_ssh_user=neverwinterdp ansible_ssh_private_key_file=~/.ssh/id_rsa
-kafka-1 ansible_ssh_user=neverwinterdp ansible_ssh_private_key_file=~/.ssh/id_rsa
-kafka-3 ansible_ssh_user=neverwinterdp ansible_ssh_private_key_file=~/.ssh/id_rsa
+46.101.0.201 ansible_ssh_user=neverwinterdp ansible_ssh_private_key_file=~/.ssh/id_rsa
+178.62.31.156 ansible_ssh_user=neverwinterdp ansible_ssh_private_key_file=~/.ssh/id_rsa
+46.101.12.214 ansible_ssh_user=neverwinterdp ansible_ssh_private_key_file=~/.ssh/id_rsa
 
 [hadoop_master]
-hadoop-master ansible_ssh_user=neverwinterdp ansible_ssh_private_key_file=~/.ssh/id_rsa
+178.62.41.65 ansible_ssh_user=neverwinterdp ansible_ssh_private_key_file=~/.ssh/id_rsa
 
 [hadoop_worker]
-hadoop-worker-2 ansible_ssh_user=neverwinterdp ansible_ssh_private_key_file=~/.ssh/id_rsa
-hadoop-worker-1 ansible_ssh_user=neverwinterdp ansible_ssh_private_key_file=~/.ssh/id_rsa
-hadoop-worker-3 ansible_ssh_user=neverwinterdp ansible_ssh_private_key_file=~/.ssh/id_rsa
+46.101.44.234 ansible_ssh_user=neverwinterdp ansible_ssh_private_key_file=~/.ssh/id_rsa
+178.62.19.70 ansible_ssh_user=neverwinterdp ansible_ssh_private_key_file=~/.ssh/id_rsa
+46.101.24.102 ansible_ssh_user=neverwinterdp ansible_ssh_private_key_file=~/.ssh/id_rsa
 
 [zookeeper]
-zookeeper-1 ansible_ssh_user=neverwinterdp ansible_ssh_private_key_file=~/.ssh/id_rsa
+46.101.19.43 ansible_ssh_user=neverwinterdp ansible_ssh_private_key_file=~/.ssh/id_rsa
 
 [elasticsearch]
-elasticsearch-1 ansible_ssh_user=neverwinterdp ansible_ssh_private_key_file=~/.ssh/id_rsa
+46.101.24.157 ansible_ssh_user=neverwinterdp ansible_ssh_private_key_file=~/.ssh/id_rsa
 ```
 

@@ -321,10 +321,12 @@ function ansible_inventory(){
     ansiblegroup=$(echo $regex | sed -e 's/-/_/g')
     #Write the ansible group header
     filecontents="$filecontents\n[$ansiblegroup]\n"
+    id=0
     for container_name in ${container_names[@]}; do
       #If the hostname matches the header, then add it to the ansible group
       if [[ $container_name =~ $regex.* ]] ; then
-        filecontents="$filecontents$container_name ansible_ssh_user=$ANSIBLE_USER ansible_ssh_private_key_file=$ANSIBLE_SSH_KEY\n"
+        id=`expr $id + 1`
+        filecontents="$filecontents$container_name ansible_ssh_user=$ANSIBLE_USER ansible_ssh_private_key_file=$ANSIBLE_SSH_KEY id=$id\n"
       fi
     done
   done
@@ -441,7 +443,8 @@ function printUsage() {
   echo "         --run-containers      : Runs docker containers"
   echo "         --ansible-inventory   : Creates ansible inventory file"
   echo "         --deploy              : Run ansible playbook"
-  echo "         --deploy-scribengin   : Run ansible playbook for just Scribengin"
+  echo "         --deploy-scribengin   : Run ansible playbook to install Scribengin"
+  echo "         --deploy-tools        : Run ansible playbook to install neverwinterdp-deployments"
   echo "         --start               : Starts services"
   echo "         --stop-cluster        : Stops cluster services"
   echo "         --force-stop-cluster  : Force stops cluster services"

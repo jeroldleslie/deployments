@@ -25,9 +25,7 @@ _start_string      = "start"
 #When the --cluster command is passed in, these are the roles that are executed
 #The order of this array DOES MATTER.  From left to right is the order in which the 
 #  cluster will be started.  To stop/force-stop, the array will be reversed
-_cluster_array     = [ "common","elasticsearch","zookeeper", "kafka", "hadoop", "scribengin","kibana" ]
-
-
+_cluster_array     = [ "common","elasticsearch","zookeeper", "kafka", "hadoop", "scribengin","kibana","ganglia" ]
 
 @click.command(help="Use Ansible to manage services in your cluster!\n")
 @click.option('--debug/--no-debug',      default=False, help="Turn debugging on")

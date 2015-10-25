@@ -2,7 +2,7 @@
 #Include variables from file
 - include_vars: "../../../profile/{{ profile_type | default('default') }}.yml"
   tags: 
-    [ install ]
+    [ install, test ]
 
 - name: Check if remote tools directory exists
   stat: path={{ monitoring.software.installation.neverwinterdp_deployments_path }}
@@ -29,3 +29,43 @@
   copy: src={{ inventory_file }} dest={{ monitoring.software.installation.neverwinterdp_deployments_path }}/inventory
   tags:
     - install
+    
+- name: Create bin directory
+  file: path={{ monitoring.software.installation.neverwinterdp_deployments_path }}/tools/bin state=directory
+  tags:
+    - install
+
+- name: Create symbolic links
+  file: src={{ monitoring.software.installation.neverwinterdp_deployments_path }}/tools/{{ item }}/{{ item }}.py dest={{ monitoring.software.installation.neverwinterdp_deployments_path }}/tools/bin/{{ item|lower }} state=link
+  with_items:
+    - serviceCommander
+    - statusCommander
+    - clusterExec
+    - loggrep
+  tags:
+    - install
+
+- name: set NEVERWINTERDP_DEPLOYMENTS_HOME in /etc/profile 
+  sudo: yes
+  lineinfile: dest=/etc/profile line="export NEVERWINTERDP_DEPLOYMENTS_HOME={{ monitoring.software.installation.neverwinterdp_deployments_path }}/tools/bin" state=present
+  tags:
+    - install
+ 
+- name: set PATH in /etc/profile
+  sudo: yes
+  lineinfile: dest=/etc/profile line="export PATH={{ ansible_env.PATH }}:{{ monitoring.software.installation.neverwinterdp_deployments_path }}/tools/bin;" state=present
+  tags:
+    - install
+
+- name: set NEVERWINTERDP_DEPLOYMENTS_HOME in /etc/environment 
+  sudo: yes
+  lineinfile: dest=/etc/environment line="NEVERWINTERDP_DEPLOYMENTS_HOME={{ monitoring.software.installation.neverwinterdp_deployments_path }}/tools/bin" state=present
+  tags:
+    - install
+ 
+- name: set PATH in /etc/environment
+  sudo: yes
+  lineinfile: dest=/etc/environment line="PATH={{ ansible_env.PATH }}:{{ monitoring.software.installation.neverwinterdp_deployments_path }}/tools/bin;" state=present
+  tags:
+    - install
+ 

@@ -3,14 +3,16 @@
 - include_vars: "../../../profile/{{ profile_type | default('default') }}.yml"
   tags: 
     [ configure, install, start, stop, force-stop ]
-
+  when: ansible_virtualization_type != 'docker'
+  
 - name: Install epel-release
   sudo: yes
   yum: name=epel-release state=installed
   when: ansible_distribution == 'CentOS' or ansible_distribution == 'Red Hat Enterprise Linux'
   tags:
     - install
-
+  when: ansible_virtualization_type != 'docker'
+  
 - name: Install Ganglia
   sudo: yes
   yum: name={{ item }} state=installed
@@ -19,25 +21,28 @@
     - ganglia-gmetad
     - ganglia-gmond
     - ganglia-web
+  when: ansible_virtualization_type != 'docker'
   tags:
     - install
-
 
 - name: Configure gmetad
   sudo: yes
   lineinfile: dest=/etc/ganglia/gmetad.conf state=present line='data_source "{{ monitoring.software.installation.cluster }}" 60 {{ monitoring.software.installation.ganglia_url }}'
+  when: ansible_virtualization_type != 'docker'
   tags:
     [ install, configure ]
 
 - name: Configure httpd
   sudo: yes
   lineinfile: dest=/etc/httpd/conf/httpd.conf line="<Directory \"/usr/share/ganglia\">\n    Options Indexes FollowSymLinks\n    AllowOverride None\n    Require all granted\n</Directory>\n"
+  when: ansible_virtualization_type != 'docker'
   tags:
     [ install, configure ]
   
 - name: Add alias to httpd ganglia.conf 
   sudo: yes
   shell: echo "Alias /ganglia /usr/share/ganglia" > /etc/httpd/conf.d/ganglia.conf 
+  when: ansible_virtualization_type != 'docker'
   tags:
     [ install, configure ]
 
@@ -50,6 +55,7 @@
     - gmetad
     - httpd
   ignore_errors: yes
+  when: ansible_virtualization_type != 'docker'
   tags:
     - force-stop
 
