@@ -19,22 +19,13 @@ user@machine: $ sudo pip install ansible tabulate click paramiko
 
 ##Components 
 
-###ansible
+###[ansible](ansible/README.md) 
 
-link 
-
-###docker
-Used to build docker images and launch containers
-
-link 
-###clusterCommander
-link
-###serviceCommander
-link
-###statusCommander
-link
-###clusterExec
-link
+###[docker](docker/scribengin/README.md)
+###[clusterCommander](tools/cluster/README.md)
+###[serviceCommander](tools/serviceCommander/README.md)
+###[statusCommander](tools/statusCommander/README.md)
+###[clusterExec](tools/clusterExec/README.md)
 
 
 ##NeverwinterDP Deployments Structure
