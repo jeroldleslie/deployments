@@ -87,7 +87,7 @@ def getAllHosts(inventory_file):
     result.append(entry)
   return result
 
-@click.command(help="Get your cluster's status based on your ansible inventory file!")
+@click.command(help="Run arbitrary commands in group of cluster machines based on your ansible inventory file!")
 @click.option('--debug/--no-debug',            default=False, help="Turn debugging on")
 @click.option('--logfile',                     default='/tmp/statuscommander.log', help="Log file to write to")
 @click.option('--group',  '-g',         required=True, help="Ansible group to execute on")

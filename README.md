@@ -1,19 +1,117 @@
-# neverwinter deployments
+# Neverwinterdp Deployments
 
-This project automates the installation, configuration and integration tests of scribengin. It works independently. To launch scribengin cluster, it need  to set NEVERWINTERDP_HOME env variable or you can give --neverwinterdp-home option when running the commands.
+This project automates the installation, configuration, starting, stopping, force stopping and cleaning specific service or group of services or pre-defined cluster related services (currently scribengin related services are pre-defined in as a cluster). It works independently.
+
+Also this project automates integration tests of scribengin. To launch scribengin cluster, it need  to set NEVERWINTERDP_HOME env variable or you can give --neverwinterdp-home option when running the commands.
+
+All the deployment automations are build on top of ansible playbooks, so neverwinterdp deployments require ansible inventory file to run. 
 
 
-Components 
-======
+
+
+###Setup
+
+```
+user@machine: $ sudo pip install ansible tabulate click paramiko
+```
+
+
+
+##Components 
+
 ###ansible
-Used for provisioning, configuring
-###docker.sh
-Used to build and configure docker images, and launch containers
-###clusterCommander.py
-Is used to start/stop/restart cluster or specific processes with the given hostmachine. Also used to monitor running and none running processes in the cluster.
 
-Usage
-======
+link 
+
+###docker
+Used to build docker images and launch containers
+
+link 
+###clusterCommander
+link
+###serviceCommander
+link
+###statusCommander
+link
+###clusterExec
+link
+
+
+##NeverwinterDP Deployments Structure
+- You must have a directory structure to support Service Commander
+- Each service must have its own playbook
+- Each service you attempt to use must correspond to a role in your [ansible-root-dir]
+- Example: 
+
+```
+./neverwinterdp-deployments
+|-- ansible
+|   |-- common.yml
+|   |-- zookeeper.yml
+|   |-- profile
+|   |   |-- default.yml
+|   |   |-- performance.yml
+|   |   |-- small.yml
+|   |   `-- stability.yml
+|   |-- programs
+|   |   |-- openjdk7_java.yml
+|   |   `-- wget.yml
+|   |-- roles
+|   |   |-- common
+|   |   |   `-- tasks
+|   |   |       `-- main.yml
+|   |   `-- zookeeper
+|   |       |-- files
+|   |       |   |-- conf
+|   |       |   |   `-- log4j.properties
+|   |       |   `-- zookeeper-server
+|   |       |-- handlers
+|   |       |   `-- main.yml
+|   |       |-- meta
+|   |       |   `-- main.yml
+|   |       |-- tasks
+|   |       |   `-- main.yml
+|   |       `-- templates
+|   |           |-- java.env.j2
+|   |           |-- myid.j2
+|   |           |-- zoo.cfg.j2
+|   |           |-- zookeeper-env.sh.j2
+|   |           `-- zookeeper.service.j2
+|-- docker
+|   |-- scribengin
+|   |   |-- dockerfile
+|   |   |   |-- centos
+|   |   |   |   `-- Dockerfile
+|   |   |   `-- ubuntu
+|   |   |       `-- Dockerfile
+|   |   |-- docker.sh
+|-- tests
+|   |-- kafka
+|   |   `-- perf
+|   |       `-- run-kafka-perf-test.sh
+|   `-- scribengin
+|       `-- tracking
+|           `-- stability
+|               |-- run-test.sh
+|               |-- setup-cluster.sh
+|               `-- setup-docker.sh
+`-- tools
+    |-- cluster
+    |   |-- clusterCommander.py
+    |-- clusterExec
+    |   |-- clusterExec.py
+    |-- loggrep
+    |   |-- loggrep.py
+    |-- serviceCommander
+    |   `-- serviceCommander.py
+    `-- statusCommander
+        `-- statusCommander.py                                 
+
+```
+
+
+##Usage
+
 ###Setup neverwinterdp_home
 
 - Checkout Scribengin into neverwinterdp_home
@@ -28,17 +126,9 @@ git clone https://github.com/Nventdata/NeverwinterDP
 export NEVERWINTERDP_HOME=/your/path/to/NeverwinterDP
 ```
    
-   
-   
-   
-***
+***  
 
-
-
-
-Running neverwinterdp deployments - SIMPLE STEPS
-======
-
+###Running neverwinterdp deployments - SIMPLE STEPS
 
 ```
 #Checkout neverwinterdp-deployments project 
@@ -48,22 +138,23 @@ cd /path/to/neverwinterdp-deployments
 ####Build docker image with scribengin in one step
 ```
 #Build images, launch containers, run ansible
-docker/scribengin/docker.sh  cluster --launch --neverwinterdp-home=/your/path/to/NeverwinterDP
+$cd /path/to/neverwinterdp-deployments
+$docker/scribengin/docker.sh  cluster --launch --neverwinterdp-home=/your/path/to/NeverwinterDP
 ```
 
-####Build digital ocean containers with scribengin in one step
+####Build/destroy digital ocean containers with scribengin in one step
 ```
 cd neverwinterdp-deployments/tools/cluster/
 
 #Create cluster
-./clusterCommander.py digitalocean --launch --neverwinterdp-home /your/path/to/NeverwinterDP/   \
-  --create-containers ./digitalOceanConfigs/scribenginPerformance.yml  cluster --start          \
-  --kafka-server-config ../../configs/bootstrap/post-install/kafka/config/server.properties     \
-  --zookeeper-server-config ../../configs/bootstrap/post-install/zookeeper/conf/zoo.cfg
-  
+
+
+/path/to/neverwinterdp-deployments/tools/clusterCommander/clusterCommander.py digitalocean --launch --neverwinterdp-home $NEVERWINTERDP_HOME --ansible-inventory-location $INVENTORY --create-containers /path/to/neverwinterdp-deployments/ansible/profile/stability.yml --subdomain test
+
+/path/to/neverwinterdp-deployments/tools/serviceCommander/serviceCommander.py --cluster --install --configure --clean --start -i $INVENTORY    
   
 #Destroy cluster
-./clusterCommander.py digitalocean --destroy
+./clusterCommander.py digitalocean --destroy --subdomain test
 ```
 
 ####Build digital ocean container for development in one step
@@ -89,25 +180,27 @@ Running neverwinterdp deployments - DETAIL
 
 ```
 #Clean docker image (optional)
-docker/scribengin/docker.sh image clean
+docker/scribengin/docker.sh cluster --clean-image
 
 #Build docker image
 
 #if env variable NEVERWINTERDP_HOME is available run 
-docker/scribengin/docker.sh image build
+docker/scribengin/docker.sh cluster --build-image
 
 #if env variable NEVERWINTERDP_HOME is not available run 
-docker/scribengin/docker.sh image build --neverwinterdp-home=/neverwinterdp/home/path
+docker/scribengin/docker.sh cluster --build-image --neverwinterdp-home=/neverwinterdp/home/path
 ```
 
 ####Sync scribengin with all containers
 
 ```
 #if env variable NEVERWINTERDP_HOME is available run 
-docker/scribengin/docker.sh cluster --deploy-scribengin
+/path/to/neverwinterdp-deployments/tools/serviceCommander/serviceCommander.py --services "scribengin" --install -i $INVENTORY  
+
 
 #if env variable NEVERWINTERDP_HOME is not available run 
-docker/scribengin/docker.sh cluster --deploy-scribengin --neverwinterdp-home=/neverwinterdp/home/path
+/path/to/neverwinterdp-deployments/tools/serviceCommander/serviceCommander.py --services "scribengin" --install -i $INVENTORY --extra-vars "neverwinterdp_home_override=/neverwinterdp/home/path"
+
 ```
 
 ####Clean-run-deploy 
@@ -120,20 +213,6 @@ docker/scribengin/docker.sh cluster --clean-containers --run-containers --deploy
 #if env variable NEVERWINTERDP_HOME is not available
 docker/scribengin/docker.sh cluster --clean-containers --run-containers --deploy --start-cluster --neverwinterdp-home=/path/to/neverwinterdp_home
 ```
-
-####Build Scribengin from cluster commander
-```
-cd /path/to/neverwinterdp-deployments
-
-#if env variable NEVERWINTERDP_HOME is available
-./tools/cluster/clusterCommander.py scribengin --build
-    
-
-#if env variable NEVERWINTERDP_HOME is not available
-./tools/cluster/clusterCommander.py --neverwinterdp-home /path/to/neverwinterdp_home scribengin --build
-```
-
-    
  
  [repository](https://bitbucket.org/nventdata/neverwinterdp-deployments)
 [documentation](https://bitbucket.org/nventdata/neverwinterdp-deployments/wiki/Home)

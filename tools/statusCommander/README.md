@@ -1,14 +1,9 @@
-#Status Commander#
+#statusCommander
 
 Get your cluster's status based on your ansible inventory file!
 
-##Installation##
 
-```
-user@machine: $ sudo pip install ansible tabulate click paramiko
-```
-
-##Usage##
+###Usage
 
 ```
 Usage: statusCommander.py [OPTIONS]
@@ -24,9 +19,10 @@ Options:
   -s, --monitor-sleep INTEGER  How long to sleep between checks while
                                monitoring
   --help                       Show this message and exit.
+
 ```
 
-##Example usage##
+###Example
 
 ```
 #Normal usage
@@ -39,7 +35,7 @@ user@machine:statusCommander $ ./statusCommander.py -i inventoryFile --threads 5
 user@machine:statusCommander $ ./statusCommander.py -i inventoryFile --timeout 45
 ```
 
-##Example Output##
+###Example Output
 ```
 Role           Hostname         ProcessIdentifier                               ProcessID    Status
 -------------  ---------------  ----------------------------------------------  -----------  -----------

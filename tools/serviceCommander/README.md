@@ -1,13 +1,10 @@
-#Service Commander#
+#serviceCommander#
 Use Ansible to manage services in your cluster!
 
+serviceCommander is a thin front-end for ansible playbooks. serivceCommander holds some options to automatically pick a specific service or group of service to perform pre-defined operations like install,configure,start,stop,force-stop,clean.
 
-##Setup##
-```
-sudo pip install click paramiko
-```
 
-##Usage##
+###Usage
 ```
 Usage: serviceCommander.py [OPTIONS]
 
@@ -23,23 +20,27 @@ Options:
   -i, --inventory-file TEXT  Ansible inventory file to use
   -u, --cluster              Alternative to --services option, runs for entire
                              cluster
-  -r, --restart              restart services
   -s, --start                start services
   -t, --stop                 stop services
   -f, --force-stop           kill services
   -a, --clean                clean services
   -n, --install              install services
   -c, --configure            configure services
+  -p, --profile-type TEXT    profile type for service configuration
   --ansible-root-dir TEXT    Root directory for Ansible
   -m, --max-retries INTEGER  Max retries for running the playbook
+  -v, --extra-vars TEXT      Extra variable for the playbook
   --help                     Show this message and exit.
+
 ```
+#####Note: 
+Service name should be eqaul to the playbook name. ex: If ```--services "serviceX"``` then ansible playbook should be ```serviceX.yml```
 
-
-
-##Examples##
+###Examples
 Using the below structure as an example...
+
 ```
+
 #Start all cluster services
 ./serviceCommander.py --cluster --start
 
@@ -60,81 +61,8 @@ Using the below structure as an example...
 ```
 
 
-##Directory Structure Setup##
-- You must have a directory structure to support Service Commander
-- Each service must have its own playbook
-- Each service you attempt to use must correspond to a role in your [ansible-root-dir]
-- Example: 
-```
-  .
-  └── tools/
-    └── ansible/
-    |    ├── kafka.yml
-    |    ├── zookeeper.yml
-    |    └── roles/
-    |      └──  kafka/
-    |      └──  zookeeper/
-    |      └──  common/
-    └── serviceCommander/
-        └── serviceCommander.py
-```
 
 
-##Playbook Setup##
-```
-#example ansible/roles/kafka/tasks/main.yml
----
- 
-# Do stuff to install
-- name: Install step 1
-  file: path={{ kafka_home_dir }} owner={{ kafka_user }} group={{ kafka_group }} state='directory' recurse='yes'
-  sudo: true
-  tags:
-    - install
-
-- name: Install step 2
-  command: ls -la
-  tags:
-    - install
- 
-## Adding Zookeeper ID file
-- name: Do some configuration
-  template: src={{ item }}.j2 dest={{ zookeeper_data_dir }}/{{ item }} group={{ zookeeper_group }} owner={{ zookeeper_user }}
-  with_items:
-    - myid
-  tags:
-    - configure
-  
- 
-- name: Stop Kafka Service
-  service: name=kafka-zookeeper state=stopped
-  sudo: true
-  when: ansible_virtualization_type != 'docker'
-  tags:
-    - stop
- 
- 
-- name: Force Stop Kafka (Docker)
-  command: killall kafka
-  sudo: yes
-  tags:
-    - force-stop
-  
-- name: Clean Kafka
-  command: rm -rf {{ kafka_home_dir }}/data && rm -rf {{ kafka_home_dir }}/logs
-  when: ansible_virtualization_type == 'docker'
-  tags:
-    - clean
- 
- 
-- name: Start Kafka Service
-  service: name=kafka-zookeeper state=started enabled=yes
-  sudo: true
-  when: ansible_virtualization_type != 'docker'
-  tags:
-    - start
-
-```
 
 
 
