@@ -321,10 +321,12 @@ function ansible_inventory(){
     ansiblegroup=$(echo $regex | sed -e 's/-/_/g')
     #Write the ansible group header
     filecontents="$filecontents\n[$ansiblegroup]\n"
+    id=0
     for container_name in ${container_names[@]}; do
       #If the hostname matches the header, then add it to the ansible group
       if [[ $container_name =~ $regex.* ]] ; then
-        filecontents="$filecontents$container_name ansible_ssh_user=$ANSIBLE_USER ansible_ssh_private_key_file=$ANSIBLE_SSH_KEY\n"
+        id=`expr $id + 1`
+        filecontents="$filecontents$container_name ansible_ssh_user=$ANSIBLE_USER ansible_ssh_private_key_file=$ANSIBLE_SSH_KEY id=$id\n"
       fi
     done
   done
