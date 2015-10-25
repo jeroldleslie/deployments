@@ -27,8 +27,6 @@ _start_string      = "start"
 #  cluster will be started.  To stop/force-stop, the array will be reversed
 _cluster_array     = [ "common","elasticsearch","zookeeper", "kafka", "hadoop", "scribengin","kibana","ganglia" ]
 
-
-
 @click.command(help="Use Ansible to manage services in your cluster!\n")
 @click.option('--debug/--no-debug',      default=False, help="Turn debugging on")
 @click.option('--logfile',               default='/tmp/servicecommander.log', help="Log file to write to")
