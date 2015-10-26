@@ -1,0 +1,64 @@
+---
+#Include variables from file
+- include_vars: "../../../profile/{{ profile_type | default('default') }}.yml"
+  tags: 
+    [ install, configure ]
+
+- name: Set neverwinterdp_home via environment variable
+  set_fact: neverwinterdp_home="{{ lookup('env','NEVERWINTERDP_HOME') }}"
+  tags: 
+    [ install ]
+
+- name: Check to make sure environment variables are sane
+  fail: msg="Variable '{{ item }}' is not defined" 
+  when: ({{item}} is undefined) or ({{item}} is none) or ({{item}}|trim == '') 
+  run_once: true
+  with_items: 
+    - neverwinterdp_home
+  tags:
+    - install
+
+- name: Get neverwinterdp_home path info locally
+  local_action: stat path={{neverwinterdp_home}}
+  register: check_path
+  run_once: true
+  tags:
+    - install
+
+- name: Check if neverwinterdp_home path exists locally
+  local_action: fail msg='{{neverwinterdp_home}} does not exist'
+  when: not(check_path.stat.exists)
+  run_once: true
+  tags:
+    - install
+
+- name: Echo local NEVERWINTERDP_HOME
+  debug: msg="This is NeverwinterDP Home on the local machine {{neverwinterdp_home}}"
+  run_once: true
+  tags:
+    - install
+
+- name: Check if remote neverwinterdp code directory exists
+  stat: path={{ monitoring.software.installation.neverwinterdp_code_path }}
+  register: tools_home_status
+  tags:
+    - install
+
+- name: Delete remote neverwinterdp code directory home if it exists
+  command: rm -rf {{ monitoring.software.installation.neverwinterdp_code_path }}
+  when: tools_home_status.stat.exists
+  tags:
+    - install
+  
+- name: Copy neverwinterdp code
+  synchronize: src={{ neverwinterdp_home }} dest={{ monitoring.software.installation.neverwinterdp_code_path }}  recursive=yes
+  tags:
+    - install
+    
+- name: Set neverwinterdp_home
+  sudo: yes
+  lineinfile: dest=/etc/profile    line="NEVERWINTERDP_HOME={{ monitoring.software.installation.neverwinterdp_code_path }}\nexport NEVERWINTERDP_HOME\n"
+  tags: 
+    [ install, configure ]
+
+

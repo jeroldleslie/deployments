@@ -1,7 +1,7 @@
 kafka:
   hardware:
     memory: 2gb
-    num: 3
+    num: 5
   software:
     installation:
       kafka_home_dir: /opt/kafka
@@ -140,4 +140,5 @@ monitoring:
       ganglia_home: /opt/ganglia
       user: neverwinterdp
       neverwinterdp_deployments_path: /opt/neverwinterdp_deployments
+      neverwinterdp_code_path: /opt/neverwinterdp_home
 

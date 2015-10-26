@@ -5,7 +5,7 @@
   remote_user: neverwinterdp
   roles:
     - common
-    - neverwinterdp_deployments
+    #- neverwinterdp_deployments
     - increase_open_file_limit
 
 - name: Hadoop
@@ -54,9 +54,12 @@
     - elasticsearch
     - kibana_charts
 
-- name: Kibana
+- name: Monitoring
   hosts: monitoring
   remote_user: neverwinterdp
   roles:
     - kibana
+    - neverwinterdp_deployments
+    - neverwinterdp_code
+    - developer_config
 

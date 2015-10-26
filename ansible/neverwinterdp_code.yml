@@ -1,0 +1,7 @@
+---
+
+- name: NeverwinterDP code
+  hosts: monitoring
+  remote_user: neverwinterdp
+  roles:
+    - neverwinterdp_code
