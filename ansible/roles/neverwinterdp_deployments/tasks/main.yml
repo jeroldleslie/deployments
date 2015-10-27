@@ -26,7 +26,7 @@
     - install
     
 - name: Copy inventory file
-  copy: src={{ inventory_file }} dest={{ monitoring.software.installation.neverwinterdp_deployments_path }}/inventory
+  copy: src={{ inventory_file }} dest=~/inventory
   tags:
     - install
     
