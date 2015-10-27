@@ -55,7 +55,7 @@ class statusCommandParams():
 #_pool is to help us clean up threads when ctrl+c/SIGINT is entered
 _pool = None
 
-scribeJpsCommand = "jps -m | grep '"+statusCommandParams.defaultReplacementString+"' | awk '{print $1 \" \" $4}'"
+scribeJpsCommand = "jps -m | grep "+statusCommandParams.defaultReplacementString+" | awk '{print $1 \" \" $4}'"
 
 #Each key corresponds to an ansible group read in from your ansible inventory
 statusCommands = {
@@ -79,7 +79,10 @@ statusCommands = {
                                           identifiers = ["dataflow-worker-*"],
                                           quietIfNotRunning = True),
                      statusCommandParams(command =  scribeJpsCommand, 
-                                          identifiers = ["vm-log-generator-*"],
+                                          identifiers = ["validator"],
+                                          quietIfNotRunning = True),
+                     statusCommandParams(command =  scribeJpsCommand, 
+                                          identifiers = ["generator"],
                                           quietIfNotRunning = True),
 
                    ],
