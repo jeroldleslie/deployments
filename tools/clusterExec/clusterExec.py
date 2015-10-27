@@ -53,9 +53,9 @@ def execRemote(group, command, timeout, threads):
   #Go through and asynchronously run ssh commands to get logs
   for server in group:
     ip = server["host"]
-    hostName = ""
+    hostName=server["host"]
     if "ansible_host" in server:
-      hostName = server["ansible_host"]
+      ip = server["ansible_host"]
     
     asyncresults.append(pool.apply_async(getSshOutput, [ip, hostName, command]))
 

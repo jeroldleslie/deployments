@@ -72,9 +72,9 @@ def getLogs(group, command):
   #Go through and asynchronously run ssh commands to get logs
   for server in group:
     ip = server["host"]
-    hostName = ""
+    hostName=server["host"]
     if "ansible_host" in server:
-      hostName = server["ansible_host"]
+      ip = server["ansible_host"]
     asyncresults.append(pool.apply_async(getSshOutput, [ip, hostName, command]))
 
   #Get asynchronous results in order that they were added

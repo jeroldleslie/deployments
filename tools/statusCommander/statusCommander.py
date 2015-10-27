@@ -166,9 +166,10 @@ def mastercommand(ctx, debug, logfile, timeout, inventory_file, monitor, monitor
         for identifier in services.identifiers:
           command = services.command.replace(services.replacementString, identifier)
           ip = server["host"]
-          hostName=""
+          hostName=server["host"]
           if "ansible_host" in server:
-            hostName = server["ansible_host"]
+            ip = server["ansible_host"]
+
           asyncresults.append(pool.apply_async(getSshOutput, [ip, hostName, command, identifier, server["group"], services.quietIfNotRunning]))
     except KeyError:
       logging.error("No commands for ansible group: "+server["group"])
