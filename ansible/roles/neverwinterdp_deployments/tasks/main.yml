@@ -35,15 +35,29 @@
   tags:
     - install
 
-- name: Create symbolic links
-  file: src={{ monitoring.software.installation.neverwinterdp_deployments_path }}/tools/{{ item }}/{{ item }}.py dest={{ monitoring.software.installation.neverwinterdp_deployments_path }}/tools/bin/{{ item|lower }} state=link
-  with_items:
-    - serviceCommander
-    - statusCommander
-    - clusterExec
-    - loggrep
+
+- name: Create symbolic link for serviceCommander
+  file: src={{ monitoring.software.installation.neverwinterdp_deployments_path }}/tools/serviceCommander/serviceCommander.py dest={{ monitoring.software.installation.neverwinterdp_deployments_path }}/tools/bin/ndpservice state=link
   tags:
     - install
+
+- name: Create symbolic link for statusCommander
+  file: src={{ monitoring.software.installation.neverwinterdp_deployments_path }}/tools/statusCommander/statusCommander.py dest={{ monitoring.software.installation.neverwinterdp_deployments_path }}/tools/bin/ndpstatus state=link
+  tags:
+    - install
+
+- name: Create symbolic link for loggrep
+  file: src={{ monitoring.software.installation.neverwinterdp_deployments_path }}/tools/loggrep/loggrep.py dest={{ monitoring.software.installation.neverwinterdp_deployments_path }}/tools/bin/ndploggrep state=link
+  tags:
+    - install
+
+- name: Create symbolic link for clusterExec
+  file: src={{ monitoring.software.installation.neverwinterdp_deployments_path }}/tools/clusterExec/clusterExec.py dest={{ monitoring.software.installation.neverwinterdp_deployments_path }}/tools/bin/ndpexec state=link
+  tags:
+    - install
+
+
+
 
 - name: set NEVERWINTERDP_DEPLOYMENTS_HOME in /etc/profile 
   sudo: yes
