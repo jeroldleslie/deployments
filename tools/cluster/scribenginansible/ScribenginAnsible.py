@@ -26,7 +26,8 @@ class ScribenginAnsible():
         if group in host["name"]:
           id+=1
           if "ip" in host:
-            inventory += host["ip"]+" ansible_ssh_user="+ansibleSshUser+" ansible_ssh_private_key_file="+ansibleSshKey+" id="+str(id)+"\n"
+            inventory += host["name"]+" ansible_ssh_user="+ansibleSshUser+" ansible_ssh_private_key_file="+ansibleSshKey \
+                            +" ansible_host="+host["ip"]+" id="+str(id)+"\n"
           else:  
             inventory += host["name"]+" ansible_ssh_user="+ansibleSshUser+" ansible_ssh_private_key_file="+ansibleSshKey+" id="+str(id)+"\n"
       

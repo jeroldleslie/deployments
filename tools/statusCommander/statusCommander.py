@@ -4,7 +4,7 @@ exec python $0 ${1+"$@"}
 """
 
 import click,logging, signal
-from socket import gethostbyaddr
+from socket import gethostbyaddr, inet_aton
 from sys import stdout
 from tabulate import tabulate
 from os.path import abspath, dirname, join, isfile
@@ -164,7 +164,10 @@ def mastercommand(ctx, debug, logfile, timeout, inventory_file, monitor, monitor
       for services in statusCommands[server["group"]]:
         for identifier in services.identifiers:
           command = services.command.replace(services.replacementString, identifier)
-          asyncresults.append(pool.apply_async(getSshOutput, [server["host"], command, identifier, server["group"], services.quietIfNotRunning]))
+          sshHostname = server["host"]
+          if "ansible_host" in server:
+            sshHostname = server["ansible_host"]
+          asyncresults.append(pool.apply_async(getSshOutput, [sshHostname, command, identifier, server["group"], services.quietIfNotRunning]))
     except KeyError:
       logging.error("No commands for ansible group: "+server["group"])
       print "No commands for ansible group: "+server["group"]
@@ -182,13 +185,21 @@ def mastercommand(ctx, debug, logfile, timeout, inventory_file, monitor, monitor
         if row[0] == result["group"]:
           needToAppendGroup = False
 
+      #If hostname is IP, resolve hostname
+      hostName = result["host"]
+      try:
+        inet_aton(hostName)
+        hostName = str(gethostbyaddr(hostName)[0])
+      except:
+        pass
+
       #Add group info to the table if its not been added yet
       if needToAppendGroup:
-        tableRows.append([result["group"],gethostbyaddr(result["host"])[0],"","",""])
+        tableRows.append([result["group"],hostName,"","",""])
       #Otherwise just add the hostname, if and only if we haven't 
       #added this hostname already to this group
       elif currHost != result["host"]:
-        tableRows.append(["",gethostbyaddr(result["host"])[0],"","",""])
+        tableRows.append(["",hostName,"","",""])
 
       #Set results as "Running" if PID is valid, otherwise its stopped
       if result["pid"]:

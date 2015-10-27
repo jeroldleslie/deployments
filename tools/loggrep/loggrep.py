@@ -5,6 +5,7 @@ exec python $0 ${1+"$@"}
 
 import click,logging
 from sys import stdout
+from socket import inet_aton, gethostbyaddr
 from os.path import abspath, dirname, join, isfile
 from sys import path
 from multiprocessing import Pool
@@ -68,17 +69,30 @@ def getLogs(group, command):
   
   #Go through and asynchronously run ssh commands to get logs
   for server in group:
-    asyncresults.append(pool.apply_async(getSshOutput, [server["host"], command]))
+    hostName = server["host"]
+    if "ansible_host" in server:
+      hostName = server["ansible_host"]
+    asyncresults.append(pool.apply_async(getSshOutput, [hostName, command]))
 
   #Get asynchronous results in order that they were added
   tableRows=[]
   currHost=""
   for async in asyncresults:
     results = async.get(timeout=_timeout)
+
+    #If hostname is IP, resolve hostname
+    hostName = results["host"]
+    try:
+      inet_aton(hostName)
+      hostName = str(gethostbyaddr(hostName)[0])
+    except:
+      pass
+
+
     #Print formatted results
-    print "*" * (len(results["host"]+" - "+results["command"])+3)
-    print results["host"]+" - "+results["command"]
-    print "*" * (len(results["host"]+" - "+results["command"])+3)
+    print "*" * (len(hostName+" - "+results["command"])+3)
+    print hostName+" - "+results["command"]
+    print "*" * (len(hostName+" - "+results["command"])+3)
     print results["stdout"]
     if results["stderr"]:
       print "STDERR:"

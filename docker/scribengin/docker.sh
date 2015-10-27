@@ -326,7 +326,8 @@ function ansible_inventory(){
       #If the hostname matches the header, then add it to the ansible group
       if [[ $container_name =~ $regex.* ]] ; then
         id=`expr $id + 1`
-        filecontents="$filecontents$container_name ansible_ssh_user=$ANSIBLE_USER ansible_ssh_private_key_file=$ANSIBLE_SSH_KEY id=$id\n"
+        IP=$(docker inspect -f "{{ .NetworkSettings.IPAddress }}" $container_name)
+        filecontents="$filecontents$container_name ansible_ssh_user=$ANSIBLE_USER ansible_ssh_private_key_file=$ANSIBLE_SSH_KEY ansible_host=$IP id=$id\n"
       fi
     done
   done
