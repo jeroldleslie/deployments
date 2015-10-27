@@ -45,7 +45,12 @@
 - include: ../../../programs/python_devel.yml
   tags:
     - install
-    
+
 - include: ../../../programs/commander_dependencies.yml
   tags:
     - install
+
+- include: ../../increase_open_file_limit/tasks/main.yml
+  tags:
+    - install
+

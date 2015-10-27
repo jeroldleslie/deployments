@@ -24,16 +24,18 @@ def getMaxThreads(inventory_file):
   i = ansibleInventoryParser(inventory_file)
   return len(i.parseInventoryFile())
 
-def getSshOutput(host, command):
+def getSshOutput(ip, host, command):
   """
   SSH's onto machine, runs command, returns result along with info about process/host
   """
-  logging.debug("hostname: "+host+ " - command: "+command)
+  logging.debug("hostname: "+host+ " - IP: "+ip+" - command: "+command)
   s = ssh()
-  out,err = s.sshExecute(host, command)
+  out,err = s.sshExecute(ip, command)
   logging.debug("\tstdout: "+out+ "\n\tstderr: "+err)
   
-  return {"host":host,
+  return {
+          "ip":ip,
+          "host":host,
           "command": command,
           "stdout" : out,
           "stderr" : err,
@@ -50,10 +52,12 @@ def execRemote(group, command, timeout, threads):
   
   #Go through and asynchronously run ssh commands to get logs
   for server in group:
-    sshHost = server["host"]
+    ip = server["host"]
+    hostName = ""
     if "ansible_host" in server:
-      sshHost = server["ansible_host"]
-    asyncresults.append(pool.apply_async(getSshOutput, [sshHost, command]))
+      hostName = server["ansible_host"]
+    
+    asyncresults.append(pool.apply_async(getSshOutput, [ip, hostName, command]))
 
   #Get asynchronous results in order that they were added
   tableRows=[]
@@ -62,11 +66,12 @@ def execRemote(group, command, timeout, threads):
     results = async.get(timeout=timeout)
     #Print formatted results
     hostName = results["host"]
-    try:
-      inet_aton(hostName)
-      hostName = str(gethostbyaddr(hostName)[0])
-    except:
-      pass
+    if not hostName:
+      try:
+        inet_aton(results["ip"])
+        hostName = str(gethostbyaddr(results["ip"])[0])
+      except:
+        pass
 
     print "*" * (len(hostName+" - "+results["command"])+3)
     print hostName+" - "+results["command"]

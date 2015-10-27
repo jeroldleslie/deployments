@@ -41,16 +41,18 @@ def getGroup(group):
   return result
 
 
-def getSshOutput(host, command):
+def getSshOutput(ip, host, command):
   """
   SSH's onto machine, runs command, returns result along with info about process/host
   """
-  logging.debug("hostname: "+host+ " - command: "+command)
+  logging.debug("IP: "+ip+ " - host: "+host+" - command: "+command)
   s = ssh()
-  out,err = s.sshExecute(host, command)
+  out,err = s.sshExecute(ip, command)
   logging.debug("\tstdout: "+out+ "\n\tstderr: "+err)
   
-  return {"host":host,
+  return {
+          "ip"  : ip,
+          "host":host,
           "command": command,
           "stdout" : out,
           "stderr" : err,
@@ -69,10 +71,11 @@ def getLogs(group, command):
   
   #Go through and asynchronously run ssh commands to get logs
   for server in group:
-    hostName = server["host"]
+    ip = server["host"]
+    hostName = ""
     if "ansible_host" in server:
       hostName = server["ansible_host"]
-    asyncresults.append(pool.apply_async(getSshOutput, [hostName, command]))
+    asyncresults.append(pool.apply_async(getSshOutput, [ip, hostName, command]))
 
   #Get asynchronous results in order that they were added
   tableRows=[]
@@ -80,13 +83,14 @@ def getLogs(group, command):
   for async in asyncresults:
     results = async.get(timeout=_timeout)
 
-    #If hostname is IP, resolve hostname
+    #If hostname is not set, and IP is set, resolve hostname
     hostName = results["host"]
-    try:
-      inet_aton(hostName)
-      hostName = str(gethostbyaddr(hostName)[0])
-    except:
-      pass
+    if not results["host"]:
+      try:
+        inet_aton(results["ip"])
+        hostName = str(gethostbyaddr(results["ip"])[0])
+      except:
+        pass
 
 
     #Print formatted results

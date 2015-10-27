@@ -91,13 +91,13 @@ statusCommands = {
 
 
 
-def getSshOutput(host, command, identifier, group, quietIfNotRunning):
+def getSshOutput(ip, host, command, identifier, group, quietIfNotRunning):
   """
   SSH's onto machine, runs command, returns result along with info about process/host
   """
-  logging.debug("hostname: "+host+ " - command: "+command)
+  logging.debug("hostname: "+host+ " - IP: "+ip+" - command: "+command)
   s = ssh()
-  out,err = s.sshExecute(host, command)
+  out,err = s.sshExecute(ip, command)
   logging.debug("\tstdout: "+out+ "\n\tstderr: "+err)
   
   result = []
@@ -113,6 +113,7 @@ def getSshOutput(host, command, identifier, group, quietIfNotRunning):
       identifier = splitoutput[1]
     
     result.append({
+            "ip" :ip,
             "host":host,
             "command":command,
             "pid":pid,
@@ -164,10 +165,11 @@ def mastercommand(ctx, debug, logfile, timeout, inventory_file, monitor, monitor
       for services in statusCommands[server["group"]]:
         for identifier in services.identifiers:
           command = services.command.replace(services.replacementString, identifier)
-          sshHostname = server["host"]
+          ip = server["host"]
+          hostName=""
           if "ansible_host" in server:
-            sshHostname = server["ansible_host"]
-          asyncresults.append(pool.apply_async(getSshOutput, [sshHostname, command, identifier, server["group"], services.quietIfNotRunning]))
+            hostName = server["ansible_host"]
+          asyncresults.append(pool.apply_async(getSshOutput, [ip, hostName, command, identifier, server["group"], services.quietIfNotRunning]))
     except KeyError:
       logging.error("No commands for ansible group: "+server["group"])
       print "No commands for ansible group: "+server["group"]
@@ -187,18 +189,19 @@ def mastercommand(ctx, debug, logfile, timeout, inventory_file, monitor, monitor
 
       #If hostname is IP, resolve hostname
       hostName = result["host"]
-      try:
-        inet_aton(hostName)
-        hostName = str(gethostbyaddr(hostName)[0])
-      except:
-        pass
+      if not hostName:
+        try:
+          inet_aton(result["ip"])
+          hostName = str(gethostbyaddr(result["ip"])[0])
+        except:
+          pass
 
       #Add group info to the table if its not been added yet
       if needToAppendGroup:
         tableRows.append([result["group"],hostName,"","",""])
       #Otherwise just add the hostname, if and only if we haven't 
       #added this hostname already to this group
-      elif currHost != result["host"]:
+      elif currHost != hostName:
         tableRows.append(["",hostName,"","",""])
 
       #Set results as "Running" if PID is valid, otherwise its stopped
@@ -208,7 +211,7 @@ def mastercommand(ctx, debug, logfile, timeout, inventory_file, monitor, monitor
         if  not result["quietIfNotRunning"]:
           tableRows.append(["","",result["identifier"],"----", "Stopped"])
       
-      currHost = result["host"]
+      currHost = hostName
         
   
   #Print out table
