@@ -1,1 +1,1 @@
-{{ inventory_hostname | regex_replace('.*?([0-9]+)$', '\\1') }}
+{{ hostvars[inventory_hostname].id }}

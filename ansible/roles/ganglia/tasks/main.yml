@@ -4,7 +4,8 @@
 - include_vars: "../../../profile/{{ profile_type | default('default') }}.yml"
   tags: 
     [ configure, install, start, stop, force-stop ]
-    
+  when: ansible_virtualization_type != 'docker'
+   
 - name: install ganglia client (Ubuntu)
   apt: pkg='ganglia-monitor' state=latest
   sudo: yes
@@ -16,6 +17,7 @@
   sudo: yes
   yum: name=epel-release state=installed
   when: ansible_distribution == 'CentOS' or ansible_distribution == 'Red Hat Enterprise Linux'
+  when: ansible_virtualization_type != 'docker'
   tags:
     - install
 
@@ -23,6 +25,7 @@
   yum: name={{ item }} state=installed
   sudo: yes
   when: ansible_distribution == 'CentOS' or ansible_distribution == 'Red Hat Enterprise Linux'
+  when: ansible_virtualization_type != 'docker'
   with_items:
     - ganglia-gmond
     - ganglia-gmond-python.x86_64
@@ -33,18 +36,21 @@
 - name: Give ganglia user home directory (to support lsof plugin)
   sudo: yes
   lineinfile:  "dest=/etc/passwd state=present  regexp=\"ganglia.*\"  line=\"ganglia:x:998:996:Ganglia Monitoring System:/var/lib/:/bin/bash\""
+  when: ansible_virtualization_type != 'docker'
   tags:
     - install
   
 - name: Give ganglia user sudo (to support lsof plugin)
   sudo: yes
   lineinfile:  "dest=/etc/sudoers  state=present line=\"ganglia       ALL=(ALL) NOPASSWD: ALL\""
+  when: ansible_virtualization_type != 'docker'
   tags:
     - install
 
 - name: Remove requiretty (to support lsof plugin)
   sudo: yes
   lineinfile: "dest=/etc/sudoers state=present line=\"Defaults:ganglia !requiretty\""
+  when: ansible_virtualization_type != 'docker'
   tags:
     - install
 
@@ -53,6 +59,7 @@
   yum: name='cronie' state=installed
   sudo: yes
   when: ansible_distribution == 'CentOS' or ansible_distribution == 'Red Hat Enterprise Linux'
+  when: ansible_virtualization_type != 'docker'
   tags:
     - install
 
@@ -73,12 +80,14 @@
 - name: Move gmond config
   template: src=../templates/gmond.conf.j2  dest=/etc/ganglia/gmond.conf
   sudo: yes
+  when: ansible_virtualization_type != 'docker'
   tags:
     [ install,configure ]
 
 - name: Move ganglia python plugins
   template: src=../templates/{{ item }}.py.j2  dest=/usr/lib64/ganglia/python_modules/{{ item }}.py
   sudo: yes
+  when: ansible_virtualization_type != 'docker'
   with_items:
     - lsof_counter
   tags:
@@ -87,6 +96,7 @@
 - name: Move ganglia python plugins configs
   template: src=../templates/{{ item }}.pyconf.j2  dest=/etc/ganglia/conf.d/{{ item }}.pyconf
   sudo: yes
+  when: ansible_virtualization_type != 'docker'
   with_items:
     - lsof_counter
   tags:
@@ -96,6 +106,7 @@
   #command: /etc/init.d/ganglia-monitor restart
   service: name=ganglia-monitor state=restarted
   sudo: yes
+  when: ansible_virtualization_type != 'docker'
   when: ansible_distribution == 'Debian' or ansible_distribution == 'Ubuntu'
   tags:
     [ install, start ]

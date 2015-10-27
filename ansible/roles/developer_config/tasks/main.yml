@@ -1,0 +1,39 @@
+- local_action: shell ls -1 ~/.git*
+  run_once: true
+  register: gitFiles
+  ignore_errors: yes
+  tags:
+    - install
+
+- local_action: shell ls -1 ~/.digitalocean 
+  run_once: true
+  register: digitaloceanFiles
+  ignore_errors: yes
+  tags:
+    - install
+
+- local_action: shell ls -1 ~/.vim* 
+  run_once: true
+  register: vimFiles
+  ignore_errors: yes
+  tags:
+    - install
+
+
+- name: Copy git configs
+  synchronize: src={{ item }}  dest=~/
+  with_items: gitFiles.stdout_lines
+  tags:
+    - install
+
+- name: Copy digitalocean configs
+  synchronize: src={{ item }}  dest=~/
+  with_items: digitaloceanFiles.stdout_lines
+  tags:
+    - install
+
+- name: Copy vim configs
+  synchronize: src={{ item }}  dest=~/
+  with_items: vimFiles.stdout_lines
+  tags:
+    - install

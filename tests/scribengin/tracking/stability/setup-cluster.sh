@@ -32,6 +32,4 @@ $clusterCommander digitalocean \
 
 $clusterCommander digitalocean --ansible-inventory --ansible-inventory-location $INVENTORY --subdomain $SUBDOMAIN
 
-$serviceCommander -e "common" --install --configure -i $INVENTORY
-
 $serviceCommander --cluster --install --configure -i $INVENTORY

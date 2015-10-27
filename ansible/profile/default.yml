@@ -140,4 +140,5 @@ monitoring:
       ganglia_home: /opt/ganglia
       user: neverwinterdp
       neverwinterdp_deployments_path: /opt/neverwinterdp_deployments
+      neverwinterdp_code_path: /opt/neverwinterdp_home
 

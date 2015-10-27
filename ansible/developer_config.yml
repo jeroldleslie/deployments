@@ -4,4 +4,4 @@
   hosts: monitoring
   remote_user: neverwinterdp
   roles:
-    - neverwinterdp_deployments
+    - developer_config
