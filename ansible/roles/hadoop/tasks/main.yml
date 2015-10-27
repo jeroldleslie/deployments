@@ -3,7 +3,8 @@
   tags: 
     [ configure, install, clean, start, stop, force-stop ]
 
-- debug: msg="Profile type is {{ profile_type | default('default') }}.yml"
+- local_action: debug msg="Profile type is {{ profile_type | default('default') }}.yml"
+  run_once: yes
   tags: 
     [ configure, install, clean, start, stop, force-stop ]
     
@@ -18,7 +19,8 @@
   tags:
     - install
     
-- debug: msg="Downloading hadoop from {{ hadoop_master.software.installation.hadoop_url }}"
+- local_action: debug msg="Downloading hadoop from {{ hadoop_master.software.installation.hadoop_url }}"
+  run_once: true
   tags:
     - install
      
