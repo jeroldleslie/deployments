@@ -4,6 +4,7 @@ exec python $0 ${1+"$@"}
 """
 
 import click,logging, signal
+from socket import gethostbyaddr
 from sys import stdout
 from tabulate import tabulate
 from os.path import abspath, dirname, join, isfile
@@ -183,11 +184,11 @@ def mastercommand(ctx, debug, logfile, timeout, inventory_file, monitor, monitor
 
       #Add group info to the table if its not been added yet
       if needToAppendGroup:
-        tableRows.append([result["group"],result["host"],"","",""])
+        tableRows.append([result["group"],gethostbyaddr(result["host"])[0],"","",""])
       #Otherwise just add the hostname, if and only if we haven't 
       #added this hostname already to this group
       elif currHost != result["host"]:
-        tableRows.append(["",result["host"],"","",""])
+        tableRows.append(["",gethostbyaddr(result["host"])[0],"","",""])
 
       #Set results as "Running" if PID is valid, otherwise its stopped
       if result["pid"]:
