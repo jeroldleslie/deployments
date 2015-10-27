@@ -142,12 +142,12 @@
   tags:
     - start
     
-- name: Start gmond manually
-  shell: "/usr/sbin/gmond"
-  sudo: yes
-  when: ansible_virtualization_type == 'docker'
-  tags:
-    - start
+#- name: Start gmond manually
+#  shell: "/usr/sbin/gmond"
+#  sudo: yes
+#  when: ansible_virtualization_type == 'docker'
+#  tags:
+#    - start
 
 # - name: Create ganglia home for custom scripts
 #   file: path={{monitoring.software.installation.ganglia_home}} state=directory mode=0755
