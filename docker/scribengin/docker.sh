@@ -314,6 +314,9 @@ function ansible_inventory(){
   for container_id in ${container_ids[@]}; do
     container_names+=($(docker inspect -f {{.Config.Hostname}} $container_id))
   done
+
+  #Put the list in alpha order
+  IFS=$'\n' container_names=($(sort <<<"${container_names[*]}"))
   
   #Go through all docker images, see if it matches the regex, and add it to the inventory
   for regex in ${regexList[@]}; do

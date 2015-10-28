@@ -1,7 +1,19 @@
-import logging, subprocess
+import logging, subprocess, re
 from os.path import abspath, dirname, join, expanduser, realpath
 from sys import path
 path.insert(0, dirname(dirname(abspath(__file__))))
+
+
+def atoi(text):
+  return int(text) if text.isdigit() else text
+
+def natural_keys(text):
+  '''
+  alist.sort(key=natural_keys) sorts in human order
+  http://nedbatchelder.com/blog/200712/human_sorting.html
+  (See Toothy's implementation in the comments)
+  '''
+  return [ atoi(c) for c in re.split('(\d+)', text) ]
 
 class ScribenginAnsible():
   def __init__(self):
@@ -22,6 +34,14 @@ class ScribenginAnsible():
       #Replace - with _ to differentiate groups from hostnames
       inventory += "\n["+group.replace("-","_")+"]\n"
       id=0
+
+      #Sort hostsAndIps by hostname
+      #Sort it such that its sorted by natural language, i.e.
+      # kafka-1
+      # kafka-2
+      # kafka-10
+      hostsAndIps = sorted(hostsAndIps, key=lambda k: natural_keys(k['name'])) 
+
       for host in hostsAndIps:
         if group in host["name"]:
           id+=1
