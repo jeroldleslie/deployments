@@ -1,0 +1,7 @@
+- name:  Disable strict host key checking in ssh
+  lineinfile: dest=~/.ssh/config
+              line='StrictHostKeyChecking no'
+              state=present
+              create=yes
+              mode=600
+  tags: [install]

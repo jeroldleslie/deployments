@@ -1,24 +1,22 @@
-- local_action: shell ls -1 ~/.git*
+- local_action: shell ls -d -1 ~/.git*
   run_once: true
   register: gitFiles
   ignore_errors: yes
   tags:
     - install
 
-- local_action: shell ls -1 ~/.digitalocean 
+- local_action: shell ls -d -1 ~/.digitalocean
   run_once: true
   register: digitaloceanFiles
   ignore_errors: yes
   tags:
     - install
 
-- local_action: shell ls -1 ~/.vim* 
+- local_action: shell ls -d -1 ~/.vim* 
   run_once: true
   register: vimFiles
   ignore_errors: yes
-  tags:
-    - install
-
+  tags: [install,testvim]
 
 - name: Copy git configs
   synchronize: src={{ item }}  dest=~/
@@ -33,7 +31,6 @@
     - install
 
 - name: Copy vim configs
-  synchronize: src={{ item }}  dest=~/
+  synchronize: src={{ item }} dest=~/
   with_items: vimFiles.stdout_lines
-  tags:
-    - install
+  tags: [install]

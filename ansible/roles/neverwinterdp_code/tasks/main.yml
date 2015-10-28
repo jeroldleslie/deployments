@@ -4,6 +4,11 @@
   tags: 
     [ install, configure ]
 
+- name: Profile type
+  local_action: debug msg="{{ profile_type | default('default') }}"
+  run_once: true
+  tags: [ configure, install, clean, start, stop, force-stop ]
+
 - name: Set neverwinterdp_home via environment variable
   set_fact: neverwinterdp_home="{{ lookup('env','NEVERWINTERDP_HOME') }}"
   tags: 
@@ -57,7 +62,7 @@
     
 - name: Set neverwinterdp_home
   sudo: yes
-  lineinfile: dest=/etc/profile    line="NEVERWINTERDP_HOME={{ monitoring.software.installation.neverwinterdp_code_path }}\nexport NEVERWINTERDP_HOME\n"
+  lineinfile: dest=/etc/profile line="NEVERWINTERDP_HOME={{ monitoring.software.installation.neverwinterdp_code_path }}/NeverwinterDP \nexport NEVERWINTERDP_HOME\n"
   tags: 
     [ install, configure ]
 

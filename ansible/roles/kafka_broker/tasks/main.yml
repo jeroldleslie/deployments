@@ -4,9 +4,10 @@
   tags: 
     [ configure, install, clean, start, stop, force-stop ]
 
-- debug: msg="Profile type is {{ profile_type | default('default') }}.yml"
-  tags: 
-    [ configure, install, clean, start, stop, force-stop ]
+- name: Profile type
+  local_action: debug msg="{{ profile_type | default('default') }}"
+  run_once: true
+  tags: [ configure, install, clean, start, stop, force-stop ]
     
 - name: Create kafka directory
   file: path={{ kafka.software.installation.kafka_home_dir }} state=directory

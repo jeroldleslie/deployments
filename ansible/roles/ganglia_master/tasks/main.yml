@@ -4,6 +4,11 @@
   tags: 
     [ configure, install, start, stop, force-stop ]
   when: ansible_virtualization_type != 'docker'
+
+- name: Profile type
+  local_action: debug msg="{{ profile_type | default('default') }}"
+  run_once: true
+  tags: [ configure, install, clean, start, stop, force-stop ]
   
 - name: Install epel-release
   sudo: yes
@@ -84,24 +89,24 @@
   tags:
     - start 
  
-- name: Start gmond manually
-  shell: "/usr/sbin/gmond"
-  sudo: yes
-  when: ansible_virtualization_type == 'docker'
-  tags:
-    - start    
+#- name: Start gmond manually
+#  shell: "/usr/sbin/gmond"
+#  sudo: yes
+#  when: ansible_virtualization_type == 'docker'
+#  tags:
+#    - start    
   
-- name: Start gmetad manually
-  shell: "/usr/sbin/gmetad"
-  sudo: yes
-  when: ansible_virtualization_type == 'docker'
-  tags:
-    - start    
+#- name: Start gmetad manually
+#  shell: "/usr/sbin/gmetad"
+#  sudo: yes
+#  when: ansible_virtualization_type == 'docker'
+#  tags:
+#    - start    
   
-- name: Start httpd manually
-  shell: "/usr/sbin/httpd"
-  sudo: yes
-  when: ansible_virtualization_type == 'docker'
-  tags:
-    - start    
+#- name: Start httpd manually
+#  shell: "/usr/sbin/httpd"
+#  sudo: yes
+#  when: ansible_virtualization_type == 'docker'
+#  tags:
+#    - start    
   

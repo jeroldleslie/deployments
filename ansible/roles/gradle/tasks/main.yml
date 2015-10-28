@@ -1,0 +1,30 @@
+---
+#Include variables from file
+- include_vars: "../../../profile/{{ profile_type | default('default') }}.yml"
+  tags: [install]
+
+- name: Profile type
+  local_action: debug msg="{{ profile_type | default('default') }}"
+  run_once: true
+  tags: [ configure, install, clean, start, stop, force-stop ]
+    
+- name: Check if Gradle is already downloaded
+  stat: path=/tmp/{{monitoring.software.installation.gradle_zipfile}}
+  register: downloaded
+  tags: [install]
+    
+- name: Download Gradle {{gradle_version}}
+  get_url: dest="/tmp/" url=https://services.gradle.org/distributions/{{monitoring.software.installation.gradle_zipfile}}
+  sudo: yes
+  when: downloaded.stat.exists == false
+  tags: [install]
+
+- name: Extract Gradle
+  shell: unzip "/tmp/{{monitoring.software.installation.gradle_zipfile}}" -d /usr/local/share/ creates=/usr/local/share/{{monitoring.software.installation.gradle_folder}}
+  sudo: yes
+  tags: [install]
+
+- name: Add Gradle executable symlink to path
+  shell: ln -s /usr/local/share/{{monitoring.software.installation.gradle_folder}}/bin/gradle /usr/local/bin/gradle creates=/usr/local/bin/gradle
+  sudo: yes
+  tags: [install]

@@ -141,4 +141,13 @@ monitoring:
       user: neverwinterdp
       neverwinterdp_deployments_path: /opt/neverwinterdp_deployments
       neverwinterdp_code_path: /opt/neverwinterdp_home
+      gradle_version: "1.12"
+      gradle_zipfile: "gradle-1.12-all.zip"
+      gradle_folder:  "gradle-1.12"
 
+common:
+  increase_open_file_limit:
+    num_open_files: 32000
+    ndp_user: neverwinterdp
+    limits_file: /etc/security/limits.conf
+    

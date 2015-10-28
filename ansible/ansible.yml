@@ -1,0 +1,7 @@
+---
+
+- name: Ansible
+  hosts: monitoring
+  remote_user: neverwinterdp
+  roles:
+    - ansible
