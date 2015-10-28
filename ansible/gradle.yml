@@ -1,0 +1,7 @@
+---
+
+- name: Gradle
+  hosts: monitoring
+  remote_user: neverwinterdp
+  roles:
+    - gradle

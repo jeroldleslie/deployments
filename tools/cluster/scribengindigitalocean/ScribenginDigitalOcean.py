@@ -158,11 +158,13 @@ class ScribenginDigitalOcean():
   def loadMachineConfig(self, configLocation):
     config = yaml.load(open(configLocation, "r"))
     machines_list=[]
+    omitRole = ["common",]
     for role in config:
-      machine_dist={}
-      machine_dist["role"]=role.replace("_","-")
-      machine_dist.update(config[role]['hardware'])
-      machines_list.append(machine_dist)
+      if not role in omitRole:
+        machine_dist={}
+        machine_dist["role"]=role.replace("_","-")
+        machine_dist.update(config[role]['hardware'])
+        machines_list.append(machine_dist)
     
     #Set default configuration params
     for machine in machines_list:
@@ -175,35 +177,36 @@ class ScribenginDigitalOcean():
     config = self.loadMachineConfig(configLocation)
     
     droplets = []
+    
     for machine in config:
-      for i in range(1, machine["num"]+1):
-        logging.debug("Creating "+machine["role"]+"-"+str(i))
+        for i in range(1, machine["num"]+1):
+          logging.debug("Creating "+machine["role"]+"-"+str(i))
         
-        hostname = machine["role"]+"-"+str(i)
-        omitNumberedName = ["hadoop-master",]
-        if machine["role"] in omitNumberedName and machine["num"] == 1:
-          hostname =machine["role"] 
+          hostname = machine["role"]+"-"+str(i)
+          omitNumberedName = ["hadoop-master",]
+          if machine["role"] in omitNumberedName and machine["num"] == 1:
+            hostname =machine["role"] 
         
-        #If region is passed in, use that
-        #Otherwise use what's set in the config
-        digitalOceanRegion = region
-        if digitalOceanRegion is None:
-            digitalOceanRegion = machine["region"]
+          #If region is passed in, use that
+          #Otherwise use what's set in the config
+          digitalOceanRegion = region
+          if digitalOceanRegion is None:
+              digitalOceanRegion = machine["region"]
         
-        #Add subdomain to hostname if its passed in
-        if subdomain is not None:
-          digitalOceanName=hostname+"."+subdomain
-        else:
-          digitalOceanName = hostname
+          #Add subdomain to hostname if its passed in
+          if subdomain is not None:
+            digitalOceanName=hostname+"."+subdomain
+          else:
+            digitalOceanName = hostname
           
-        droplets.append(digitalocean.Droplet(token=self.token,
-                                 name=digitalOceanName,
-                                 region=digitalOceanRegion,
-                                 image=machine["image"],
-                                 size_slug=machine["memory"],
-                                 backups=False,
-                                 ssh_keys=machine["ssh_keys"],
-                                 private_networking=machine['private_networking'],))
+          droplets.append(digitalocean.Droplet(token=self.token,
+                                   name=digitalOceanName,
+                                   region=digitalOceanRegion,
+                                   image=machine["image"],
+                                   size_slug=machine["memory"],
+                                   backups=False,
+                                   ssh_keys=machine["ssh_keys"],
+                                   private_networking=machine['private_networking'],))
     self.createDropletSet(droplets)
     return droplets
     

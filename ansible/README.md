@@ -50,7 +50,8 @@ Example task:
   file: path={{zookeeper.software.installation.zookeeper_home_dir}} state=directory
   tags:
     - install
-````
+```
+
 - All the tasks should have atleast one tag. Allowed tags are "install,configure,start,stop,clean,force-stop". See the below example how tags are used in task.
 
 ```
@@ -63,6 +64,7 @@ Example task:
 
 
 ###Example Playbook Setup
+
 ```
 #example ansible/roles/kafka/tasks/main.yml
 ---

@@ -84,24 +84,24 @@
   tags:
     - start 
  
-- name: Start gmond manually
-  shell: "/usr/sbin/gmond"
-  sudo: yes
-  when: ansible_virtualization_type == 'docker'
-  tags:
-    - start    
+#- name: Start gmond manually
+#  shell: "/usr/sbin/gmond"
+#  sudo: yes
+#  when: ansible_virtualization_type == 'docker'
+#  tags:
+#    - start    
   
-- name: Start gmetad manually
-  shell: "/usr/sbin/gmetad"
-  sudo: yes
-  when: ansible_virtualization_type == 'docker'
-  tags:
-    - start    
+#- name: Start gmetad manually
+#  shell: "/usr/sbin/gmetad"
+#  sudo: yes
+#  when: ansible_virtualization_type == 'docker'
+#  tags:
+#    - start    
   
-- name: Start httpd manually
-  shell: "/usr/sbin/httpd"
-  sudo: yes
-  when: ansible_virtualization_type == 'docker'
-  tags:
-    - start    
+#- name: Start httpd manually
+#  shell: "/usr/sbin/httpd"
+#  sudo: yes
+#  when: ansible_virtualization_type == 'docker'
+#  tags:
+#    - start    
   

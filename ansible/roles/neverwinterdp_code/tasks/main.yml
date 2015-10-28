@@ -57,7 +57,7 @@
     
 - name: Set neverwinterdp_home
   sudo: yes
-  lineinfile: dest=/etc/profile    line="NEVERWINTERDP_HOME={{ monitoring.software.installation.neverwinterdp_code_path }}\nexport NEVERWINTERDP_HOME\n"
+  lineinfile: dest=/etc/profile line="NEVERWINTERDP_HOME={{ monitoring.software.installation.neverwinterdp_code_path }}/NeverwinterDP \nexport NEVERWINTERDP_HOME\n"
   tags: 
     [ install, configure ]
 

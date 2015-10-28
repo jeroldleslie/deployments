@@ -25,8 +25,7 @@ _start_string      = "start"
 #When the --cluster command is passed in, these are the roles that are executed
 #The order of this array DOES MATTER.  From left to right is the order in which the 
 #  cluster will be started.  To stop/force-stop, the array will be reversed
-_cluster_array     = [ "common", "developer_config", "neverwinterdp_deployments", "neverwinterdp_code", 
-                        "elasticsearch","zookeeper", "kafka", "hadoop", "scribengin",
+_cluster_array     = [ "common", "elasticsearch","zookeeper", "kafka", "hadoop", "scribengin",
                         "kibana","ganglia" ]
 
 @click.command(help="Use Ansible to manage services in your cluster!\n")
@@ -37,6 +36,7 @@ _cluster_array     = [ "common", "developer_config", "neverwinterdp_deployments"
 @click.option('--subset',          '-l', default='', help="Further limit selected hosts with an additional pattern")
 @click.option('--inventory-file',  '-i', default='inventory', help="Ansible inventory file to use")
 @click.option('--cluster',         '-u', is_flag=True, help="Alternative to --services option, runs for entire cluster")
+@click.option('--developer-tools', '-d', is_flag=True, help="Installs developer tools")
 
 @click.option('--start',           '-s', is_flag=True, help="start services")
 @click.option('--stop',            '-t', is_flag=True, help="stop services")
@@ -48,7 +48,7 @@ _cluster_array     = [ "common", "developer_config", "neverwinterdp_deployments"
 @click.option('--ansible-root-dir',      default=dirname(dirname(dirname(abspath(__file__))))+"/ansible", help="Root directory for Ansible")
 @click.option('--max-retries',     '-m', default=5, help="Max retries for running the playbook")
 @click.option('--extra-vars',      '-v', default='', help='Extra variable for the playbook')
-def mastercommand(debug, logfile, services, subset, inventory_file, cluster, start, stop, force_stop, clean, install, configure, profile_type, ansible_root_dir, max_retries, extra_vars):
+def mastercommand(debug, logfile, services, subset, inventory_file, cluster, developer_tools, start, stop, force_stop, clean, install, configure, profile_type, ansible_root_dir, max_retries, extra_vars):
   if debug:
     #Set logging file, overwrite file, set logging level to DEBUG
     logging.basicConfig(filename=logfile, filemode="w", level=logging.DEBUG)
@@ -92,7 +92,12 @@ def mastercommand(debug, logfile, services, subset, inventory_file, cluster, sta
       index+=1
   
   
+    
   servicesToRun = _cluster_array
+  
+  if developer_tools:
+    servicesToRun.append("developer_tools")
+    
   if nonClusterServices:
     servicesToRun += nonClusterServices
   #The reversed list is the order to stop/force-stop
@@ -107,7 +112,7 @@ def mastercommand(debug, logfile, services, subset, inventory_file, cluster, sta
       
   if (profile_type != ""):
     extra_vars_dict['profile_type'] = profile_type
-  
+ 
   runner = ansibleRunner()
 
   #Go through each tag to run

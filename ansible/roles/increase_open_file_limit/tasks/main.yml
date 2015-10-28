@@ -1,11 +1,24 @@
+---
+#Include variables from file
+- include_vars: "../../../profile/{{ profile_type | default('default') }}.yml"
+  tags: [install]
+
+- name: Profile type
+  local_action: debug msg="{{ profile_type | default('default') }}"
+  run_once: true
+  tags: [install]
+    
 - name: Remove any previous open file limit lines (lineinfile removes one line at a time)
   sudo: yes
-  lineinfile: dest={{ limits_file }} state=absent regexp="(.*\s*[hard|soft]\s*nofile\s*\d*\s*)+" 
-
+  lineinfile: dest={{ common.increase_open_file_limit.limits_file }} state=absent regexp="(.*\s*[hard|soft]\s*nofile\s*\d*\s*)+" 
+  tags: [install]
+    
 - name: Remove any previous open file limit lines (lineinfile removes one line at a time, 2nd run)
   sudo: yes
-  lineinfile: dest={{ limits_file }} state=absent regexp="(.*\s*[hard|soft]\s*nofile\s*\d*\s*)+" 
-
+  lineinfile: dest={{ common.increase_open_file_limit.limits_file }} state=absent regexp="(.*\s*[hard|soft]\s*nofile\s*\d*\s*)+" 
+  tags: [install]
+    
 - name: Increase open file limit
   sudo: yes
-  lineinfile: dest={{ limits_file }} state=present regexp="(.*\s*[hard|soft]\s*nofile\s*\d*\s*)+" line="{{ ndp_user }}   hard    nofile      {{ num_open_files }}\n{{ ndp_user }}   soft    nofile      {{num_open_files}}"
+  lineinfile: dest={{ common.increase_open_file_limit.limits_file }} state=present regexp="(.*\s*[hard|soft]\s*nofile\s*\d*\s*)+" line="{{ common.increase_open_file_limit.ndp_user }}   hard    nofile      {{ common.increase_open_file_limit.num_open_files }}\n{{ common.increase_open_file_limit.ndp_user }}   soft    nofile      {{common.increase_open_file_limit.num_open_files}}"
+  tags: [install]

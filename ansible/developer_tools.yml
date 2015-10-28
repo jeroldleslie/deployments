@@ -1,0 +1,7 @@
+---
+
+- name: Build Tools
+  hosts: monitoring
+  remote_user: neverwinterdp
+  roles:
+    - developer_tools

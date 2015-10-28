@@ -2,7 +2,7 @@
 #Include variables from file
 - include_vars: "../../../profile/{{ profile_type | default('default') }}.yml"
   tags: 
-    [ install, test ]
+    [ install ]
 
 - name: Check if remote tools directory exists
   stat: path={{ monitoring.software.installation.neverwinterdp_deployments_path }}
