@@ -68,19 +68,19 @@
   tags:
     - install
 
-- name: Check if crond is running (Docker)
-  shell: ps -ax | grep crond | grep -v grep | wc -l
-  register: crond_running
-  when: ansible_virtualization_type == 'docker'
-  tags:
-    - install
+#- name: Check if crond is running (Docker)
+#  shell: ps -ax | grep crond | grep -v grep | wc -l
+#  register: crond_running
+#  when: ansible_virtualization_type == 'docker'
+#  tags:
+#    - install
 
-- name: Make sure crond is started (Docker)
-  shell: crond
-  sudo: yes
-  when: ansible_virtualization_type == 'docker' and crond_running.stdout == "0"
-  tags:
-    - install
+#- name: Make sure crond is started (Docker)
+#  shell: crond
+#  sudo: yes
+#  when: ansible_virtualization_type == 'docker' and crond_running.stdout == "0"
+#  tags:
+#    - install
     
 - name: Move gmond config
   template: src=../templates/gmond.conf.j2  dest=/etc/ganglia/gmond.conf
