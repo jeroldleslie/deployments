@@ -4,6 +4,11 @@
   tags: 
     [ install ]
 
+- name: Profile type
+  local_action: debug msg="{{ profile_type | default('default') }}"
+  run_once: true
+  tags: [ configure, install, clean, start, stop, force-stop ]
+
 - name: Check if remote tools directory exists
   stat: path={{ monitoring.software.installation.neverwinterdp_deployments_path }}
   register: tools_home_status

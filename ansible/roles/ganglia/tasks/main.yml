@@ -5,6 +5,11 @@
   tags: 
     [ configure, install, start, stop, force-stop ]
   when: ansible_virtualization_type != 'docker'
+
+- name: Profile type
+  local_action: debug msg="{{ profile_type | default('default') }}"
+  run_once: true
+  tags: [ configure, install, clean, start, stop, force-stop ]
    
 - name: install ganglia client (Ubuntu)
   apt: pkg='ganglia-monitor' state=latest

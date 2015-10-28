@@ -6,7 +6,7 @@
 - name: Profile type
   local_action: debug msg="{{ profile_type | default('default') }}"
   run_once: true
-  tags: [install]
+  tags: [ configure, install, clean, start, stop, force-stop ]
     
 - name: Remove any previous open file limit lines (lineinfile removes one line at a time)
   sudo: yes

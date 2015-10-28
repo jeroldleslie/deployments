@@ -2,6 +2,11 @@
 #Include variables from file
 - include_vars: "../../../profile/{{ profile_type | default('default') }}.yml"
   tags: [install]
+
+- name: Profile type
+  local_action: debug msg="{{ profile_type | default('default') }}"
+  run_once: true
+  tags: [ configure, install, clean, start, stop, force-stop ]
     
 - name: Check if Gradle is already downloaded
   stat: path=/tmp/{{monitoring.software.installation.gradle_zipfile}}
