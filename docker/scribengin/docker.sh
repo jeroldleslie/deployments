@@ -171,10 +171,11 @@ function build_images() {
 
 function clean_containers() {
   h1 "Cleaning Containers"
-  for container_id in $(all_container_ids); do
-    container_name=$(docker inspect -f {{.Config.Hostname}} $container_id)
-    docker rm -f $container_id
-    echo "Remove the instance $container_name"
+  containers=( $(docker ps -a | grep scribengin | awk '{print $NF}') )
+  for (( i=0; i<${#containers[@]}; i=$i+1 )); do
+    #Removes trailing hyphen and digits
+    image_name=${containers[i]}
+    docker rm -f $image_name
   done
 }
 
@@ -208,18 +209,15 @@ function launch_intermediate_containers() {
   ansible_inventory $@ 
   
   deploy_all $@ 
-  
-  #Create base images for each container
-  containers=( $(docker ps -a | grep scribengin | awk '{print $1 " " $NF}') )
-  for (( i=0; i<${#containers[@]}; i=$i+2 )); do
-    container_ID=${containers[i]}
-    #Removes trailing hyphen and digits
-    #image_name=`echo ${containers[i+1]} | sed -e 's/[0-9]*$//g' -e 's/-$//'`
-    image_name=${containers[i+1]}
-    h1 "Creating base image for $image_name"
-    docker commit $container_ID $OS_TYPE-scribengin:$image_name
-  done
 
+  #Create base images for each container
+  containers=( $(docker ps -a | grep scribengin | awk '{print $NF}') )
+  for (( i=0; i<${#containers[@]}; i=$i+1 )); do
+    #Removes trailing hyphen and digits
+    image_name=${containers[i]}
+    h1 "Creating base image for $image_name"
+    docker commit $image_name $OS_TYPE-scribengin:$image_name
+  done
   clean_containers $@
 }
 
