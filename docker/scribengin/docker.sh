@@ -154,36 +154,29 @@ function build_images() {
 
 
   #Install common dependencies  
-  #docker run -d -p 22 --privileged -h scribengincommon --name scribengincommon  $OS_TYPE:scribengin
-  #SCRIPT_DIR=$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )
-  #TMP_INVENTORY=/tmp/commoninventory
-  #echo $(docker inspect -f "{{ .NetworkSettings.IPAddress }}" scribengincommon) > $TMP_INVENTORY
-  #$SCRIPT_DIR/../../tools/serviceCommander/serviceCommander.py -e "common" --install -i $TMP_INVENTORY
-  #containerID=$(docker ps -a | grep scribengincommon | awk '{print $1}')
-  #docker commit $containerID $OS_TYPE:scribengin
-  #docker rm -f $containerID
-  #rm /tmp/commoninventory
+  docker run -d -p 22 --privileged -h scribengincommon --name scribengincommon  $OS_TYPE:scribengin
+  SCRIPT_DIR=$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )
+  TMP_INVENTORY=/tmp/commoninventory
+  echo $(docker inspect -f "{{ .NetworkSettings.IPAddress }}" scribengincommon) > $TMP_INVENTORY
+  $SCRIPT_DIR/../../tools/serviceCommander/serviceCommander.py -e "common" --install -i $TMP_INVENTORY
+  containerID=$(docker ps -a | grep scribengincommon | awk '{print $1}')
+  docker commit $containerID $OS_TYPE:scribengin
+  docker rm -f $containerID
+  rm /tmp/commoninventory
   
-  #rm -rf $DOCKERSCRIBEDIR/tmp
+  rm -rf $DOCKERSCRIBEDIR/tmp
   
   launch_intermediate_containers $@
 }
 
 function clean_containers() {
   h1 "Cleaning Containers"
-  
   containers=( $(docker ps -a | grep scribengin | awk '{print $NF}') )
   for (( i=0; i<${#containers[@]}; i=$i+1 )); do
     #Removes trailing hyphen and digits
     image_name=${containers[i]}
     docker rm -f $image_name
   done
-  
-#  for container_id in $(all_container_ids); do
-#    container_name=$(docker inspect -f {{.Config.Hostname}} $container_id)
-#    docker rm -f $container_id
-#    echo "Remove the instance $container_name"
-#  done
 }
 
 function launch_intermediate_containers() {
@@ -215,7 +208,7 @@ function launch_intermediate_containers() {
   #container_update_hosts $@
   ansible_inventory $@ 
   
-  #deploy_all $@ 
+  deploy_all $@ 
 
   #Create base images for each container
   containers=( $(docker ps -a | grep scribengin | awk '{print $NF}') )
