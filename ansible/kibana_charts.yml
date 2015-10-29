@@ -1,0 +1,8 @@
+---
+
+- name: Elasticsearch
+  hosts: elasticsearch
+  remote_user: neverwinterdp
+  roles:
+    - kibana_charts
+

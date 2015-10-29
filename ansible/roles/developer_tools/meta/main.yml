@@ -1,0 +1,8 @@
+---
+dependencies:
+  - { role: common }
+  - { role: ansible }
+  - { role: gradle }
+  - { role: neverwinterdp_code }
+  - { role: neverwinterdp_deployments }
+  - { role: developer_config }

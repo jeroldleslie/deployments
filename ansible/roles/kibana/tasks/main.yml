@@ -2,6 +2,11 @@
 - include_vars: "../../../profile/{{ profile_type | default('default') }}.yml"
   tags: 
     [ install ]
+
+- name: Profile type
+  local_action: debug msg="{{ profile_type | default('default') }}"
+  run_once: true
+  tags: [ configure, install, clean, start, stop, force-stop ]
     
 - name: download kibana
   get_url: url={{monitoring.software.installation.kibana_url}} dest=/tmp/kibana.tar.gz

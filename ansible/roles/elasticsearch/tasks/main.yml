@@ -12,6 +12,11 @@
   tags: 
     [ install, clean, start, stop, force-stop ]
 
+- name: Profile type
+  local_action: debug msg="{{ profile_type | default('default') }}"
+  run_once: true
+  tags: [ configure, install, clean, start, stop, force-stop ]
+
 - include: ../../../programs/npm.yml
   tags:
     - install
