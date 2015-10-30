@@ -199,24 +199,24 @@ def mastercommand(ctx, debug, logfile, timeout, inventory_file, monitor, monitor
 
       #Add group info to the table if its not been added yet
       if needToAppendGroup:
-        tableRows.append([result["group"],hostName,"","",""])
+        tableRows.append([result["group"],hostName,result["ip"],"","",""])
       #Otherwise just add the hostname, if and only if we haven't 
       #added this hostname already to this group
       elif currHost != hostName:
-        tableRows.append(["",hostName,"","",""])
+        tableRows.append(["",hostName,result["ip"],"","",""])
 
       #Set results as "Running" if PID is valid, otherwise its stopped
       if result["pid"]:
-        tableRows.append(["","",result["identifier"],result["pid"],"Running"])
+        tableRows.append(["","","",result["identifier"],result["pid"],"Running"])
       else:
         if  not result["quietIfNotRunning"]:
-          tableRows.append(["","",result["identifier"],"----", "Stopped"])
+          tableRows.append(["","","",result["identifier"],"----", "Stopped"])
       
       currHost = hostName
         
   
   #Print out table
-  tableHeaders  = ["Role", "Hostname", "ProcessIdentifier", "ProcessID", "Status"]
+  tableHeaders  = ["Role", "Hostname", "IP", "ProcessIdentifier", "ProcessID", "Status"]
   print tabulate(tableRows, headers=tableHeaders)
 
   pool.terminate()
