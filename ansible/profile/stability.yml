@@ -32,8 +32,8 @@ kafka:
       host_name: localhost
       advertised_host_name: <hostname routable by clients>
       advertised_port: <port accessible by clients>
-      log_flush_interval_messages: 100000000000
-      log_flush_interval_ms: 9000000000
+      log_flush_interval_messages: 10000
+      log_flush_interval_ms: 3000
       message_max_bytes: 1000000
       auto_create_topics_enable: 'true'
     consumer_properties:

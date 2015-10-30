@@ -86,10 +86,10 @@ auto.create.topics.enable={{ kafka.software.server_properties.auto_create_topics
 # every N messages (or both). This can be done globally and overridden on a per-topic basis.
 
 # The number of messages to accept before forcing a flush of data to disk
-#log.flush.interval.messages={{ kafka.software.server_properties.log_flush_interval_messages }}
+log.flush.interval.messages={{ kafka.software.server_properties.log_flush_interval_messages }}
 
 # The maximum amount of time a message can sit in a log before we force a flush
-#log.flush.interval.ms={{ kafka.software.server_properties.log_flush_interval_ms }}
+log.flush.interval.ms={{ kafka.software.server_properties.log_flush_interval_ms }}
 
 default.replication.factor={{ kafka.software.server_properties.default_replication_factor }}
 
