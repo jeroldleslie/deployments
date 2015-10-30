@@ -60,18 +60,18 @@ function container_update_hosts() {
   h1 "Update /etc/hosts file on containers"
   HOSTS=$'## scribengin server ##\n'
   HOSTS+=$'127.0.0.1 localhost\n\n'
-  
-  for container_id in $(container_ids); do
+  images=( $(docker ps -a | grep scribengin | awk '{print $NF}') )
+  for image in "${images[@]}" ; do
     #extract the container name
-    container_name=$(docker inspect -f {{.Config.Hostname}} $container_id)
-    container_domain=$(docker inspect -f {{.Config.Domainname}} $container_id)
+    container_name=$(docker inspect -f {{.Config.Hostname}} $image)
+    container_domain=$(docker inspect -f {{.Config.Domainname}} $image)
     #extract the container ip
-    container_ip=$(docker inspect -f "{{ .NetworkSettings.IPAddress }}" $container_id)
+    container_ip=$(docker inspect -f "{{ .NetworkSettings.IPAddress }}" $image)
     #extract the container running state
-    container_running=$(docker inspect -f {{.State.Running}} $container_id)
+    container_running=$(docker inspect -f {{.State.Running}} $image)
     HOSTS+="$container_ip $container_name"
     HOSTS+=$'\n'
-    #echo "container id = $container_id, container name = $container_name, container ip = $container_ip, container running = $container_running"
+    #echo "container id = $image, container name = $container_name, container ip = $container_ip, container running = $container_running"
   done
 
   echo ""
@@ -80,16 +80,16 @@ function container_update_hosts() {
   echo "-----------------------------------------------------------------------------------------------"
   echo "$HOSTS"
   echo "-----------------------------------------------------------------------------------------------"
-  for container_id in $(container_ids); do
+  for image in "${images[@]}" ; do
     #extract the container name
-    container_name=$(docker inspect -f {{.Config.Hostname}} $container_id)
+    container_name=$(docker inspect -f {{.Config.Hostname}} $image)
     
     #Update ssh key while we're at it
     echo "ssh-keygen -R $container_name"
     ssh-keygen -R $container_name
     
     echo "Update /etc/hosts for $container_name"
-    ssh -o StrictHostKeyChecking=no -p $(login_ssh_port $container_id) root@$HOST_IP "echo '$HOSTS'  > /etc/hosts"
+    ssh -o StrictHostKeyChecking=no -p $(login_ssh_port $image) root@$HOST_IP "echo '$HOSTS'  > /etc/hosts"
   done
 }
 
@@ -103,8 +103,9 @@ function host_machine_update_hosts() {
   
   #Build entry to add to /etc/hosts by reading info from Docker
   hostString="$startString\n"
-  for container_id in $(container_ids); do
-    hostname=$(docker inspect -f '{{ .Config.Hostname }}' $container_id)
+  images=( $(docker ps -a | grep scribengin | awk '{print $NF}') )
+  for image in "${images[@]}" ; do
+    hostname=$(docker inspect -f '{{ .Config.Hostname }}' $image)
     hostString="$hostString$(docker inspect -f "{{ .NetworkSettings.IPAddress }}" $hostname)    $hostname\n"
   done
   hostString="$hostString$endString\n"
@@ -305,17 +306,6 @@ function ansible_inventory(){
   #File contents we'll write to $INVENTORY_FILE_LOCATION
   filecontents=""
   
-  #Do all the work to get container names
-  #Doing it here so we only have to do it once
-  container_ids=$(container_ids)
-  container_names=()
-  for container_id in ${container_ids[@]}; do
-    container_names+=($(docker inspect -f {{.Config.Hostname}} $container_id))
-  done
-
-  #Put the list in alpha order
-  IFS=$'\n' container_names=($(sort <<<"${container_names[*]}"))
-  
   #Go through all docker images, see if it matches the regex, and add it to the inventory
   for regex in ${regexList[@]}; do
     #our ansible groups use _ instead of - character to help differentiate the groups from containers
@@ -323,7 +313,8 @@ function ansible_inventory(){
     #Write the ansible group header
     filecontents="$filecontents\n[$ansiblegroup]\n"
     id=0
-    for container_name in ${container_names[@]}; do
+    container_names=( $(docker ps -a | grep scribengin | awk '{print $NF}') )
+    for container_name in "${container_names[@]}" ; do
       #If the hostname matches the header, then add it to the ansible group
       if [[ $container_name =~ $regex.* ]] ; then
         id=`expr $id + 1`
