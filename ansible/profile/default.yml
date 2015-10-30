@@ -83,7 +83,8 @@ hadoop_master:
     installation:
       hadoop_home_dir: /opt/hadoop
       hadoop_tar: hadoop-2.7.1.tar.gz
-      hadoop_url: https://archive.apache.org/dist/hadoop/core/hadoop-2.7.1/hadoop-2.7.1.tar.gz
+      #hadoop_url: https://archive.apache.org/dist/hadoop/core/hadoop-2.7.1/hadoop-2.7.1.tar.gz
+      hadoop_url: http://jenkinsdp.do.demandcube.com/hadoop-2.7.1.tar.gz
     jvm:
       NAMENODE_HEAPSIZE: 1024
       SECONDARYNAMENODE_HEAPSIZE: 512
