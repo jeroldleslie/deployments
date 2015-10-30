@@ -12,6 +12,16 @@
   file: path=/opt/hadoop state=directory
   tags:
     - install
+
+- name: Create hadoop directory
+  file: path={{ hadoop_master.software.installation.hadoop_home_dir }} state=directory
+  tags:
+    - install
+
+- name: Create hadoop vm-logs directory
+  file: path={{ hadoop_master.software.installation.hadoop_home_dir }}/vm-logs state=directory
+  tags:
+    - install
    
 - name: Check if Hadoop is already downloaded
   stat: path=/tmp/{{ hadoop_master.software.installation.hadoop_tar }}
@@ -103,6 +113,12 @@
 
 - name: Clean vm directory
   shell: "rm -rf {{ hadoop_master.software.installation.hadoop_home_dir }}/vm"
+  sudo: yes
+  tags:
+  - clean
+
+- name: Clean vm directory
+  shell: "rm -rf {{ hadoop_master.software.installation.hadoop_home_dir }}/vm-logs/*"
   sudo: yes
   tags:
   - clean
