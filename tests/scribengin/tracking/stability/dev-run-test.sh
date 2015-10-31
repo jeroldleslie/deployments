@@ -33,7 +33,7 @@ chmod +x $NEVERWINTERDP_BUILD/dataflow/*/bin/*.sh
 $SHELL vm info
 
 GENERATOR_OPTS="\
-  --generator-num-of-chunk=50 --generator-num-of-message-per-chunk=100000000 --generator-num-of-writer=2 --generator-break-in-period=-1 \
+  --generator-num-of-chunk=50 --generator-num-of-message-per-chunk=100000000 --generator-num-of-writer=1 --generator-break-in-period=-1 \
   --generator-num-of-kafka-partition=8 --generator-num-of-kafka-replication=2 \
   --generator-max-wait-time=10000"
 

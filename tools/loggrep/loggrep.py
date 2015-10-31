@@ -135,7 +135,7 @@ def mastercommand(debug, logfile, threads, timeout, inventory_file):
 
 @mastercommand.command(help="Get Kafka logs")
 @click.option('--find-folder',  '-f', default="/opt/kafka/logs/", help="Folder to find logs")
-@click.option('--find-iname',   '-n', default="*.log", help="Name to look for - (find's -iname option)")
+@click.option('--find-iname',   '-n', default="*.log*", help="Name to look for - (find's -iname option)")
 @click.option('--grep-options', '-g', default="-i", help="Options for grep")
 @click.option('--grep-string',  '-s', default="exception", help="What to grep for")
 def kafka(find_folder, find_iname, grep_options, grep_string):
