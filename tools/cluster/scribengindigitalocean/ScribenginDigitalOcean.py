@@ -250,10 +250,14 @@ class ScribenginDigitalOcean():
     logging.debug("Host and Ips: "+str(hostAndIPs))
     return hostAndIPs
   
-  def writeAnsibleInventory(self, inventoryFileLocation="/tmp/scribengininventoryDO", 
+  def writeAnsibleInventory(self, inventoryFileLocation="", 
                             ansibleSshUser="neverwinterdp", ansibleSshKey="~/.ssh/id_rsa",
                             subdomain=None):
     ans = ScribenginAnsible()
+    
+    if inventoryFileLocation == "":
+      inventoryFileLocation="/tmp/scribengininventory_"+subdomain
+    
     ans.writeAnsibleInventory(self.getScribenginHostsAndIPs(subdomain),
                               inventoryFileLocation, ansibleSshUser,
                               ansibleSshKey)
