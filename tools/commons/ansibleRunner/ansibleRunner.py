@@ -1,10 +1,12 @@
-import logging, subprocess
-from os.path import abspath, dirname
+import logging, subprocess, os, sys
+from os.path import abspath, dirname, join
 from sys import path
 path.insert(0, dirname(dirname(abspath(__file__))))
 
 class ansibleRunner():
   def __init__(self):
+    self.ansiblehome=join(self.module_path(),"..","..","..","ansible")
+    os.chdir(self.ansiblehome) 
     pass
   
   ##hostsAndIps is expected to be an array of dictionaries with format -
@@ -41,7 +43,11 @@ class ansibleRunner():
              outputToStdout=True, retry=0, retryLine=None, maxRetries=5, extra_vars={},
              tags=None, limit=None, neverwinterdpHome=None):
     
-    command = "ansible-playbook "+playbook+" -i "+inventory
+    command = "ansible-playbook "+playbook
+    
+    if inventory.strip() != "":
+       command += " -i "+inventory
+       
     if neverwinterdpHome is not None:
       extra_vars["neverwinterdp_home_override"]=neverwinterdpHome
     
@@ -85,7 +91,16 @@ class ansibleRunner():
       logging.info("Retrying Ansible")
       self.deploy(playbook=playbook, inventory=inventory, neverwinterdpHome=neverwinterdpHome, outputToStdout=outputToStdout, retry=retry+1, retryLine=retryLine, extra_vars=extra_vars)
 
-
+  def we_are_frozen(self):
+      # All of the modules are built-in to the interpreter, e.g., by py2exe
+      return hasattr(sys, "frozen")
+  
+  def module_path(self):
+      encoding = sys.getfilesystemencoding()
+      if self.we_are_frozen():
+          return os.path.dirname(unicode(sys.executable, encoding))
+      return os.path.dirname(unicode(__file__, encoding))
+  
 if __name__ == "__main__":
   x = ansibleRunner()
   x.writeAnsibleInventory()

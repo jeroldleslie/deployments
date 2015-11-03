@@ -359,7 +359,7 @@ def zookeeperfailure(failure_interval, wait_before_start, servers, min_servers, 
 
 @mastercommand.command("ansible", help="commands to help with ansible")
 @click.option('--write-inventory-file',    is_flag=True,  help='')
-@click.option('--inventory-file',          default="/tmp/scribengininventoryDO",  help='')
+@click.option('--inventory-file',          default="",  help='')
 @click.option('--deploy-cluster',          is_flag=True, help='')
 @click.option('--deploy-scribengin',       is_flag=True, help='')
 @click.option('--deploy-tools',            is_flag=True, help='')
@@ -403,7 +403,7 @@ def ansible(write_inventory_file, inventory_file, deploy_cluster,
 @click.option('--update-host-file',         is_flag=True,  help='clean the container')
 @click.option('--setup-neverwinterdp-user', is_flag=True,  help='Sets up the neverwinterdp user')
 @click.option('--ansible-inventory',        is_flag=True,  help='Creates ansible inventory file')
-@click.option('--ansible-inventory-location', default="/tmp/scribengininventoryDO",  help='Where to save ansible inventory file')
+@click.option('--ansible-inventory-location', default="",  help='Where to save ansible inventory file')
 @click.option('--region',                    default="lon1",  type=click.Choice(['lon1','sgp1','nyc1','nyc2','nyc3','sfo1']), help='Region to spawn droplet in')
 @click.option('--deploy',                   is_flag=True,  help='Run ansible')
 @click.option('--destroy',                  is_flag=True,  help='destroys all scribengin containers')

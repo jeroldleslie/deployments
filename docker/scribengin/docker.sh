@@ -294,7 +294,7 @@ function ansible_inventory(){
   h1 "Creating ansible inventory file"
   ANSIBLE_USER=$(get_opt    --ansible-user    'neverwinterdp' $@)
   ANSIBLE_SSH_KEY=$(get_opt --ansible-ssh-key '~/.ssh/id_rsa' $@)
-  INVENTORY_FILE_LOCATION=$(get_opt --inventory-file-location '/tmp/scribengininventory' $@)
+  INVENTORY_FILE_LOCATION=$(get_opt --inventory-file-location '/tmp/scribengininventory_docker' $@)
   
   #list of container regex's - these must match the ansible group names
   regexList=("monitoring"
@@ -325,6 +325,8 @@ function ansible_inventory(){
   done
   echo "Writing ansible inventory file to $INVENTORY_FILE_LOCATION"
   echo -e $filecontents > $INVENTORY_FILE_LOCATION
+  echo "Writing ansible inventory file to ~/inventory"
+  echo -e $filecontents > ~/inventory
   echo -e $filecontents
 }
 

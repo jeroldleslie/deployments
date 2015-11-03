@@ -19,9 +19,15 @@ function get_opt() {
 
 SCRIPT_DIR=$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )
 ROOT=$SCRIPT_DIR/../../../..
-INVENTORY=$(get_opt --inventory '/tmp/scribengininventory' $@)
+INVENTORY=$(get_opt --inventory '' $@)
 
 clusterCommander="$ROOT/tools/cluster/clusterCommander.py"
 
+if [ ! -z "$INVENTORY" -a "$INVENTORY" != " " ]; then
+  INVENTORY_ARGS="--inventory-file $INVENTORY"
+fi
+        
+
 $ROOT/docker/scribengin/docker.sh cluster --clean-containers --run-containers 
-$clusterCommander ansible --write-inventory-file --inventory-file $INVENTORY
+$clusterCommander ansible --write-inventory-file $INVENTORY_ARGS
+

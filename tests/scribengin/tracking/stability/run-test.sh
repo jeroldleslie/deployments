@@ -41,7 +41,11 @@ serviceCommander="$ROOT/tools/serviceCommander/serviceCommander.py"
 statusCommander="$ROOT/tools/statusCommander/statusCommander.py"
 
 MONITOR_MAX_RUNTIME=$(get_opt --monitor-max-runtime '0' $@)
-INVENTORY=$(get_opt --inventory '/tmp/scribengininventory' $@)
+INVENTORY=$(get_opt --inventory '' $@)
+
+if [ ! -z "$INVENTORY" -a "$INVENTORY" != " " ]; then
+  INVENTORY_ARGS="-i $INVENTORY"
+fi
 
 JUNIT_REPORT_FILE=$(get_opt --junit-report-file '' $@)
 JUNIT_PRE_SLEEP=$(get_opt --junit-pre-sleep '0' $@)
@@ -52,13 +56,13 @@ DATAFLOW_KILL_WORKER_RANDOM=$(get_opt --dataflow-kill-worker-random 'false' $@)
 DATAFLOW_KILL_WORKER_MAX=$(get_opt --dataflow-kill-worker-max '5' $@)
 DATAFLOW_KILL_WORKER_PERIOD=$(get_opt --dataflow-kill-worker-period '60000' $@)
 
-$serviceCommander -e "scribengin" --install -i $INVENTORY
+$serviceCommander -e "scribengin" --install $INVENTORY_ARGS
 if [ $STOP_CLEAN_DISABLE == "false" ] ; then
-  $serviceCommander --cluster --force-stop --clean --configure --start --profile-type=stability -i $INVENTORY
+  $serviceCommander --cluster --force-stop --clean --configure --start --profile-type=stability $INVENTORY_ARGS
 else
-  $serviceCommander --cluster --configure --start --profile-type=stability -i $INVENTORY
+  $serviceCommander --cluster --configure --start --profile-type=stability $INVENTORY_ARGS
 fi
-$statusCommander -i $INVENTORY
+$statusCommander $INVENTORY_ARGS
 
 
 #################################################################################################################################
