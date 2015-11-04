@@ -126,23 +126,33 @@ $ndploggrep kafka
 
 ##Quick launch scribengin clusters and tests
 
-###1. Run cluster
-#####Launch Docker containers
+###1. Launch and start cluster
+- #####For Docker containers
 ```
 #./neverwinterdp-deployments/tests/scribengin/tracking/stability/setup-docker.sh
 ```
-
-or
-#####Launch digitakocean cluster
+- #####For digitalocean cluster
 ```
 #./neverwinterdp-deployments/tests/scribengin/tracking/stability/setup-cluster.sh --subdomain=test
 ```
 
-###2. Run dev test
+###2. Run scribengin test
 
 ```
-#./neverwinterdp-deployments/tests/scribengin/tracking/stability/dev-run-test.sh
+#./neverwinterdp-deployments/tests/scribengin/tracking/stability/run-test.sh
 ```
+
+
+###3. Destroy cluster after test
+- #####For Docker containers
+```
+#./neverwinterdp-deployments/docker/scribengin/docker.sh --clean-containers
+```
+- #####For digitalocean cluster
+```
+#./neverwinterdp-deployments/tools/cluster/clusterCommander.py digitalocean --destroy --subdomain test
+```
+
 
 ##NeverwinterDP Deployments Structure
 - You must have a directory structure to support Service Commander
