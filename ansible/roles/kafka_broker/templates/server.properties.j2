@@ -66,9 +66,14 @@ num.partitions={{ kafka.software.server_properties.num_partitions }}
 # This value is recommended to be increased for installations with data dirs located in RAID array.
 num.recovery.threads.per.data.dir={{ kafka.software.server_properties.num_recovery_threads_per_data_dir }}
 
-
-
+#The number of byes of messages to attempt to fetch for each partition in the fetch requests the replicas send to the leader.
 replica.fetch.max.bytes={{ kafka.software.server_properties.replica_fetch_max_bytes }}
+
+#The maximum amount of time to wait time for data to arrive on the leader in the fetch requests sent by the replicas to the leader. default = 500
+replica.fetch.wait.max.ms=1000
+
+#Number of threads used to replicate messages from leaders. Increasing this value can increase the degree of I/O parallelism in the follower broker.
+num.replica.fetchers=2
 
 message.max.bytes={{ kafka.software.server_properties.message_max_bytes }}
 
