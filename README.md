@@ -6,26 +6,152 @@ Also this project automates integration tests of scribengin. To launch scribengi
 
 All the deployment automations are build on top of ansible playbooks, so neverwinterdp deployments require ansible inventory file to run. 
 
-
-
-
-###Setup
-
-```
-user@machine: $ sudo pip install ansible tabulate click paramiko
-```
-
-
-
 ##Components 
 
-###[ansible](ansible/README.md) 
+####[ansible](ansible/README.md) 
 
-###[docker](docker/scribengin/README.md)
-###[clusterCommander](tools/cluster/README.md)
-###[serviceCommander](tools/serviceCommander/README.md)
-###[statusCommander](tools/statusCommander/README.md)
-###[clusterExec](tools/clusterExec/README.md)
+####[docker](docker/scribengin/README.md)
+####[clusterCommander](tools/cluster/README.md)
+####[serviceCommander](tools/serviceCommander/README.md)
+####[statusCommander](tools/statusCommander/README.md)
+####[clusterExec](tools/clusterExec/README.md)
+
+
+
+##Installation
+###Prerequisites
+You need to install python (Python 2.7.6 recomanded), ansible (ansible 1.9.3 recomanded) and other dependencies like tabulate, click, paramiko
+
+```
+#Install required modules
+sudo easy_install --upgrade nose==1.3.4 tabulate paramiko junit-xml click requests pip
+sudo pip install pyopenssl==0.15.1 ndg-httpsclient pyasn1 kazoo elasticsearch python-digitalocean pyyaml --upgrade
+```
+
+###Checkout locally
+
+```
+git clone https://<username>@bitbucket.org/nventdata/neverwinterdp-deployments.git
+cd neverwinterdp-deployments
+```
+
+##Usage
+
+###Service Commander
+#####Examples
+
+```
+#Assumes inventory file is at ~/inventory, or you can pass inventory file location to override ~/inventory using -i option
+#Start all cluster services
+./serviceCommander.py --cluster --start
+#Install, configure, force-stop, clean, restart cluster
+./serviceCommander.py --cluster --install --configure --force-stop --clean --start
+#Start all cluster services and also two extra services called serviceX and serviceY
+./serviceCommander.py --cluster --services serviceX,serviceY  --start
+#Install, configure, and start kafka and zookeeper
+./serviceCommander.py --services kafka,zookeeper --install --configure --start 
+#Start zookeeper
+./serviceCommander.py --services zookeeper --start
+#Start kafka and point to a non-default ansible-root-dir
+./serviceCommander.py --services kafka --start --ansible-root-dir /etc/ansible/
+```
+
+###Status Commander
+#####Examples
+
+```
+#Assumes inventory file is at ~/inventory, or you can pass inventory file location to override ~/inventory using -i option
+#Normal usage.
+./statusCommander.py
+#To change the number of threads to run at a time
+./statusCommander.py -i inventoryFile --threads 5
+#To change the amount of time on an ssh connection before timing out
+./statusCommander.py -i inventoryFile --timeout 45
+```
+
+###Cluster Exec
+#####Examples
+
+```
+#See below for sample inventory file
+#Execute command on all hosts in the hadoop_worker group.  Assumes inventory file is at ~/inventory
+./clusterExec.py -g hadoop_worker -c "ls -la"
+#Execute command on all hosts in the zookeeper group
+./clusterExec.py -g zookeeper -c "ls -la"
+#Execute command on all hosts in the kafka group, set the SSH timeout to 10 seconds, specify inventory file
+./clusterExec.py -i /tmp/scribengininventoryDO -g kafka -c "ls -la" -t 10
+#Special case: Execute command on all hosts in the inventory file
+./clusterExec.py -g cluster -c "ls -la"
+#Special case: Execute command on hosts in hadoop_worker and hadoop_master group
+./clusterExec.py -g hadoop -c "ls -la"
+```
+###Log Grep
+#####Examples
+```
+#Search kafka logs(This assumes your ansible inventory file is found at ~/inventory)
+./loggrep.py kafka
+#Search kafka and zookeeper logs, specify an inventory file
+./loggrep.py -i /tmp/scribengininventoryDO kafka zookeeper
+#Search the whole cluster's logs (kafka, zk, and hadoop)
+./loggrep.py -i /tmp/scribengininventoryDO cluster
+#Search Kafka logs for "info"
+./loggrep.py -i /tmp/scribengininventoryDO kafka -s info
+#Search Kafka logs, use custom grep options
+./loggrep.py -i /tmp/scribengininventoryDO kafka -g "-i -c"
+#Change up the search.  The following command will run on all your kafka machines:
+#find /opt/new_kafka_folder \( -iname "*.log" \) -exec grep -i -c 'searchString' {} \; -print
+./loggrep.py -i /tmp/scribengininventoryDO kafka --find-folder /opt/new_kafka_folder --find-iname "*.log" --grep-option "-i -c" --grep-string "searchString"
+#Search all cluster logs with custom search string and grep optoins
+./loggrep.py -i /tmp/scribengininventoryDO cluster -g "-i -c" -s searchString
+```
+
+##Developer Tools
+Neverwinterdp Deployment tools can be installed on any of your cluster machines using ```./serviceCommander.py --developer-tools --inventory-file $INVENTORY_FILE```
+
+Currently ```monitoring``` is the default group of hosts to install developer tools. It can be modified as your choice in ```/neverwinterdp-deployments/ansible/developer_tools.yml```
+
+###Developer Tools Usage
+Login into any one of the machine which installed developer tools ```ex: ssh monitoring-1```
+
+You can run neverwinterdp components form anywhere in the machine (ie., from any directory) using ```ndpservice, ndpstatus, ndploggrep, ndpexec```
+
+#####Examples
+```
+$ndpservice --cluster --start
+$ndpstatus -i inventoryFile
+$ndpexec -g hadoop_worker -c "ls -la"
+$ndploggrep kafka
+```
+
+
+##Quick launch scribengin clusters and tests
+
+###1. Launch and start cluster
+- #####For Docker containers
+```
+#./neverwinterdp-deployments/tests/scribengin/tracking/stability/setup-docker.sh
+```
+- #####For digitalocean cluster
+```
+#./neverwinterdp-deployments/tests/scribengin/tracking/stability/setup-cluster.sh --subdomain=test
+```
+
+###2. Run scribengin test
+
+```
+#./neverwinterdp-deployments/tests/scribengin/tracking/stability/run-test.sh
+```
+
+
+###3. Destroy cluster after test
+- #####For Docker containers
+```
+#./neverwinterdp-deployments/docker/scribengin/docker.sh --clean-containers
+```
+- #####For digitalocean cluster
+```
+#./neverwinterdp-deployments/tools/cluster/clusterCommander.py digitalocean --destroy --subdomain test
+```
 
 
 ##NeverwinterDP Deployments Structure
@@ -97,113 +223,5 @@ user@machine: $ sudo pip install ansible tabulate click paramiko
     |   `-- serviceCommander.py
     `-- statusCommander
         `-- statusCommander.py                                 
-
 ```
 
-
-##Usage
-
-###Setup neverwinterdp_home
-
-- Checkout Scribengin into neverwinterdp_home
-
-```
-git clone https://github.com/Nventdata/NeverwinterDP
-```
-
-- Set NEVERWINTERDP_HOME environment variable (optional) or you can give --neverwinterdp-home option value in the commandline arguments.
-
-```
-export NEVERWINTERDP_HOME=/your/path/to/NeverwinterDP
-```
-   
-***  
-
-###Running neverwinterdp deployments - SIMPLE STEPS
-
-```
-#Checkout neverwinterdp-deployments project 
-git clone git clone https://<bitbucket_user>@bitbucket.org/nventdata/neverwinterdp-deployments.git
-cd /path/to/neverwinterdp-deployments
-```
-####Build docker image with scribengin in one step
-```
-#Build images, launch containers, run ansible
-$cd /path/to/neverwinterdp-deployments
-$docker/scribengin/docker.sh  cluster --launch --neverwinterdp-home=/your/path/to/NeverwinterDP
-```
-
-####Build/destroy digital ocean containers with scribengin in one step
-```
-cd neverwinterdp-deployments/tools/cluster/
-
-#Create cluster
-
-
-/path/to/neverwinterdp-deployments/tools/clusterCommander/clusterCommander.py digitalocean --launch --neverwinterdp-home $NEVERWINTERDP_HOME --ansible-inventory-location $INVENTORY --create-containers /path/to/neverwinterdp-deployments/ansible/profile/stability.yml --subdomain test
-
-/path/to/neverwinterdp-deployments/tools/serviceCommander/serviceCommander.py --cluster --install --configure --clean --start -i $INVENTORY    
-  
-#Destroy cluster
-./clusterCommander.py digitalocean --destroy --subdomain test
-```
-
-####Build digital ocean container for development in one step
-```
-cd neverwinterdp-deployments/tools/cluster/
-
-#Create it
-./clusterCommander.py digitaloceandevsetup --name [name of your machine] --create
-
-#Destroy it
-./clusterCommander.py digitaloceandevsetup --name [name of your machine] --destroy
-```
-
-
-***  
-
-
-
-Running neverwinterdp deployments - DETAIL
-======
-
-####Build docker image with scribengin (explained)
-
-```
-#Clean docker image (optional)
-docker/scribengin/docker.sh cluster --clean-image
-
-#Build docker image
-
-#if env variable NEVERWINTERDP_HOME is available run 
-docker/scribengin/docker.sh cluster --build-image
-
-#if env variable NEVERWINTERDP_HOME is not available run 
-docker/scribengin/docker.sh cluster --build-image --neverwinterdp-home=/neverwinterdp/home/path
-```
-
-####Sync scribengin with all containers
-
-```
-#if env variable NEVERWINTERDP_HOME is available run 
-/path/to/neverwinterdp-deployments/tools/serviceCommander/serviceCommander.py --services "scribengin" --install -i $INVENTORY  
-
-
-#if env variable NEVERWINTERDP_HOME is not available run 
-/path/to/neverwinterdp-deployments/tools/serviceCommander/serviceCommander.py --services "scribengin" --install -i $INVENTORY --extra-vars "neverwinterdp_home_override=/neverwinterdp/home/path"
-
-```
-
-####Clean-run-deploy 
-```
-#To clean containers, run containers ,build scribengin and deploy scribengin 
-#into running containers
-#if env variable NEVERWINTERDP_HOME is available
-docker/scribengin/docker.sh cluster --clean-containers --run-containers --deploy --start-cluster
-
-#if env variable NEVERWINTERDP_HOME is not available
-docker/scribengin/docker.sh cluster --clean-containers --run-containers --deploy --start-cluster --neverwinterdp-home=/path/to/neverwinterdp_home
-```
- 
- [repository](https://bitbucket.org/nventdata/neverwinterdp-deployments)
-[documentation](https://bitbucket.org/nventdata/neverwinterdp-deployments/wiki/Home)

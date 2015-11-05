@@ -7,7 +7,7 @@ import click,logging, signal
 from socket import gethostbyaddr, inet_aton
 from sys import stdout
 from tabulate import tabulate
-from os.path import abspath, dirname, join, isfile
+from os.path import abspath, dirname, join, isfile, expanduser
 from sys import path
 from multiprocessing import Pool
 from time import sleep
@@ -127,7 +127,7 @@ def getSshOutput(ip, host, command, identifier, group, quietIfNotRunning):
 @click.option('--debug/--no-debug',      default=False, help="Turn debugging on")
 @click.option('--logfile',               default='/tmp/statuscommander.log', help="Log file to write to")
 @click.option('--timeout',         '-m', default=30, help="SSH timeout time (seconds)")
-@click.option('--inventory-file',  '-i', default='inventory', help="Ansible inventory file to use")
+@click.option('--inventory-file',  '-i', default='~/inventory', help="Ansible inventory file to use")
 @click.option('--monitor',         '-n', is_flag=True, help="Run continuously")
 @click.option('--monitor-sleep',   '-s', default=10, help="How long to sleep between checks while monitoring")
 @click.pass_context
@@ -141,8 +141,10 @@ def mastercommand(ctx, debug, logfile, timeout, inventory_file, monitor, monitor
   else:
     #Set logging file, overwrite file, set logging level to INFO
     logging.basicConfig(filename=logfile, filemode="w", level=logging.INFO)
-  
-  
+
+
+  if inventory_file == "~/inventory":
+    inventory_file=join( expanduser("~"), "inventory")
 
   #Check if inventory file exists
   if not isfile(inventory_file):

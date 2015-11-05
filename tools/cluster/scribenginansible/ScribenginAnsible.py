@@ -21,9 +21,13 @@ class ScribenginAnsible():
   
   ##hostsAndIps is expected to be an array of dictionaries with format -
   #[ {"name": host1, "ip":"1.2.3.4"}, {"name": host2, "ip":"1.2.3.5"}, ....  ]
-  def writeAnsibleInventory(self, hostsAndIps=None, inventoryFileLocation="/tmp/scribengininventoryDO", 
+  def writeAnsibleInventory(self, hostsAndIps=None, inventoryFileLocation="", 
                             ansibleSshUser="neverwinterdp", ansibleSshKey="~/.ssh/id_rsa"):
     inventory = ""
+    
+    if inventoryFileLocation.strip() == "":
+      inventoryFileLocation="/tmp/scribengininventory_docker"
+      
     groupList = ["monitoring",
                  "kafka",
                  "hadoop-master",
@@ -51,10 +55,15 @@ class ScribenginAnsible():
           else:  
             inventory += host["name"]+" ansible_ssh_user="+ansibleSshUser+" ansible_ssh_private_key_file="+ansibleSshKey+" id="+str(id)+"\n"
       
-    f = open(inventoryFileLocation,'w')
+    f = open(inventoryFileLocation,'w+')
     f.write(inventory)
     f.close()
-    logging.debug("Ansible inventory written to "+inventoryFileLocation)
+    
+    defaultInventory = open(join(expanduser("~"),"inventory"),'w+')
+    defaultInventory.write(inventory)
+    defaultInventory.close()
+    
+    logging.debug("Ansible inventory written to "+inventoryFileLocation+", ~/inventory")
     logging.info("Ansible inventory contents: \n"+inventory)
   
   def get_extra_vars_string(self,extra_vars={}):

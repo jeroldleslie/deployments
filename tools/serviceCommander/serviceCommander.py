@@ -34,7 +34,7 @@ _cluster_array     = [ "common", "elasticsearch","zookeeper", "kafka", "hadoop",
 
 @click.option('--services',        '-e', default='', help="Services to impact input as a comma separated list")
 @click.option('--subset',          '-l', default='', help="Further limit selected hosts with an additional pattern")
-@click.option('--inventory-file',  '-i', default='inventory', help="Ansible inventory file to use")
+@click.option('--inventory-file',  '-i', default='', help="Ansible inventory file to use")
 @click.option('--cluster',         '-u', is_flag=True, help="Alternative to --services option, runs for entire cluster")
 @click.option('--developer-tools', '-d', is_flag=True, help="Installs developer tools")
 
@@ -132,7 +132,7 @@ def mastercommand(debug, logfile, services, subset, inventory_file, cluster, dev
         
       logging.debug("Running playbook: "+playbook)
       logging.debug("Tags: "+tag)
-      logging.debug("Inventory: "+inventory_file)
+      logging.debug("Inventory: "+str(inventory_file))
       logging.debug("Max Retries: "+str(max_retries))
       logging.debug("Subset: "+str(subset))
       logging.debug("")
