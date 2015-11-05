@@ -4,40 +4,18 @@ SCRIPT_DIR=$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )
 
 ROOT=$SCRIPT_DIR/../../../..
 
-function get_opt() {
-  OPT_NAME=$1
-  DEFAULT_VALUE=$2
-  shift
-  
-  #Par the parameters
-  for i in "$@"; do
-    index=$(($index+1))
-    if [[ $i == $OPT_NAME* ]] ; then
-      value="${i#*=}"
-      echo "$value"
-      return
-    fi
-  done
-  echo $DEFAULT_VALUE
-}
+INVENTORY="/tmp/cluster-stability.inventory"
 
-INVENTORY=$(get_opt --inventory '' $@)
-if [ ! -z "$INVENTORY" -a "$INVENTORY" != " " ]; then
-  INVENTORY_ARGS="-i $INVENTORY"
-fi
-
-clusterCommander="$ROOT/tools/cluster/clusterCommander.py"
 serviceCommander="$ROOT/tools/serviceCommander/serviceCommander.py"
 statusCommander="$ROOT/tools/statusCommander/statusCommander.py"
 
-$serviceCommander --cluster --force-stop --clean $INVENTORY_ARGS
-if [ ! -z "$INVENTORY_ARGS" -a "$INVENTORY_ARGS" != " " ]; then
-  ansible-playbook $ROOT/ansible/yourkit.yml $INVENTORY_ARGS
-fi
+$serviceCommander -i $INVENTORY --cluster --force-stop --clean
 
-$serviceCommander -e "scribengin" --install $INVENTORY_ARGS
-$serviceCommander --cluster --configure --start --profile-type=stability $INVENTORY_ARGS
-$statusCommander $INVENTORY_ARGS
+#ansible-playbook -i $INVENTORY $ROOT/ansible/yourkit.yml
+
+$serviceCommander -i $INVENTORY -e "scribengin" --install
+$serviceCommander -i $INVENTORY --cluster --configure --start --profile-type=stability
+$statusCommander  -i $INVENTORY
 
 
 #################################################################################################################################
