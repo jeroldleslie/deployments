@@ -6,7 +6,7 @@ exec python $0 ${1+"$@"}
 import click,logging
 from sys import stdout
 from socket import inet_aton, gethostbyaddr
-from os.path import abspath, dirname, join, isfile
+from os.path import abspath, dirname, join, isfile, expanduser
 from sys import path
 from multiprocessing import Pool
 
@@ -18,7 +18,7 @@ from commons.ansibleInventoryParser.ansibleInventoryParser import ansibleInvento
 
 
 _timeout = 30
-_inventory_file = "inventory"
+_inventory_file = join( expanduser("~"), "inventory")
 
 def getMaxThreads():
   """
@@ -111,13 +111,17 @@ def buildCommandString(find_folder, find_iname, grep_options, grep_string):
 @click.option('--logfile',               default='/tmp/clusterlog.log', help="Log file to write to")
 @click.option('--threads',         '-t', default=15, help="Number of threads to run simultaneously")
 @click.option('--timeout',         '-m', default=30, help="SSH timeout time (seconds)")
-@click.option('--inventory-file',  '-i', default='inventory', help="Ansible inventory file to use. Default is ./inventory")
+@click.option('--inventory-file',  '-i', default='~/inventory', help="Ansible inventory file to use. Default is ./inventory")
 def mastercommand(debug, logfile, threads, timeout, inventory_file):
   global _timeout, _inventory_file
   _timeout = timeout
-  _inventory_file = inventory_file
-
-
+  
+  if inventory_file == "~/inventory":  
+    inventory_file=join( expanduser("~"), "inventory")
+    _inventory_file=join( expanduser("~"), "inventory")
+  else:
+    _inventory_file=inventory_file
+  
   if not isfile(inventory_file):
     logging.error(inventory_file+" is not a file!  -i option needs to point to a valid ansible inventory file")
     print inventory_file+" is not a file!  -i option needs to point to a valid ansible inventory file"
