@@ -68,7 +68,7 @@ zookeeper:
     jvm:
       ZOOKEEPER_HEAP_SIZE: 1536
     zoo_cfg:
-      tickTime: 3000
+      tickTime: 5000
       initLimit: 10
       syncLimit: 5
       maxClientCnxns: 60
