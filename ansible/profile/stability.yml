@@ -25,7 +25,7 @@ kafka:
       replica_fetch_max_bytes: 1048576
       log_segment_bytes: 400000000
       log_retention_hours: 2
-      log_retention_bytes: 1200000000
+      log_retention_bytes: 1000000000
       log_retention_check_interval_ms: 60000
       log_cleaner_enable: 'false'
       default_replication_factor: 2
@@ -96,7 +96,7 @@ hadoop_master:
       fs_default_name: hdfs://hadoop-master:9000
       hadoop_http_staticuser_user: neverwinterdp
     hdfs_site:
-      dfs_replication: 3
+      dfs_replication: 2
     yarn_site:
       yarn_resourcemanager_hostname: hadoop-master
       yarn_nodemanager_hostname: 0.0.0.0
