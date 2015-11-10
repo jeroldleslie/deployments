@@ -5,13 +5,16 @@
 #                                                                                    #
 ######################################################################################
 
-FROM centos:centos7
+FROM local/c7-systemd
 MAINTAINER Nventdata 
-RUN echo "Expose SSH port"
+ENV container docker
+
+RUN echo "Expose ports"
 EXPOSE 22 2181 9092 50070 8088 9000 9300
 
 RUN echo "Install openssh"
-RUN yum -y install openssh-server openssh-client; yum clean all
+RUN yum -y install openssh-server openssh-clients initscripts
+RUN yum clean all
 
 RUN echo "Install openssl"
 RUN yum -y install openssl
@@ -21,9 +24,12 @@ RUN yum install -y sudo
 #RUN echo "Install redhat-lsb"
 #RUN yum -y install redhat-lsb
 
+
 RUN sshd-keygen
+
 RUN echo "SSH login fix for Docker"
 RUN sed -i "s/#UsePrivilegeSeparation.*/UsePrivilegeSeparation no/g" /etc/ssh/sshd_config && sed -i "s/UsePAM.*/UsePAM no/g" /etc/ssh/sshd_config
+
 
 RUN echo "Configure root Account"
 RUN mkdir /var/run/sshd
@@ -47,7 +53,6 @@ RUN chown -R neverwinterdp:neverwinterdp /home/neverwinterdp/.ssh
 RUN chmod 700 /home/neverwinterdp/.ssh
 ADD tmp/authorized_keys /home/neverwinterdp/.ssh/authorized_keys
 RUN chmod 644 /home/neverwinterdp/.ssh/authorized_keys
-
 
 
 

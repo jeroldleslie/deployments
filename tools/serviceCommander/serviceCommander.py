@@ -25,8 +25,8 @@ _start_string      = "start"
 #When the --cluster command is passed in, these are the roles that are executed
 #The order of this array DOES MATTER.  From left to right is the order in which the 
 #  cluster will be started.  To stop/force-stop, the array will be reversed
-_cluster_array     = [ "common", "elasticsearch","zookeeper", "kafka", "hadoop", "scribengin",
-                        "kibana","ganglia" ]
+_cluster_array     = [ "common", "hadoop", "elasticsearch","zookeeper", "kafka",
+                        "kibana","ganglia", "scribengin" ]
 
 @click.command(help="Use Ansible to manage services in your cluster!\n")
 @click.option('--debug/--no-debug',      default=False, help="Turn debugging on")
@@ -46,7 +46,7 @@ _cluster_array     = [ "common", "elasticsearch","zookeeper", "kafka", "hadoop",
 @click.option('--configure',       '-c', is_flag=True, help="configure services")
 @click.option('--profile-type',         '-p', default='',   help="profile type for service configuration" )
 @click.option('--ansible-root-dir',      default=dirname(dirname(dirname(abspath(__file__))))+"/ansible", help="Root directory for Ansible")
-@click.option('--max-retries',     '-m', default=5, help="Max retries for running the playbook")
+@click.option('--max-retries',     '-m', default=0, help="Max retries for running the playbook")
 @click.option('--extra-vars',      '-v', default='', help='Extra variable for the playbook')
 def mastercommand(debug, logfile, services, subset, inventory_file, cluster, developer_tools, start, stop, force_stop, clean, install, configure, profile_type, ansible_root_dir, max_retries, extra_vars):
   if debug:

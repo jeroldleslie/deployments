@@ -7,3 +7,18 @@
     - common
     - increase_open_file_limit
     #- neverwinterdp_deployments
+
+
+#Need to run yourkit and jhiccup separately so they pick up
+#the relevant ENV variables that they're setting
+- name: yourkit
+  hosts: all
+  remote_user: neverwinterdp
+  roles:
+    - yourkit
+
+- name: jhiccup
+  hosts: all
+  remote_user: neverwinterdp
+  roles:
+    - jhiccup
