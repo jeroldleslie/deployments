@@ -48,7 +48,7 @@ if [ ! -z "$INVENTORY" -a "$INVENTORY" != " " ]; then
 fi
 
 JUNIT_REPORT_FILE=$(get_opt --junit-report-file '' $@)
-JUNIT_PRE_SLEEP=$(get_opt --junit-pre-sleep '0' $@)
+JUNIT_PRE_SLEEP=$(get_opt --junit-pre-sleep '30' $@)
 
 DATAFLOW_STORAGE=$(get_opt --dataflow-storage 'kafka' $@)
 
