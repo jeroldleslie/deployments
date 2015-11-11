@@ -3,7 +3,7 @@
 - include_vars: "../../../profile/{{ profile_type | default('default') }}.yml"
   tags: 
     [ configure, install, start, stop, force-stop ]
-  when: ansible_virtualization_type != 'docker'
+  #when: ansible_virtualization_type != 'docker'
 
 - name: Profile type
   local_action: debug msg="{{ profile_type | default('default') }}"
@@ -16,7 +16,7 @@
   when: ansible_distribution == 'CentOS' or ansible_distribution == 'Red Hat Enterprise Linux'
   tags:
     - install
-  when: ansible_virtualization_type != 'docker'
+  #when: ansible_virtualization_type != 'docker'
   
 - name: Install Ganglia
   sudo: yes
@@ -26,28 +26,28 @@
     - ganglia-gmetad
     - ganglia-gmond
     - ganglia-web
-  when: ansible_virtualization_type != 'docker'
+  #when: ansible_virtualization_type != 'docker'
   tags:
     - install
 
 - name: Configure gmetad
   sudo: yes
   lineinfile: dest=/etc/ganglia/gmetad.conf state=present line='data_source "{{ monitoring.software.installation.cluster }}" 60 {{ monitoring.software.installation.ganglia_url }}'
-  when: ansible_virtualization_type != 'docker'
+  #when: ansible_virtualization_type != 'docker'
   tags:
     [ install, configure ]
 
 - name: Configure httpd
   sudo: yes
   lineinfile: dest=/etc/httpd/conf/httpd.conf line="<Directory \"/usr/share/ganglia\">\n    Options Indexes FollowSymLinks\n    AllowOverride None\n    Require all granted\n</Directory>\n"
-  when: ansible_virtualization_type != 'docker'
+  #when: ansible_virtualization_type != 'docker'
   tags:
     [ install, configure ]
   
 - name: Add alias to httpd ganglia.conf 
   sudo: yes
   shell: echo "Alias /ganglia /usr/share/ganglia" > /etc/httpd/conf.d/ganglia.conf 
-  when: ansible_virtualization_type != 'docker'
+  #when: ansible_virtualization_type != 'docker'
   tags:
     [ install, configure ]
 
@@ -60,7 +60,7 @@
     - gmetad
     - httpd
   ignore_errors: yes
-  when: ansible_virtualization_type != 'docker'
+  #when: ansible_virtualization_type != 'docker'
   tags:
     - force-stop
 
@@ -73,7 +73,7 @@
     - gmond
     - gmetad
     - httpd
-  when: ansible_virtualization_type != 'docker'
+  #when: ansible_virtualization_type != 'docker'
   tags:
     - stop
 
@@ -89,24 +89,24 @@
   tags:
     - start 
  
-#- name: Start gmond manually
-#  shell: "/usr/sbin/gmond"
-#  sudo: yes
-#  when: ansible_virtualization_type == 'docker'
-#  tags:
-#    - start    
+- name: Start gmond manually
+  shell: "/usr/sbin/gmond"
+  sudo: yes
+  when: ansible_virtualization_type == 'docker'
+  tags:
+    - start    
   
-#- name: Start gmetad manually
-#  shell: "/usr/sbin/gmetad"
-#  sudo: yes
-#  when: ansible_virtualization_type == 'docker'
-#  tags:
-#    - start    
+- name: Start gmetad manually
+  shell: "/usr/sbin/gmetad"
+  sudo: yes
+  when: ansible_virtualization_type == 'docker'
+  tags:
+    - start    
   
-#- name: Start httpd manually
-#  shell: "/usr/sbin/httpd"
-#  sudo: yes
-#  when: ansible_virtualization_type == 'docker'
-#  tags:
-#    - start    
+- name: Start httpd manually
+  shell: "/usr/sbin/httpd"
+  sudo: yes
+  when: ansible_virtualization_type == 'docker'
+  tags:
+    - start    
   

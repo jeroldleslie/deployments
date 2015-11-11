@@ -1,0 +1,20 @@
+modules {
+  module {
+    name = "hiccup_catcher"
+    language = "python"
+
+    #param username {
+    #  value = "{{ monitoring.software.installation.user  }}"
+    #}
+  }
+}
+
+collection_group {
+  collect_every = 60
+  time_threshold = 90
+  metric {
+    name = "hiccup_catcher"
+    title = "Catch system hiccups"
+    value_threshold = 100000
+  }
+}
