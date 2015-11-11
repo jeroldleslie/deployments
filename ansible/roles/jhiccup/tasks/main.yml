@@ -1,0 +1,75 @@
+- name: Create jHiccup directory
+  file: path=/opt/jHiccup state=directory
+  tags:
+    - install
+
+- name: Create jHiccup logs directory
+  file: path=/opt/jHiccup/logs state=directory
+  tags:
+    - install
+
+- name: Create jHiccup env script file
+  sudo: yes
+  file: path=/etc/profile.d/env.sh state=touch mode=0755
+  tags:
+    - install
+
+- name: download jHiccup tar
+  synchronize: src=jHiccup.tar.gz dest=/tmp/jHiccup.tar.gz
+  tags:
+    - install
+
+- name: Decompress jHiccup tar
+  command: tar zxvf /tmp/jHiccup.tar.gz -C /opt/jHiccup --strip-components=1
+  tags:
+    - install
+
+
+
+- name: set Kafka Java options
+  sudo: yes
+  lineinfile: dest=/etc/profile.d/env.sh regexp="export\s*KAFKA_OPTS" line="export KAFKA_OPTS=\"{{ ansible_env.KAFKA_OPTS | default('') }} -javaagent:/opt/jHiccup/jHiccup.jar=-d,10000,-i,5000,-l,/opt/kafka/logs/kafka.hlog \"" state=present
+  tags:
+    - install
+
+- name: set Zookeeper Java options
+  sudo: yes
+  lineinfile: dest=/etc/profile.d/env.sh regexp="export\s*JVMFLAGS" line="export JVMFLAGS=\"{{ ansible_env.JVMFLAGS | default('') }} -javaagent:/opt/jHiccup/jHiccup.jar=-d,10000,-i,5000,-l,/opt/zookeeper/logs/zookeeper.hlog \"" state=present
+  tags:
+    - install
+
+
+- name: set Hadoop Datanode Java options
+  sudo: yes
+  lineinfile: dest=/etc/profile.d/env.sh regexp="export\s*HADOOP_DATANODE_OPTS" line="export HADOOP_DATANODE_OPTS=\"{{ ansible_env.HADOOP_DATANODE_OPTS | default('') }} -javaagent:/opt/jHiccup/jHiccup.jar=-d,10000,-i,5000,-l,/opt/hadoop/logs/datanode.hlog \"" state=present
+  tags:
+    - install
+
+- name: set Hadoop NameNode Java options
+  sudo: yes
+  lineinfile: dest=/etc/profile.d/env.sh regexp="export\s*HADOOP_NAMENODE_OPTS" line="export HADOOP_NAMENODE_OPTS=\"{{ ansible_env.HADOOP_NAMENODE_OPTS | default('') }} -javaagent:/opt/jHiccup/jHiccup.jar=-d,10000,-i,5000,-l,/opt/hadoop/logs/namenode.hlog \"" state=present
+  tags:
+    - install
+
+- name: set Hadoop SecondaryNameNode Java options
+  sudo: yes
+  lineinfile: dest=/etc/profile.d/env.sh regexp="export\s*HADOOP_SECONDARYNAMENODE_OPTS" line="export HADOOP_SECONDARYNAMENODE_OPTS=\"{{ ansible_env.HADOOP_SECONDARYNAMENODE_OPTS | default('') }} -javaagent:/opt/jHiccup/jHiccup.jar=-d,10000,-i,5000,-l,/opt/hadoop/logs/secondarynamenode.hlog \"" state=present
+  tags:
+    - install
+
+
+- name: set YARN NodeManager Java options
+  sudo: yes
+  lineinfile: dest=/etc/profile.d/env.sh regexp="export\s*YARN_NODEMANAGER_OPTS" line="export YARN_NODEMANAGER_OPTS=\"{{ ansible_env.YARN_NODEMANAGER_OPTS | default('') }} -javaagent:/opt/jHiccup/jHiccup.jar=-d,10000,-i,5000,-l,/opt/hadoop/logs/nodemanager.hlog \"" state=present
+  tags:
+    - install
+
+- name: set YARN ResourceManager Java options
+  sudo: yes
+  lineinfile: dest=/etc/profile.d/env.sh regexp="export\s*YARN_RESOURCEMANAGER_OPTS" line="export YARN_RESOURCEMANAGER_OPTS=\"{{ ansible_env.YARN_RESOURCEMANAGER_OPTS | default('') }} -javaagent:/opt/jHiccup/jHiccup.jar=-d,10000,-i,5000,-l,/opt/hadoop/logs/resourcemanager.hlog \"" state=present
+  tags:
+    - install
+
+
+
+

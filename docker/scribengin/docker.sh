@@ -52,7 +52,12 @@ function all_container_ids() {
 function ip_route() {
   if [[ $OSTYPE == *"darwin"* ]] ; then
     h1 "Updating route for OSX"
-    sudo route -n add 172.17.0.0/16 `boot2docker ip`
+    if [ -f /usr/local/bin/boot2docker ]; then
+       HOST_IP=$(boot2docker ip)
+    else
+       HOST_IP=$(docker-machine ip default)
+    fi
+    sudo route -n add 172.17.0.0/16 $HOST_IP
   fi
 }
 
@@ -151,6 +156,11 @@ function build_images() {
   
   mkdir $DOCKERSCRIBEDIR/tmp
   cp ~/.ssh/id_rsa.pub $DOCKERSCRIBEDIR/tmp/authorized_keys
+
+  #Build the systemd image first
+  docker build --rm -t local/c7-systemd $DOCKERSCRIBEDIR/systemd/
+
+  #Build the scribengin image next
   docker build -t $OS_TYPE:scribengin $DOCKERSCRIBEDIR
 
 
@@ -159,6 +169,7 @@ function build_images() {
   SCRIPT_DIR=$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )
   TMP_INVENTORY=/tmp/commoninventory
   echo $(docker inspect -f "{{ .NetworkSettings.IPAddress }}" scribengincommon) > $TMP_INVENTORY
+  ip_route
   $SCRIPT_DIR/../../tools/serviceCommander/serviceCommander.py -e "common" --install -i $TMP_INVENTORY
   containerID=$(docker ps -a | grep scribengincommon | awk '{print $1}')
   docker commit $containerID $OS_TYPE:scribengin
@@ -333,11 +344,12 @@ function ansible_inventory(){
 function deploy_all(){
   NEVERWINTERDP_HOME_OVERRIDE=$(get_opt --neverwinterdp-home '' $@)
   SCRIPT_DIR=$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )
+  PROFILE_TYPE=$(get_opt --profile-type 'stability' $@)
   
   if [[ $NEVERWINTERDP_HOME_OVERRIDE == "" ]] ; then
-    $SCRIPT_DIR/../../tools/serviceCommander/serviceCommander.py --cluster --install --configure --clean -i $INVENTORY_FILE_LOCATION
+    $SCRIPT_DIR/../../tools/serviceCommander/serviceCommander.py --services "elasticsearch,zookeeper,kafka,hadoop,kibana,ganglia"  --install --configure --clean -i $INVENTORY_FILE_LOCATION --profile-type $PROFILE_TYPE
   else
-    $SCRIPT_DIR/../../tools/serviceCommander/serviceCommander.py --cluster --install --configure --clean -i $INVENTORY_FILE_LOCATION --extra-vars "neverwinterdp_home_override=$NEVERWINTERDP_HOME_OVERRIDE"
+    $SCRIPT_DIR/../../tools/serviceCommander/serviceCommander.py --services "elasticsearch,zookeeper,kafka,hadoop,kibana,ganglia" --install --configure --clean -i $INVENTORY_FILE_LOCATION --extra-vars "neverwinterdp_home_override=$NEVERWINTERDP_HOME_OVERRIDE" --profile-type $PROFILE_TYPE
   fi
 }
 
@@ -360,6 +372,8 @@ function cluster(){
   #DEPLOY_KIBANA=$(has_opt "--deploy-kibana" $@)
   INVENTORY_FILE_LOCATION=$(get_opt --inventory-file-location '/tmp/scribengininventory' $@)
   NEVERWINTERDP_HOME_OVERRIDE=$(get_opt --neverwinterdp-home '' $@)
+  PROFILE_TYPE=$(get_opt --profile-type 'stability' $@)
+
   
   if [ $CLEAN_CONTAINERS == "true" ] || [ $LAUNCH == "true" ] ; then
     clean_containers $@
@@ -390,30 +404,32 @@ function cluster(){
   
   if [ $DEPLOY_SCRIBENGIN == "true" ] || [ $LAUNCH == "true" ] ; then
     if [[ $NEVERWINTERDP_HOME_OVERRIDE == "" ]] ; then
-      $SCRIPT_DIR/../../tools/serviceCommander/serviceCommander.py -e "scribengin" --install -i $INVENTORY_FILE_LOCATION
+      $SCRIPT_DIR/../../tools/serviceCommander/serviceCommander.py -e "scribengin" --install -i $INVENTORY_FILE_LOCATION --profile-type $PROFILE_TYPE
     else
-      $SCRIPT_DIR/../../tools/serviceCommander/serviceCommander.py -e "scribengin" --install -i $INVENTORY_FILE_LOCATION --extra-vars "neverwinterdp_home_override=$NEVERWINTERDP_HOME_OVERRIDE"
+      $SCRIPT_DIR/../../tools/serviceCommander/serviceCommander.py -e "scribengin" --install -i $INVENTORY_FILE_LOCATION --extra-vars "neverwinterdp_home_override=$NEVERWINTERDP_HOME_OVERRIDE" --profile-type $PROFILE_TYPE
     fi
   fi  
   
   if [ $DEPLOY_TOOLS == "true" ] || [ $LAUNCH == "true" ] ; then
-    $SCRIPT_DIR/../../tools/serviceCommander/serviceCommander.py -e "neverwinterdp_deployments" --install -i $INVENTORY_FILE_LOCATION
+    $SCRIPT_DIR/../../tools/serviceCommander/serviceCommander.py -e "neverwinterdp_deployments" --install -i $INVENTORY_FILE_LOCATION --profile-type $PROFILE_TYPE
+    $SCRIPT_DIR/../../tools/serviceCommander/serviceCommander.py -e "gradle" --install -i $INVENTORY_FILE_LOCATION --profile-type $PROFILE_TYPE
+    $SCRIPT_DIR/../../tools/serviceCommander/serviceCommander.py -e "ansible" --install -i $INVENTORY_FILE_LOCATION --profile-type $PROFILE_TYPE
   fi
   
   if [ $STOP_CLUSTER == "true" ] ; then
-    $SCRIPT_DIR/../../tools/serviceCommander/serviceCommander.py --cluster --stop -i $INVENTORY_FILE_LOCATION
+    $SCRIPT_DIR/../../tools/serviceCommander/serviceCommander.py --cluster --stop -i $INVENTORY_FILE_LOCATION --profile-type $PROFILE_TYPE
   fi
   
   if [ $FORCE_STOP_CLUSTER == "true" ] ; then
-    $SCRIPT_DIR/../../tools/serviceCommander/serviceCommander.py --cluster --force-stop -i $INVENTORY_FILE_LOCATION
+    $SCRIPT_DIR/../../tools/serviceCommander/serviceCommander.py --cluster --force-stop -i $INVENTORY_FILE_LOCATION --profile-type $PROFILE_TYPE
   fi
   
   if [ $CLEAN_CLUSTER == "true" ] || [ $LAUNCH == "true" ] ; then
-    $SCRIPT_DIR/../../tools/serviceCommander/serviceCommander.py --cluster --clean -i $INVENTORY_FILE_LOCATION
+    $SCRIPT_DIR/../../tools/serviceCommander/serviceCommander.py --cluster --clean -i $INVENTORY_FILE_LOCATION --profile-type $PROFILE_TYPE
   fi
   
   if [ $START == "true" ] || [ $LAUNCH == "true" ] ; then
-    $SCRIPT_DIR/../../tools/serviceCommander/serviceCommander.py --cluster --configure --start -i $INVENTORY_FILE_LOCATION
+    $SCRIPT_DIR/../../tools/serviceCommander/serviceCommander.py --cluster --configure --start -i $INVENTORY_FILE_LOCATION --profile-type $PROFILE_TYPE
   fi
 }
 
@@ -477,8 +493,13 @@ if [[ "$OS" == 'Linux' ]]; then
 elif [[ "$OS" == 'FreeBSD' ]]; then
    platform='freebsd'
 elif [[ "$OS" == 'Darwin' ]]; then
-   platform='macos'
-   HOST_IP=$(boot2docker ip)
+  eval "$(docker-machine env default)"
+  platform='macos'
+  if [ -f /usr/local/bin/boot2docker ]; then
+    HOST_IP=$(boot2docker ip)
+  else
+    HOST_IP=$(docker-machine ip default)
+  fi
 fi
 
 BIN_DIR=`dirname "$0"`

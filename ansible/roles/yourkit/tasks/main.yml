@@ -1,28 +1,32 @@
 - name: Create yourkit directory
   file: path=/opt/yourkit state=directory
+  tags:
+    - install
 
-- name: Create yourkit env script file
+- name: Create env script file
   sudo: yes
-  file: path=/etc/profile.d/yourkit.sh state=touch mode=0755
+  file: path=/etc/profile.d/env.sh state=touch mode=0755
+  tags:
+    - install
 
 - name: download yourkit tar
   get_url: url={{ yourkit_url }} dest=/tmp/yourkit.tar.bz2
+  tags:
+    - install
 
 - name: Decompress yourkit tar
   command: tar xfj /tmp/yourkit.tar.bz2 -C /opt/yourkit --strip-components=1
+  tags:
+    - install
 
-- name: set KAFKA_OPTS (Kafka)
-  sudo: yes
-  lineinfile: dest=/etc/profile.d/yourkit.sh  line="export KAFKA_OPTS=\"{{ ansible_env.KAFKA_OPTS | default('') }} -agentpath:/opt/yourkit/bin/linux-x86-64/libyjpagent.so=disablestacktelemetry,disableexceptiontelemetry,delay=10000 \"" state=present
 
-- name: set JVMFLAGS (Zookeeper)
+- name: set Java options
   sudo: yes
-  lineinfile: dest=/etc/profile.d/yourkit.sh line="export JVMFLAGS=\"{{ ansible_env.JVMFLAGS | default('') }} -agentpath:/opt/yourkit/bin/linux-x86-64/libyjpagent.so=disablestacktelemetry,disableexceptiontelemetry,delay=10000 \"" state=present
-
-- name: set YARN_OPTS (YARN)
-  sudo: yes
-  lineinfile: dest=/etc/profile.d/yourkit.sh line="export YARN_OPTS=\"{{ ansible_env.YARN_OPTS | default('') }} -agentpath:/opt/yourkit/bin/linux-x86-64/libyjpagent.so=disablestacktelemetry,disableexceptiontelemetry,delay=10000 \""  state=present
-
-- name: set HADOOP_OPTS (HDFS)
-  sudo: yes
-  lineinfile: dest=/etc/profile.d/yourkit.sh line="export HADOOP_OPTS=\"{{ ansible_env.HADOOP_OPTS | default('') }} -agentpath:/opt/yourkit/bin/linux-x86-64/libyjpagent.so=disablestacktelemetry,disableexceptiontelemetry,delay=10000 \""  state=present
+  lineinfile: dest=/etc/profile.d/env.sh  line="export {{ item }}=\"{{ ansible_env[  item ] | default('') }} -agentpath:/opt/yourkit/bin/linux-x86-64/libyjpagent.so=disablestacktelemetry,disableexceptiontelemetry,delay=10000 \"" state=present
+  with_items:
+    - KAFKA_OPTS
+    - JVMFLAGS
+    - YARN_OPTS
+    - HADOOP_OPTS
+  tags:
+    - install
