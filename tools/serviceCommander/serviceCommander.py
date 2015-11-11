@@ -129,10 +129,11 @@ def mastercommand(debug, logfile, services, subset, inventory_file, cluster, dev
 
     #Loop through each service/playbook
     for playbook in services :
+      if ( playbook == "scribengin" ) and ( tag == _start_string) and scribengin_pre_start_sleep > 0:
+        sleep(scribengin_pre_start_sleep)
+      
       if ( playbook == "scribengin" ) and ( tag == _force_stop_string or tag == _stop_string ):
         playbook = join(ansible_root_dir, playbook)+"_kill.yml"
-      elif ( playbook == "scribengin" ) and ( tag == _start_string) and scribengin_pre_start_sleep > 0:
-        sleep(scribengin_pre_start_sleep)
       else:
         playbook = join(ansible_root_dir, playbook)+".yml"
         
