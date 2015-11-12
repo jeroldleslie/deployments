@@ -6,6 +6,7 @@
   roles:
     - common
     - increase_open_file_limit
+    - ntp
     #- neverwinterdp_deployments
 
 
