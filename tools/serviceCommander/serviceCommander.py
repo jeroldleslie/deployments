@@ -8,6 +8,7 @@ from sys import stdout
 
 from os.path import abspath, dirname, join
 from sys import path
+from time import sleep
               
 #Make sure the commons package is on the path correctly
 path.insert(0, dirname(dirname(abspath(__file__))))
@@ -48,7 +49,10 @@ _cluster_array     = [ "common", "hadoop", "elasticsearch","zookeeper", "kafka",
 @click.option('--ansible-root-dir',      default=dirname(dirname(dirname(abspath(__file__))))+"/ansible", help="Root directory for Ansible")
 @click.option('--max-retries',     '-m', default=0, help="Max retries for running the playbook")
 @click.option('--extra-vars',      '-v', default='', help='Extra variable for the playbook')
-def mastercommand(debug, logfile, services, subset, inventory_file, cluster, developer_tools, start, stop, force_stop, clean, install, configure, profile_type, ansible_root_dir, max_retries, extra_vars):
+@click.option('--scribengin-pre-start-sleep', default=0, help='Time to sleep before starting Scribengin (give the cluster time to come up)')
+def mastercommand(debug, logfile, services, subset, inventory_file, cluster, developer_tools, 
+                start, stop, force_stop, clean, install, configure, profile_type, 
+                ansible_root_dir, max_retries, extra_vars, scribengin_pre_start_sleep):
   if debug:
     #Set logging file, overwrite file, set logging level to DEBUG
     logging.basicConfig(filename=logfile, filemode="w", level=logging.DEBUG)
@@ -125,6 +129,9 @@ def mastercommand(debug, logfile, services, subset, inventory_file, cluster, dev
 
     #Loop through each service/playbook
     for playbook in services :
+      if ( playbook == "scribengin" ) and ( tag == _start_string) and scribengin_pre_start_sleep > 0:
+        sleep(scribengin_pre_start_sleep)
+      
       if ( playbook == "scribengin" ) and ( tag == _force_stop_string or tag == _stop_string ):
         playbook = join(ansible_root_dir, playbook)+"_kill.yml"
       else:

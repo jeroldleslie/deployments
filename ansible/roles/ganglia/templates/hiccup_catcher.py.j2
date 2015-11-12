@@ -1,0 +1,57 @@
+#Instructions on how to write a ganglia module
+#https://github.com/ganglia/monitor-core/wiki/Ganglia-GMond-Python-Modules
+
+import time
+
+#set default username, should get passed in by lsof_counter.pyconf
+#username = 'neverwinterdp'
+
+def hiccup_handler(name):
+  prevTime=-1
+  currTime = int(time.time()*1000)
+  try:
+    f = open("/tmp/hiccup_catcher", "r")
+    prevTime = int(f.readline())
+    f.close()
+  except:
+    pass
+
+  f = open("/tmp/hiccup_catcher", "w+")
+  f.write(str(currTime))
+  f.close()
+  result=currTime-prevTime
+  if prevTime == -1:
+    return int(0)
+  
+  return int(result)
+
+def metric_init(params):
+    """
+    Iniitalize metrics
+    """
+
+
+    d1 = {'name': 'hiccup_catcher',
+        'call_back': hiccup_handler,
+        'time_max': 90,
+        'value_type': 'uint',
+        'units': 'num',
+        'slope': 'both',
+        'format': '%u',
+        'description': 'Time since last test - catch hiccups',
+        'groups': 'hiccups'}
+
+    descriptors = [d1]
+
+    return descriptors
+
+def metric_cleanup():
+    '''Clean up the metric module.'''
+    pass
+
+#This code is for debugging and unit testing
+if __name__ == '__main__':
+    metric_init({})
+    for d in descriptors:
+        v = d['call_back'](d['name'])
+        print 'value for %s is %u' % (d['name'],  v)

@@ -373,6 +373,7 @@ function cluster(){
   INVENTORY_FILE_LOCATION=$(get_opt --inventory-file-location '/tmp/scribengininventory' $@)
   NEVERWINTERDP_HOME_OVERRIDE=$(get_opt --neverwinterdp-home '' $@)
   PROFILE_TYPE=$(get_opt --profile-type 'stability' $@)
+  SCRIBENGIN_PRE_START_SLEEP=$(get_opt --scribengin-pre-start-sleep '30' $@)
 
   
   if [ $CLEAN_CONTAINERS == "true" ] || [ $LAUNCH == "true" ] ; then
@@ -429,7 +430,7 @@ function cluster(){
   fi
   
   if [ $START == "true" ] || [ $LAUNCH == "true" ] ; then
-    $SCRIPT_DIR/../../tools/serviceCommander/serviceCommander.py --cluster --configure --start -i $INVENTORY_FILE_LOCATION --profile-type $PROFILE_TYPE
+    $SCRIPT_DIR/../../tools/serviceCommander/serviceCommander.py --cluster --configure --start -i $INVENTORY_FILE_LOCATION --profile-type $PROFILE_TYPE --scribengin-pre-start-sleep $SCRIBENGIN_PRE_START_SLEEP
   fi
 }
 
