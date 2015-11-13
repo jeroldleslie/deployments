@@ -89,7 +89,12 @@ class ansibleRunner():
     if(toRetry and retry < maxRetries):
       print "Retrying Ansible"
       logging.info("Retrying Ansible")
-      self.deploy(playbook=playbook, inventory=inventory, neverwinterdpHome=neverwinterdpHome, outputToStdout=outputToStdout, retry=retry+1, retryLine=retryLine, extra_vars=extra_vars)
+      self.deploy(playbook=playbook, inventory=inventory, neverwinterdpHome=neverwinterdpHome, 
+        outputToStdout=outputToStdout, retry=retry+1, retryLine=retryLine, extra_vars=extra_vars, 
+        tags=tags, maxRetries=maxRetries)
+    elif(toRetry and retry >= maxRetries):
+      import sys
+      sys.exit(-1)
 
   def we_are_frozen(self):
       # All of the modules are built-in to the interpreter, e.g., by py2exe
@@ -103,7 +108,8 @@ class ansibleRunner():
   
 if __name__ == "__main__":
   x = ansibleRunner()
-  x.writeAnsibleInventory()
+
+  x.writeAnsibleInventory(inventoryFileLocation="/tmp/scribengininventory_docker")
   
   
   
