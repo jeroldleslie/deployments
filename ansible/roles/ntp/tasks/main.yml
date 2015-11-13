@@ -1,0 +1,38 @@
+#http://www.tecmint.com/install-ntp-server-in-centos/
+
+- include_vars: "../../../profile/{{ profile_type | default('default') }}.yml"
+  tags: 
+    [ configure, install, clean, start, stop, force-stop ]
+
+- name: Profile type
+  local_action: debug msg="{{ profile_type | default('default') }}"
+  run_once: true
+  tags: [ configure, install, clean, start, stop, force-stop ]
+
+- name: install ntp
+  yum: name='ntp' state=installed
+  sudo: yes
+  tags:
+    - install
+  
+
+- name: Rendering ntp conf
+  template: src=ntp.conf.j2 dest=/etc/ntp.conf
+  sudo: yes
+  tags:
+    - install
+
+
+- name: Start NTP service 
+  service: name=ntpd state=started enabled=yes
+  sudo: true
+  when: ansible_virtualization_type != 'docker'
+  tags:
+    - install
+
+- name: Start NTP service (Docker)
+  shell: /usr/sbin/ntpd
+  sudo: true
+  when: ansible_virtualization_type == 'docker'
+  tags:
+    - install
