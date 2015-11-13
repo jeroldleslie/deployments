@@ -148,7 +148,7 @@ monitoring:
 
 common:
   increase_open_file_limit:
-    num_open_files: 32000
+    num_open_files: 4092
     ndp_user: neverwinterdp
     limits_file: /etc/security/limits.conf
   ntp:
