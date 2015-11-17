@@ -3,7 +3,7 @@
 exec python $0 ${1+"$@"}
 """
 
-import click, logging, multiprocessing, signal, os
+import click, logging, multiprocessing, signal, os, subprocess
 from digitalocean import Droplet
 from sys import stdout, exit
 from time import sleep
@@ -462,8 +462,7 @@ def digitalocean(launch, create_containers, update_local_host_file, update_host_
     click.echo("Destroying Scribengin droplets")
     digitalOcean.destroyAllScribenginDroplets(subdomain)
 
-  
-@mastercommand.command("digitaloceandevsetup", help="commands to help launch a developer box in digital ocean")
+@mastercommand.command("digitaloceandevsetupubuntu", help="commands to help launch a developer box in digital ocean")
 @click.option('--name',     required=True,  help='Name of droplet to create or destroy')
 @click.option('--size',     default="16gb",  type=click.Choice(['512mb', '1gb', '2gb', '4gb', '8gb', '16gb', '32gb', '48gb', '64gb']),  help='Size of machine to spawn')
 @click.option('--region',   default="lon1",  type=click.Choice(['lon1','sgp1','nyc1','nyc2','nyc3','sfo1']), help='Region to spawn droplet in')
@@ -477,7 +476,7 @@ def digitalocean(launch, create_containers, update_local_host_file, update_host_
 @click.option('--sshKeyPath',    default='~/.ssh/id_rsa', help='path to private key')
 @click.option('--sshKeyPathPublic',    default='~/.ssh/id_rsa.pub', help='path to public key')
 @click.option('--awsCredentialFile',    default='~/.aws/credentials', help='path to AWS credentials file')
-def digitaloceandevsetup(name, size, region, image, private_networking, create, destroy, branch,
+def digitaloceandevsetupubuntu(name, size, region, image, private_networking, create, destroy, branch,
                          digitaloceantoken, digitaloceantokenfile, sshkeypath, sshkeypathpublic, awscredentialfile):
   #Python can't properly interpret the ~/ directive, so fix file paths
   if "~/" in sshkeypath:
@@ -540,6 +539,143 @@ def digitaloceandevsetup(name, size, region, image, private_networking, create, 
     sshHandle.sshExecute("echo -e \"StrictHostKeyChecking no\\n\" >> ~/.ssh/config")
     sshHandle.sshExecute("git clone git@bitbucket.org:nventdata/neverwinterdp-deployments.git")
     
+    print "Your droplet "+name+" is ready at 'ssh neverwinterdp@"+digitalOcean.getDropletIp(droplet.name)+"'"
+  
+  if destroy:
+    import re
+    doNotDestroy = [ re.compile('.*jenkins.*'),
+                    re.compile('.*crucible.*'), ]
+    
+    if any(regex.match(name) for regex in doNotDestroy):
+      click.echo(name+" matches a machine that will not be destroyed.  Returning")
+      return
+    
+    click.echo("Are you SURE you wish to destroy "+name+"? (yes/no) ", nl=False)
+    yes = set(['yes','y', 'ye'])
+    no = set(['no','n'])
+    
+    choice = raw_input().lower()
+    if choice in yes:
+       digitalOcean.destroyDropletAndWait(digitalOcean.getDroplet(name))
+    elif choice in no:
+       click.echo("Skipping destruction")
+    else:
+       click.echo("Please respond with 'yes' or 'no'.  Returning.")
+
+@mastercommand.command("digitaloceandevsetupcentos", help="commands to help launch a developer box in digital ocean")
+@click.option('--name',     required=True,  help='Name of droplet to create or destroy')
+@click.option('--size',     default="16gb",  type=click.Choice(['512mb', '1gb', '2gb', '4gb', '8gb', '16gb', '32gb', '48gb', '64gb']),  help='Size of machine to spawn')
+@click.option('--region',   default="lon1",  type=click.Choice(['lon1','sgp1','nyc1','nyc2','nyc3','sfo1']), help='Region to spawn droplet in')
+@click.option('--image',   default="centos-7-0-x64",  help='Which image to launch from (Choose a centos image)')
+@click.option('--private-networking',   default="true",  type=click.Choice(["true","false"]),help='Whether to turn on private networking')
+@click.option('--create',  is_flag=True,    help='Create image')
+@click.option('--destroy',  is_flag=True,    help='Destroy image')
+@click.option('--branch',        default="dev/master",  help='Branch of NeverwinterDP to check out')
+@click.option('--digitaloceantoken',        default=None,  help='digital ocean token in plain text')
+@click.option('--digitaloceantokenfile',    default='~/.digitaloceantoken', help='digital ocean token file location')
+@click.option('--sshKeyPath',    default='~/.ssh/id_rsa', help='path to private key')
+@click.option('--sshKeyPathPublic',    default='~/.ssh/id_rsa.pub', help='path to public key')
+@click.option('--awsCredentialFile',    default='~/.aws/credentials', help='path to AWS credentials file')
+def digitaloceandevsetupcentos(name, size, region, image, private_networking, create, destroy, branch,
+                         digitaloceantoken, digitaloceantokenfile, sshkeypath, sshkeypathpublic, awscredentialfile):
+  #Python can't properly interpret the ~/ directive, so fix file paths
+  if "~/" in sshkeypath:
+      sshkeypath = join( expanduser("~"), sshkeypath.replace("~/",""))
+  if "~/" in sshkeypathpublic:
+      sshkeypathpublic = join( expanduser("~"), sshkeypathpublic.replace("~/",""))
+  if "~/" in awscredentialfile:
+      awscredentialfile = join( expanduser("~"), awscredentialfile.replace("~/",""))
+  
+  
+  digitalOcean = ScribenginDigitalOcean(digitalOceanToken=digitaloceantoken, digitalOceanTokenFileLocation=digitaloceantokenfile)
+  
+  droplet = Droplet(token=digitalOcean.token,
+                    name=name,
+                    region=region,
+                    image=image,
+                    size_slug=size,
+                    backups=False,
+                    ssh_keys=digitalOcean.defaultDropletConfig["ssh_keys"],
+                    private_networking=private_networking,)
+  if create:
+    digitalOcean.createAndWait(droplet)
+
+    print "Setting up neverwinterdp user"
+    sshHandle = digitalOcean.setupNeverwinterdpUser(serverName=name)
+
+
+    print "Remove sudo tty requirement"
+    sshHandle.sshExecute("sed -i '/Defaults\s*requiretty/d' /etc/sudoers", "root")
+    sshHandle.sshExecute("sed -i '/Defaults\s!visiblepw/d' /etc/sudoers ", "root")
+
+
+    print "Setting up keys"
+    with open (sshkeypath, "r") as myfile:
+      privateKeyContent = myfile.read()
+    with open (sshkeypathpublic, "r") as myfile:
+      publicKeyContent = myfile.read()
+    sshHandle.sshExecute("mkdir -p ~/.ssh && chmod 700 ~/.ssh && echo \""+privateKeyContent+
+                         "\" > ~/.ssh/id_rsa && echo \""+publicKeyContent+
+                         "\" > ~/.ssh/id_rsa.pub && chmod 600 ~/.ssh/id_rsa ~/.ssh/id_rsa.pub && "+
+                         "touch ~/.ssh/config && chmod 600 ~/.ssh/config && "+
+                         "chown -R neverwinterdp:neverwinterdp ~/.ssh && " +
+                         "sudo chmod 777 /etc/hosts")
+    
+    
+    
+    print "Install wget, git, nano, java, vim"
+    sshHandle.sshExecute("yum -y update && sudo yum install wget git nano java-1.7.0-openjdk-devel vim epel-release git unzip -y", "root")
+    sshHandle.sshExecute(r'echo -e "JAVA_HOME=/usr/lib/jvm/java-1.7.0-openjdk\\n" >> /etc/environment', "root")
+    print "Install gradle"
+    sshHandle.sshExecute("wget -q -N http://services.gradle.org/distributions/gradle-1.12-all.zip && sudo unzip -o -q  gradle-1.12-all.zip -d /opt/gradle && sudo ln -sfn gradle-1.12 /opt/gradle/latest && sudo printf \"export GRADLE_HOME=/opt/gradle/latest\nexport PATH=\$PATH:\$GRADLE_HOME/bin\" > /etc/profile.d/gradle.sh && . /etc/profile.d/gradle.sh", "root")
+
+
+    print "Install Docker"
+    sshHandle.sshExecute("curl -sSL https://get.docker.com/ | sh")
+    sshHandle.sshExecute("sudo systemctl enable docker")
+    print "Configure neverwinterdp user for Docker"
+    sshHandle.sshExecute("sudo usermod -aG docker neverwinterdp")
+    #Workaround for https://github.com/docker/docker/issues/17653
+    sshHandle.sshExecute("sudo sed -i '/ExecStart=\/usr\/bin\/docker daemon -H fd:\/\//c\ExecStart=/usr/bin/docker daemon --exec-opt native.cgroupdriver=systemd -H fd:\/\/' /etc/systemd/system/multi-user.target.wants/docker.service")
+    sshHandle.sshExecute("sudo systemctl stop docker")
+    sshHandle.sshExecute("sudo systemctl start docker")
+    sshHandle.sshExecute("sudo systemctl status docker")
+    
+
+    print "Install Ansible"
+    sshHandle.sshExecute("sudo yum -y install ansible")
+    
+    
+    print "Copy AWS credentials file"
+    try:
+      with open(awscredentialfile, 'r') as f:
+        awsCreds = f.read()
+      sshHandle.sshExecute("mkdir ~/.aws && echo \""+awsCreds+"\" > ~/.aws/credentials")
+    except Exception as e:
+      print "Problem copying AWS credentials file: "+str(e)
+    
+    print "Setup github credentials"
+    try:
+      gitUser = subprocess.Popen('git config --global user.name', shell=True, stdout=subprocess.PIPE, stderr=subprocess.STDOUT).stdout.readlines()[0].rstrip()
+      gitEmail = subprocess.Popen('git config --global user.email', shell=True, stdout=subprocess.PIPE, stderr=subprocess.STDOUT).stdout.readlines()[0].rstrip()
+      sshHandle.sshExecute("git config --global user.name \""+gitUser+"\"")
+      sshHandle.sshExecute("git config --global user.email \""+gitEmail+"\"")
+    except Exception as e:
+      print "Problem getting github credentials: "+str(e)
+
+    print "Check out NeverwinterDP"
+    sshHandle.sshExecute("git clone https://github.com/Nventdata/NeverwinterDP/ && cd NeverwinterDP && git checkout "+branch)
+    sshHandle.sshExecute(r'echo -e "NEVERWINTERDP_HOME=/home/neverwinterdp/NeverwinterDP\\n" >> /etc/environment', "root")
+    print "Check out neverwinterdp-deployments"
+    sshHandle.sshExecute("echo -e \"StrictHostKeyChecking no\\n\" >> ~/.ssh/config")
+    sshHandle.sshExecute("git clone git@bitbucket.org:nventdata/neverwinterdp-deployments.git")
+    
+    print "Set up pip and python required libraries"
+    sshHandle.sshExecute("sudo yum -y group install \"Development Tools\"")
+    sshHandle.sshExecute("sudo yum -y install python-devel libffi-devel openssl-devel")
+    sshHandle.sshExecute("sudo easy_install --upgrade nose==1.3.4 tabulate paramiko junit-xml click requests pip")
+    sshHandle.sshExecute("sudo pip install pyopenssl==0.15.1 ndg-httpsclient pyasn1 kazoo elasticsearch python-digitalocean pyyaml --upgrade")
+
     print "Your droplet "+name+" is ready at 'ssh neverwinterdp@"+digitalOcean.getDropletIp(droplet.name)+"'"
   
   if destroy:

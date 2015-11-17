@@ -355,6 +355,7 @@ class ScribenginDigitalOcean():
     userScript='''
         useradd -m -d /home/neverwinterdp -s /bin/bash -c "neverwinterdp user" -p $(openssl passwd -1 neverwinterdp)  neverwinterdp && 
         echo "neverwinterdp ALL=(ALL) NOPASSWD: ALL" >> /etc/sudoers && 
+        echo "root ALL=(ALL) NOPASSWD: ALL" >> /etc/sudoers && 
         chown -R neverwinterdp:neverwinterdp /opt && 
         cp -R /root/.ssh/ /home/neverwinterdp/ && 
         chown -R neverwinterdp:neverwinterdp /home/neverwinterdp/.ssh
