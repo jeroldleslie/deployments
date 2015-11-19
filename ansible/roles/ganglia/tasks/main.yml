@@ -62,7 +62,6 @@
 - name: Make sure crond is installed (CentOS)
   yum: name='cronie' state=installed
   sudo: yes
-  when: ansible_distribution == 'CentOS' or ansible_distribution == 'Red Hat Enterprise Linux'
   when: not( host_os_info.stdout == "ubuntu" and ansible_virtualization_type == 'docker' )
   tags:
     - install
