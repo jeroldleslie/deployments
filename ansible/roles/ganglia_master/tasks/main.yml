@@ -9,11 +9,18 @@
   local_action: debug msg="{{ profile_type | default('default') }}"
   run_once: true
   tags: [ configure, install, clean, start, stop, force-stop ]
-  
+
+  #To avoid Ubuntu issue running CentOS container
+- name: Get OS of host
+  local_action: shell python -c "import platform; print platform.dist()[0].lower().rstrip()"
+  register: host_os_info
+  run_once: true
+  tags: [ configure, install, clean, start, stop, force-stop ]
+
 - name: Install epel-release
   sudo: yes
   yum: name=epel-release state=installed
-  when: ansible_distribution == 'CentOS' or ansible_distribution == 'Red Hat Enterprise Linux'
+  when: not ( host_os_info.stdout == "ubuntu" and ansible_virtualization_type == 'docker' )
   tags:
     - install
   #when: ansible_virtualization_type != 'docker'
@@ -21,6 +28,7 @@
 - name: Install Ganglia
   sudo: yes
   yum: name={{ item }} state=installed
+  when: not ( host_os_info.stdout == "ubuntu" and ansible_virtualization_type == 'docker' )
   with_items:
     - ganglia
     - ganglia-gmetad
@@ -33,21 +41,21 @@
 - name: Configure gmetad
   sudo: yes
   lineinfile: dest=/etc/ganglia/gmetad.conf state=present line='data_source "{{ monitoring.software.installation.cluster }}" 60 {{ monitoring.software.installation.ganglia_url }}'
-  #when: ansible_virtualization_type != 'docker'
+  when: not ( host_os_info.stdout == "ubuntu" and ansible_virtualization_type == 'docker' )
   tags:
     [ install, configure ]
 
 - name: Configure httpd
   sudo: yes
   lineinfile: dest=/etc/httpd/conf/httpd.conf line="<Directory \"/usr/share/ganglia\">\n    Options Indexes FollowSymLinks\n    AllowOverride None\n    Require all granted\n</Directory>\n"
-  #when: ansible_virtualization_type != 'docker'
+  when: not ( host_os_info.stdout == "ubuntu" and ansible_virtualization_type == 'docker' )
   tags:
     [ install, configure ]
   
 - name: Add alias to httpd ganglia.conf 
   sudo: yes
   shell: echo "Alias /ganglia /usr/share/ganglia" > /etc/httpd/conf.d/ganglia.conf 
-  #when: ansible_virtualization_type != 'docker'
+  when: not ( host_os_info.stdout == "ubuntu" and ansible_virtualization_type == 'docker' )
   tags:
     [ install, configure ]
 
@@ -60,7 +68,7 @@
     - gmetad
     - httpd
   ignore_errors: yes
-  #when: ansible_virtualization_type != 'docker'
+  when: not ( host_os_info.stdout == "ubuntu" and ansible_virtualization_type == 'docker' )
   tags:
     - force-stop
 
@@ -73,14 +81,14 @@
     - gmond
     - gmetad
     - httpd
-  #when: ansible_virtualization_type != 'docker'
+  when: not ( host_os_info.stdout == "ubuntu" and ansible_virtualization_type == 'docker' )
   tags:
     - stop
 
 - name: Start ganglia master services (CentOS)
   service: name={{ item }} state=started
   sudo: yes
-  when: ansible_distribution == 'CentOS' or ansible_distribution == 'Red Hat Enterprise Linux'
+  when: not ( host_os_info.stdout == "ubuntu" and ansible_virtualization_type == 'docker' )
   with_items:
     - gmond
     - gmetad
@@ -92,21 +100,21 @@
 - name: Start gmond manually
   shell: "/usr/sbin/gmond"
   sudo: yes
-  when: ansible_virtualization_type == 'docker'
+  when: not ( host_os_info.stdout == "ubuntu" and ansible_virtualization_type == 'docker' ) and ansible_virtualization_type == 'docker' 
   tags:
     - start    
   
 - name: Start gmetad manually
   shell: "/usr/sbin/gmetad"
   sudo: yes
-  when: ansible_virtualization_type == 'docker'
+  when: not ( host_os_info.stdout == "ubuntu" and ansible_virtualization_type == 'docker' ) and  ansible_virtualization_type == 'docker'
   tags:
     - start    
   
 - name: Start httpd manually
   shell: "/usr/sbin/httpd"
   sudo: yes
-  when: ansible_virtualization_type == 'docker'
+  when: not ( host_os_info.stdout == "ubuntu" and ansible_virtualization_type == 'docker' ) and  ansible_virtualization_type == 'docker'
   tags:
     - start    
   

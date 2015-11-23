@@ -10,27 +10,26 @@
   local_action: debug msg="{{ profile_type | default('default') }}"
   run_once: true
   tags: [ configure, install, clean, start, stop, force-stop ]
-   
-- name: install ganglia client (Ubuntu)
-  apt: pkg='ganglia-monitor' state=latest
-  sudo: yes
-  when: ansible_distribution == 'Debian' or ansible_distribution == 'Ubuntu'  
-  tags:
-    - install
+
+  #To avoid Ubuntu issue running CentOS container
+- name: Get OS of host
+  local_action: shell python -c "import platform; print platform.dist()[0].lower().rstrip()"
+  register: host_os_info
+  run_once: true
+  tags: [ configure, install, clean, start, stop, force-stop ]
+
 
 - name: Install epel-release
   sudo: yes
   yum: name=epel-release state=installed
-  when: ansible_distribution == 'CentOS' or ansible_distribution == 'Red Hat Enterprise Linux'
-  #when: ansible_virtualization_type != 'docker'
+  when: not ( host_os_info.stdout == "ubuntu" and ansible_virtualization_type == 'docker' )
   tags:
     - install
 
 - name: Install ganglia client packages (CentOS)
   yum: name={{ item }} state=installed
   sudo: yes
-  when: ansible_distribution == 'CentOS' or ansible_distribution == 'Red Hat Enterprise Linux'
-  #when: ansible_virtualization_type != 'docker'
+  when: not ( host_os_info.stdout == "ubuntu" and ansible_virtualization_type == 'docker' )
   with_items:
     - ganglia-gmond
     - ganglia-gmond-python.x86_64
@@ -41,21 +40,21 @@
 - name: Give ganglia user home directory (to support lsof plugin)
   sudo: yes
   lineinfile:  "dest=/etc/passwd state=present  regexp=\"ganglia.*\"  line=\"ganglia:x:998:996:Ganglia Monitoring System:/var/lib/:/bin/bash\""
-  #when: ansible_virtualization_type != 'docker'
+  when: not ( host_os_info.stdout == "ubuntu" and ansible_virtualization_type == 'docker' )
   tags:
     - install
   
 - name: Give ganglia user sudo (to support lsof plugin)
   sudo: yes
   lineinfile:  "dest=/etc/sudoers  state=present line=\"ganglia       ALL=(ALL) NOPASSWD: ALL\""
-  #when: ansible_virtualization_type != 'docker'
+  when: not ( host_os_info.stdout == "ubuntu" and ansible_virtualization_type == 'docker' )
   tags:
     - install
 
 - name: Remove requiretty (to support lsof plugin)
   sudo: yes
   lineinfile: "dest=/etc/sudoers state=present line=\"Defaults:ganglia !requiretty\""
-  #when: ansible_virtualization_type != 'docker'
+  when: not ( host_os_info.stdout == "ubuntu" and ansible_virtualization_type == 'docker' )
   tags:
     - install
 
@@ -63,36 +62,35 @@
 - name: Make sure crond is installed (CentOS)
   yum: name='cronie' state=installed
   sudo: yes
-  when: ansible_distribution == 'CentOS' or ansible_distribution == 'Red Hat Enterprise Linux'
-  #when: ansible_virtualization_type != 'docker'
+  when: not ( host_os_info.stdout == "ubuntu" and ansible_virtualization_type == 'docker' )
   tags:
     - install
 
-- name: Check if crond is running (Docker)
-  shell: ps -ax | grep crond | grep -v grep | wc -l
-  register: crond_running
-  when: ansible_virtualization_type == 'docker'
-  tags:
-    - install
+#- name: Check if crond is running (Docker)
+#  shell: ps -ax | grep crond | grep -v grep | wc -l
+#  register: crond_running
+#  when: ansible_virtualization_type == 'docker' and not ( host_os_info.stdout == "ubuntu" and ansible_virtualization_type == 'docker' )
+#  tags:
+#    - install
 
-- name: Make sure crond is started (Docker)
-  shell: crond
-  sudo: yes
-  when: ansible_virtualization_type == 'docker' and crond_running.stdout == "0"
-  tags:
-    - install
+#- name: Make sure crond is started (Docker)
+#  shell: crond
+#  sudo: yes
+#  when: ansible_virtualization_type == 'docker' and crond_running.stdout == "0" and not ( host_os_info.stdout == "ubuntu" and ansible_virtualization_type == 'docker' )
+#  tags:
+#    - install
     
 - name: Move gmond config
   template: src=../templates/gmond.conf.j2  dest=/etc/ganglia/gmond.conf
   sudo: yes
-  #when: ansible_virtualization_type != 'docker'
+  when: not ( host_os_info.stdout == "ubuntu" and ansible_virtualization_type == 'docker' )
   tags:
     [ install,configure ]
 
 - name: Move ganglia python plugins
   template: src=../templates/{{ item }}.py.j2  dest=/usr/lib64/ganglia/python_modules/{{ item }}.py
   sudo: yes
-  #when: ansible_virtualization_type != 'docker'
+  when: not ( host_os_info.stdout == "ubuntu" and ansible_virtualization_type == 'docker' )
   with_items:
     - lsof_counter
     - hiccup_catcher
@@ -102,21 +100,13 @@
 - name: Move ganglia python plugins configs
   template: src=../templates/{{ item }}.pyconf.j2  dest=/etc/ganglia/conf.d/{{ item }}.pyconf
   sudo: yes
-  #when: ansible_virtualization_type != 'docker'
+  when: not ( host_os_info.stdout == "ubuntu" and ansible_virtualization_type == 'docker' )
   with_items:
     - lsof_counter
     - hiccup_catcher
   tags:
     - install
 
-- name: Restart ganglia client service (Ubuntu)
-  #command: /etc/init.d/ganglia-monitor restart
-  service: name=ganglia-monitor state=restarted
-  sudo: yes
-  when: ansible_virtualization_type != 'docker'
-  when: ansible_distribution == 'Debian' or ansible_distribution == 'Ubuntu'
-  tags:
-    [ install, start ]
       
 - name: Restart ganglia client service (CentOS)
   service: name=gmond state=restarted
@@ -138,6 +128,7 @@
   shell: kill -9 $(ps -ef | grep gmond | grep -v grep | awk '{print $2}')
   sudo: yes
   ignore_errors: yes
+  when: not ( host_os_info.stdout == "ubuntu" and ansible_virtualization_type == 'docker' )
   tags:
     - force-stop
     
@@ -152,7 +143,7 @@
 - name: Start gmond manually
   shell: "/usr/sbin/gmond"
   sudo: yes
-  when: ansible_virtualization_type == 'docker'
+  when: ansible_virtualization_type == 'docker' and not ( host_os_info.stdout == "ubuntu" and ansible_virtualization_type == 'docker' )
   tags:
     - start
 

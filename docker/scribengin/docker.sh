@@ -1,4 +1,5 @@
 #!/bin/bash
+set -e
 
 function h1() {
   echo ""
@@ -148,13 +149,17 @@ function build_images() {
   #Direcotry this script is in
   DOCKERSCRIBEDIR=$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )
   DOCKERSCRIBEDIR=$DOCKERSCRIBEDIR/dockerfile/$OS_TYPE
-  mkdir $DOCKERSCRIBEDIR/tmp
+  if [ ! -d $DOCKERSCRIBEDIR/tmp ]; then
+    mkdir $DOCKERSCRIBEDIR/tmp
+  fi
   
   cp ~/.ssh/id_rsa      $DOCKERSCRIBEDIR/tmp/id_rsa
   cp ~/.ssh/id_rsa.pub  $DOCKERSCRIBEDIR/tmp/id_rsa.pub
   cp ~/.ssh/id_rsa.pub $DOCKERSCRIBEDIR/tmp/authorized_keys
   
-  mkdir $DOCKERSCRIBEDIR/tmp
+  if [ ! -d $DOCKERSCRIBEDIR/tmp ]; then
+    mkdir $DOCKERSCRIBEDIR/tmp
+  fi
   cp ~/.ssh/id_rsa.pub $DOCKERSCRIBEDIR/tmp/authorized_keys
 
   #Build the systemd image first
@@ -347,7 +352,7 @@ function deploy_all(){
   PROFILE_TYPE=$(get_opt --profile-type 'stability' $@)
   
   if [[ $NEVERWINTERDP_HOME_OVERRIDE == "" ]] ; then
-    $SCRIPT_DIR/../../tools/serviceCommander/serviceCommander.py --services "elasticsearch,zookeeper,kafka,hadoop,kibana,ganglia"  --install --configure --clean -i $INVENTORY_FILE_LOCATION --profile-type $PROFILE_TYPE
+    $SCRIPT_DIR/../../tools/serviceCommander/serviceCommander.py --services "elasticsearch,zookeeper,kafka,hadoop,kibana,ganglia" --install --configure --clean -i $INVENTORY_FILE_LOCATION --profile-type $PROFILE_TYPE
   else
     $SCRIPT_DIR/../../tools/serviceCommander/serviceCommander.py --services "elasticsearch,zookeeper,kafka,hadoop,kibana,ganglia" --install --configure --clean -i $INVENTORY_FILE_LOCATION --extra-vars "neverwinterdp_home_override=$NEVERWINTERDP_HOME_OVERRIDE" --profile-type $PROFILE_TYPE
   fi
