@@ -23,9 +23,9 @@ kafka:
       num_partitions: 8
       num_recovery_threads_per_data_dir: 1
       replica_fetch_max_bytes: 1048576
-      log_segment_bytes: 350000000
+      log_segment_bytes: 500000000
       log_retention_hours: 2
-      log_retention_bytes: 1150000000
+      log_retention_bytes: 1800000000
       log_retention_check_interval_ms: 60000
       log_cleaner_enable: 'false'
       default_replication_factor: 2
@@ -102,13 +102,13 @@ hadoop_master:
       yarn_nodemanager_hostname: 0.0.0.0
       yarn_resourcemanager_scheduler_class: org.apache.hadoop.yarn.server.resourcemanager.scheduler.capacity.CapacityScheduler
 
-      yarn_nodemanager_resource_cpu_vcores: 4
+      yarn_nodemanager_resource_cpu_vcores: 5
       yarn_nodemanager_resource_memory_mb: 3072
       yarn_nodemanager_vmem_pmem_ratio: 3
       yarn_nodemanager_vmem_check_enabled: true
 
-      yarn_scheduler_minimum_allocation_mb: 768
-      yarn_scheduler_maximum_allocation_mb: 768
+      yarn_scheduler_minimum_allocation_mb: 614
+      yarn_scheduler_maximum_allocation_mb: 614
       yarn_scheduler_minimum_allocation_vcores: 1
       yarn_scheduler_maximum_allocation_vcores: 1
 
