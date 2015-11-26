@@ -50,6 +50,12 @@
   tags:
     - install
 
+- name: set default dashboard
+  sudo: yes
+  lineinfile: 'dest=/opt/kibana/config/kibana.yml regexp="default_app_id: *" line="default_app_id: \"dashboard/Default\""'
+  tags:
+    - install
+    
 - name: Rendering kibana.service
   template: src={{ item }}.j2 dest=/lib/systemd/system/{{ item }}
   sudo: yes
