@@ -14,15 +14,18 @@
   shell: elasticdump --input=/opt/kibana.json --output=http://localhost:9200/.kibana --type=data
   register: stdout
   run_once: true
+  ignore_errors: yes
   tags:
     - install
 
 - name: Output from gradle build
   debug: var=stdout.stdout_lines
+  ignore_errors: yes
   run_once: true
   tags:
     - install
 
 - debug: msg="Point <monitoring server ip>:5601 in your browser to view kibana charts. If running on docker use host machines IP address i.e. <hostmachineip>:5601"  
+  ignore_errors: yes
   tags:
     - install
