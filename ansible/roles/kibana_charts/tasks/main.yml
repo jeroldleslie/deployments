@@ -1,9 +1,30 @@
+#Include variables from file
+- include_vars: "../../../profile/{{ profile_type | default('default') }}.yml"
+  tags: 
+    [ install, clean, start, stop, force-stop ]
+
+#Start elasticsearch before importing kibana charts
+- name: Start Elasticsearch
+  service: name=elasticsearch state=started enabled=yes
+  sudo: true
+  when: ansible_virtualization_type != 'docker'
+  tags:
+    - install
+    
+#Start elasticsearch before importing kibana charts
+- name: Start Elasticsearch
+  shell: "{{ elasticsearch.software.installation.elasticsearch_home_dir }}/bin/elasticsearch.sh"
+  when: ansible_virtualization_type == 'docker'
+  tags:
+    - install
+
+#Allow elasticsearch to start
 - name: Wait elasticsearch to start
   wait_for: port=9200 delay=10 timeout=30
   ignore_errors: yes
   tags:
     - install
-    
+
 - name: move kibana data json files to container
   sudo: yes
   copy: src=kibana.json dest=/opt/kibana.json
