@@ -141,7 +141,7 @@ def mastercommand(debug, logfile, threads, timeout, inventory_file):
 @click.option('--find-folder',  '-f', default="/opt/kafka/logs/", help="Folder to find logs")
 @click.option('--find-iname',   '-n', default="*.log*", help="Name to look for - (find's -iname option)")
 @click.option('--grep-options', '-g', default="-i", help="Options for grep")
-@click.option('--grep-string',  '-s', default="exception", help="What to grep for")
+@click.option('--grep-string',  '-s', default="Exception", help="What to grep for")
 def kafka(find_folder, find_iname, grep_options, grep_string):
   getLogs(getGroup("kafka"), buildCommandString(find_folder, find_iname, grep_options, grep_string))
 
@@ -150,7 +150,7 @@ def kafka(find_folder, find_iname, grep_options, grep_string):
 @click.option('--find-folder',  '-f', default="/opt/zookeeper/logs/", help="Command to run to get logs")
 @click.option('--find-iname',   '-n', default="zookeeper.*", help="Name to look for - (find's -iname option)")
 @click.option('--grep-options', '-g', default="-i", help="Options for grep")
-@click.option('--grep-string',  '-s', default="exception", help="What to grep for")
+@click.option('--grep-string',  '-s', default="Exception", help="What to grep for")
 def zookeeper(find_folder, find_iname, grep_options, grep_string):
   getLogs(getGroup("zookeeper"), buildCommandString(find_folder, find_iname, grep_options, grep_string))
 
@@ -159,7 +159,7 @@ def zookeeper(find_folder, find_iname, grep_options, grep_string):
 @click.option('--find-folder',  '-f', default="/opt/hadoop/logs/", help="Command to run to get logs")
 @click.option('--find-iname',   '-n', default="*.log", help="Name to look for - (find's -iname option)")
 @click.option('--grep-options', '-g', default="-i", help="Options for grep")
-@click.option('--grep-string',  '-s', default="exception", help="What to grep for")
+@click.option('--grep-string',  '-s', default="Exception", help="What to grep for")
 def hadoop(find_folder, find_iname, grep_options, grep_string):
   group = getGroup("hadoop_worker") + getGroup("hadoop_master")
   getLogs(group, buildCommandString(find_folder, find_iname, grep_options, grep_string))
@@ -170,7 +170,7 @@ def hadoop(find_folder, find_iname, grep_options, grep_string):
 @click.option('--find-folder',  '-f', default="/opt/hadoop/vm/", help="Command to run to get logs")
 @click.option('--find-iname',   '-n', default="stdout\" -o -iname \"stderr", help="Name to look for - (find's -iname option)")
 @click.option('--grep-options', '-g', default="-i", help="Options for grep")
-@click.option('--grep-string',  '-s', default="exception", help="What to grep for")
+@click.option('--grep-string',  '-s', default="Exception", help="What to grep for")
 def yarnapp(find_folder, find_iname, grep_options, grep_string):
   getLogs(getGroup("hadoop_worker"), buildCommandString(find_folder, find_iname, grep_options, grep_string))
 
@@ -180,7 +180,7 @@ def yarnapp(find_folder, find_iname, grep_options, grep_string):
 @click.option('--find-folder',  '-f', default="/opt/hadoop/vm/", help="Command to run to get logs")
 @click.option('--find-iname',   '-n', default="*.log", help="Name to look for - (find's -iname option)")
 @click.option('--grep-options', '-g', default="-i", help="Options for grep")
-@click.option('--grep-string',  '-s', default="exception", help="What to grep for")
+@click.option('--grep-string',  '-s', default="Exception", help="What to grep for")
 def yarnvmapp(find_folder, find_iname, grep_options, grep_string):
   getLogs(getGroup("hadoop_worker"), buildCommandString(find_folder, find_iname, grep_options, grep_string))
 
@@ -189,7 +189,7 @@ def yarnvmapp(find_folder, find_iname, grep_options, grep_string):
 @click.option('--find-folder',  '-f', default="/opt/hadoop/logs/", help="Command to run to get logs")
 @click.option('--find-iname',   '-n', default=".*yarn*.log", help="Name to look for - (find's -iname option)")
 @click.option('--grep-options', '-g', default="-i", help="Options for grep")
-@click.option('--grep-string',  '-s', default="exception", help="What to grep for")
+@click.option('--grep-string',  '-s', default="Exception", help="What to grep for")
 def yarn(find_folder, find_iname, grep_options, grep_string):
   group = getGroup("hadoop_worker") + getGroup("hadoop_master")
   getLogs(group, buildCommandString(find_folder, find_iname, grep_options, grep_string))
@@ -198,7 +198,7 @@ def yarn(find_folder, find_iname, grep_options, grep_string):
 
 @mastercommand.command(help="Get Cluster logs")
 @click.option('--grep-options', '-g', default="-i", help="Options for grep")
-@click.option('--grep-string',  '-s', default="exception", help="What to grep for")
+@click.option('--grep-string',  '-s', default="Exception", help="What to grep for")
 @click.pass_context
 def cluster(ctx, grep_options, grep_string):
   ctx.invoke(zookeeper, grep_options=grep_options, grep_string=grep_string)
