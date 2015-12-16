@@ -50,13 +50,20 @@
     - install
 
 - name: Delete remote neverwinterdp code directory home if it exists
+  sudo: yes
   command: rm -rf {{ monitoring.software.installation.neverwinterdp_code_path }}
   when: tools_home_status.stat.exists
   tags:
     - install
-  
+
+- name: Creating neverwinterdp code directory
+  sudo: yes
+  file: path={{ monitoring.software.installation.neverwinterdp_code_path }} state=directory mode=0755
+  tags:
+    - install
+      
 - name: Copy neverwinterdp code
-  synchronize: src={{ neverwinterdp_home }} dest={{ monitoring.software.installation.neverwinterdp_code_path }}  recursive=yes
+  synchronize: src={{ neverwinterdp_home }} dest={{ monitoring.software.installation.neverwinterdp_code_path }}  recursive=yes 
   tags:
     - install
     

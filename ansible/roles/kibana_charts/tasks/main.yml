@@ -9,27 +9,27 @@
   sudo: true
   when: ansible_virtualization_type != 'docker'
   tags:
-    - install
+    [ install, start ]
     
 #Start elasticsearch before importing kibana charts
 - name: Start Elasticsearch
   shell: "{{ elasticsearch.software.installation.elasticsearch_home_dir }}/bin/elasticsearch.sh"
   when: ansible_virtualization_type == 'docker'
   tags:
-    - install
+    [ install, start ]
 
 #Allow elasticsearch to start
 - name: Wait elasticsearch to start
   wait_for: port=9200 delay=10 timeout=30
   ignore_errors: yes
   tags:
-    - install
+    [ install, start ]
 
 - name: move kibana data json files to container
   sudo: yes
   copy: src=kibana.json dest=/opt/kibana.json
   tags:
-    - install
+    [ install, start ]
   
 - name: Run elasticdump
   shell: elasticdump --input=/opt/kibana.json --output=http://localhost:9200/.kibana --type=data
@@ -37,16 +37,16 @@
   run_once: true
   ignore_errors: yes
   tags:
-    - install
+    [ install, start ]
 
 - name: Output from gradle build
   debug: var=stdout.stdout_lines
   ignore_errors: yes
   run_once: true
   tags:
-    - install
+    [ install, start ]
 
 - debug: msg="Point <monitoring server ip>:5601 in your browser to view kibana charts. If running on docker use host machines IP address i.e. <hostmachineip>:5601"  
   ignore_errors: yes
   tags:
-    - install
+    [ install, start ]

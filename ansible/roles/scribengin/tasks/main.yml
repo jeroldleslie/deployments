@@ -84,22 +84,26 @@
     - install
 
 - name: Delete neverwinterdp home if it exists
+  sudo: yes
   command: rm -rf {{remote_scribengin_home}}
   when: neverwinterdp_home_status.stat.exists
   tags:
     - install
 
 - name: Copy local files from {{neverwinterdp_home}}/release/build/release/neverwinterdp/ to remote hosts {{remote_scribengin_home}}
-  synchronize: src={{neverwinterdp_home}}/release/build/release/neverwinterdp/ dest={{remote_scribengin_home}}
+  sudo: yes
+  copy: src={{neverwinterdp_home}}/release/build/release/neverwinterdp/ dest={{remote_scribengin_home}}
   tags:
     - install
   
 - name: Make shell.sh executable
+  sudo: yes
   file: mode=u+rxw path={{remote_scribengin_home}}/scribengin/bin/shell.sh
   tags:
     - install
 
 - name: Make kafka.sh executable
+  sudo: yes
   file: mode=u+rxw path={{remote_scribengin_home}}/scribengin/tools/kafka/kafka.sh
   tags:
     - install
@@ -159,7 +163,12 @@
   debug: msg="Cleaning hadoop datas is enough"
   tags:
     - clean
-    
+
+- name: No Configuration
+  debug: msg="There is no configuration"
+  tags:
+    - configure
+        
 #- name: Restart VM Service
 #  service: name=vm state=restarted enabled=no
 #  sudo: true
