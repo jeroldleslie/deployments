@@ -42,7 +42,7 @@ VALIDATOR_OPTS="--validator-num-of-reader=1 $VALIDATOR_OPTS"
 
 
 DATAFLOW_OPTS="--dataflow-num-of-worker=8 --dataflow-num-of-executor-per-worker=2"
-DATAFLOW_STORAGE_OPTS="--dataflow-storage=s3"
+DATAFLOW_STORAGE_OPTS="--dataflow-storage=kafka"
 #DATAFLOW_LOG_OPTS="--dataflow-worker-enable-gc"
 #DATAFLOW_KILL_OPTS="--dataflow-kill-worker-random=true --dataflow-kill-worker-max=200 --dataflow-kill-worker-period=600000"
 DATAFLOW_OPTS="$DATAFLOW_OPTS $DATAFLOW_STORAGE_OPTS $DATAFLOW_LOG_OPTS $DATAFLOW_KILL_OPTS"

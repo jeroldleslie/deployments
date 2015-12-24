@@ -4,6 +4,13 @@
 <configuration>
   <property>
     <name>dfs.replication</name>
-    <value>{{ hadoop_master.software.hdfs_site.dfs_replication}}</value>
+    <value>{{ hadoop_master.software.hdfs_site.dfs_replication }}</value>
   </property>
+
+  <property>
+    <name>dfs.datanode.max.xcievers</name>
+    <value>4096</value>
+    <description>PRIVATE CONFIG VARIABLE</description>
+  </property>
+
 </configuration>
