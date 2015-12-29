@@ -16,14 +16,12 @@
     - install
 
 - name: Delete remote cluster directory home if it exists
-  sudo: yes
   command: rm -rf {{ monitoring.software.installation.neverwinterdp_deployments_path }}
   when: tools_home_status.stat.exists
   tags:
     - install
 
 - name: Creating neverwinterdp deployments directory
-  sudo: yes
   file: path={{ monitoring.software.installation.neverwinterdp_deployments_path }} state=directory mode=0755
   tags:
     - install

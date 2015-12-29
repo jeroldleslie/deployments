@@ -90,32 +90,39 @@
   tags:
     - install
 
-- name: Copy local files from {{neverwinterdp_home}}/release/build/release/neverwinterdp/ to remote hosts {{remote_scribengin_home}}
+- name: chown -R neverwinterdp:neverwinterdp /opt 
   sudo: yes
-  copy: src={{neverwinterdp_home}}/release/build/release/neverwinterdp/ dest={{remote_scribengin_home}}
+  command: chown -R neverwinterdp:neverwinterdp /opt
+  tags:
+    - install
+
+- name: Create neverwinterdp 
+  file: path={{remote_scribengin_home}} state=directory owner=neverwinterdp group=neverwinterdp
+  tags:
+    - install
+
+- name: Copy local files from {{neverwinterdp_home}}/release/build/release/neverwinterdp/ to remote hosts {{remote_scribengin_home}}
+  synchronize: src={{neverwinterdp_home}}/release/build/release/neverwinterdp/ dest={{remote_scribengin_home}}
   tags:
     - install
   
 - name: Make shell.sh executable
-  sudo: yes
   file: mode=u+rxw path={{remote_scribengin_home}}/scribengin/bin/shell.sh
   tags:
     - install
 
 - name: Make kafka.sh executable
-  sudo: yes
   file: mode=u+rxw path={{remote_scribengin_home}}/scribengin/tools/kafka/kafka.sh
   tags:
     - install
      
-- name: Rendering scribengin services
-  template: src={{ item }}.j2 dest=/lib/systemd/system/{{ item }}
-  sudo: yes
-  with_items:
-    - vm.service
-    - scribengin.service
-  tags:
-    - install
+#- name: Rendering scribengin services
+#  template: src={{ item }}.j2 dest=/lib/systemd/system/{{ item }}
+#  with_items:
+#    - vm.service
+#    - scribengin.service
+#  tags:
+#    - install
   
 - name: Stop vm-scribengin-master-*
   shell: kill -9 $(jps -m | grep 'vm-scribengin-master-*' | awk '{print $1}')

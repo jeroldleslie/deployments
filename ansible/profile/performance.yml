@@ -140,8 +140,8 @@ monitoring:
       cluster: scribengin
       ganglia_home: /opt/ganglia
       user: neverwinterdp
-      neverwinterdp_deployments_path: /opt/neverwinterdp_deployments
-      neverwinterdp_code_path: /opt/neverwinterdp_home
+      neverwinterdp_deployments_path: /home/neverwinterdp/neverwinterdp-deployments
+      neverwinterdp_code_path: /home/neverwinterdp/
       gradle_version: "1.12"
       gradle_zipfile: "gradle-1.12-all.zip"
       gradle_folder:  "gradle-1.12"

@@ -50,3 +50,6 @@
   tags:
     - install
 
+- include: ../../../programs/which.yml
+  tags:
+    - install

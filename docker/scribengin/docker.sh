@@ -418,6 +418,7 @@ function cluster(){
   
   if [ $DEPLOY_TOOLS == "true" ] || [ $LAUNCH == "true" ] ; then
     $SCRIPT_DIR/../../tools/serviceCommander/serviceCommander.py -e "neverwinterdp_deployments" --install -i $INVENTORY_FILE_LOCATION --profile-type $PROFILE_TYPE
+    $SCRIPT_DIR/../../tools/serviceCommander/serviceCommander.py -e "neverwinterdp_code" --install -i $INVENTORY_FILE_LOCATION --profile-type $PROFILE_TYPE
     $SCRIPT_DIR/../../tools/serviceCommander/serviceCommander.py -e "gradle" --install -i $INVENTORY_FILE_LOCATION --profile-type $PROFILE_TYPE
     $SCRIPT_DIR/../../tools/serviceCommander/serviceCommander.py -e "ansible" --install -i $INVENTORY_FILE_LOCATION --profile-type $PROFILE_TYPE
   fi

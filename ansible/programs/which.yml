@@ -1,0 +1,10 @@
+
+- name: install which (CentOS)
+  when: ansible_distribution == 'CentOS' or ansible_distribution == 'Red Hat Enterprise Linux'
+  sudo: yes
+  yum: pkg=which state=installed
+
+- name: install which (Ubuntu)
+  when: ansible_distribution == 'Debian' or ansible_distribution == 'Ubuntu'
+  sudo: yes
+  apt: pkg=which state=installed
