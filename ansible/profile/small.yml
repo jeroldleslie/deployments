@@ -147,10 +147,20 @@ monitoring:
       gradle_folder:  "gradle-1.12"
 
 common:
-  increase_open_file_limit:
+  linux_perf_tweaks:
     num_open_files: 32000
     ndp_user: neverwinterdp
     limits_file: /etc/security/limits.conf
+    vmswappiness: 5
+    rmem_max: 16777216
+    wmem_max: 16777216
+    tcp_rmem: "4096 87380 16777216"
+    tcp_wmem: "4096 87380 16777216"
+    tcp_tw_reuse: 1
+    tcp_tw_recycle: 1
+    tcp_fin_timeout: 30
+    tcp_syncookies: 1
+    tcp_max_syn_backlog: 65536
   ntp:
     servers: 
       - 0.europe.pool.ntp.org

@@ -1,3 +1,4 @@
 ---
 dependencies:
-  - { role: increase_open_file_limit }
+  #- { role: increase_open_file_limit }
+  - { role: linux_perf_tweaks }

@@ -3,6 +3,7 @@ MAINTAINER Nventdata
 
 ENV container docker
 RUN yum -y swap -- remove fakesystemd -- install systemd systemd-libs
+RUN yum clean all && yum swap fakesystemd systemd
 RUN yum -y update; yum clean all; \
 (cd /lib/systemd/system/sysinit.target.wants/; for i in *; do [ $i == systemd-tmpfiles-setup.service ] || rm -f $i; done); \
 rm -f /lib/systemd/system/multi-user.target.wants/*;\
