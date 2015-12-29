@@ -148,7 +148,7 @@ monitoring:
 
 common:
   linux_perf_tweaks:
-    num_open_files: 32000
+    num_open_files: 4092
     ndp_user: neverwinterdp
     limits_file: /etc/security/limits.conf
     vmswappiness: 5
