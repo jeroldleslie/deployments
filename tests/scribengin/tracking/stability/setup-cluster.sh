@@ -34,7 +34,7 @@ serviceCommander="$ROOT/tools/serviceCommander/serviceCommander.py"
 $clusterCommander digitalocean \
   --launch --neverwinterdp-home $NEVERWINTERDP_HOME \
   $ANSIBLE_INVENTORY_LOCATION \
-  --create-containers $ROOT/ansible/profile/stability.yml --subdomain $SUBDOMAIN
+  --create-containers $ROOT/ansible/profile/stability.yml --subdomain $SUBDOMAIN --region nyc3
 
 $clusterCommander digitalocean --ansible-inventory $ANSIBLE_INVENTORY_LOCATION --subdomain $SUBDOMAIN
 
