@@ -124,11 +124,11 @@
 #  tags:
 #    - install
   
-- name: Stop vm-scribengin-master-*
-  shell: kill -9 $(jps -m | grep 'vm-scribengin-master-*' | awk '{print $1}')
-  ignore_errors: yes
-  tags:
-    [ stop, force-stop ]
+#- name: Stop vm-scribengin-master-*
+#  shell: kill -9 $(jps -m | grep 'vm-scribengin-master-*' | awk '{print $1}')
+#  ignore_errors: yes
+#  tags:
+#    [ stop, force-stop ]
 
 - name: Stop vm-master-*
   shell: "kill -9 $(jps -m | grep 'vm-master-*' | awk '{print $1}')"
