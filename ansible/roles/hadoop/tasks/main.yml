@@ -74,7 +74,7 @@
 - name: Move configuration files to container
   copy: src=config/ dest={{ hadoop_master.software.installation.hadoop_home_dir }}/etc/hadoop/
   tags:
-    [ install , configure ]
+    - configure
 
 - name: Add masters and slaves file
   template: src={{ item }}.j2 dest={{ hadoop_master.software.installation.hadoop_home_dir }}/etc/hadoop/{{ item }}
@@ -89,7 +89,7 @@
     - yarn-site.xml
     - capacity-scheduler.xml
   tags:
-    [ install , configure ]
+    - configure
     
 - name: Add hdfs
   template: src={{ item }}.j2 dest={{ hadoop_master.software.installation.hadoop_home_dir }}/bin/{{ item }}
@@ -97,34 +97,20 @@
   with_items:
     - hdfs
   tags:
-    [ install , configure ]
+    - configure
 
-- name: Clean Hadoop datas
-  shell: "rm -rf {{ hadoop_master.software.installation.hadoop_home_dir }}/data"
-  sudo: yes
-  tags: 
-    [ install , clean ]
-
-- name: Clean Hadoop logs
-  shell: "rm -rf {{ hadoop_master.software.installation.hadoop_home_dir }}/logs"
-  sudo: yes
+- name: Check if Hadoop data is already exists
+  stat: path={{ hadoop_master.software.installation.hadoop_home_dir }}/logs
+  register: hadooplogdir
   tags:
-  tags: 
-    [ install , clean ]
+    - configure
 
-- name: Clean vm directory
-  shell: "rm -rf {{ hadoop_master.software.installation.hadoop_home_dir }}/vm"
-  sudo: yes
-  tags: 
-    [ install , clean ]
+- include: clean.yml
+  when: hadooplogdir.stat.exists == False
+  tags:
+    - configure
+        
+- include: clean.yml
+  tags:
+    - clean
 
-- name: Clean vm directory
-  shell: "rm -rf {{ hadoop_master.software.installation.hadoop_home_dir }}/vm-logs/*"
-  sudo: yes
-  tags: 
-    [ install , clean ]
-
-- name: Format Hadoop 
-  shell: "{{ hadoop_master.software.installation.hadoop_home_dir }}/bin/hdfs namenode -format"
-  tags: 
-    [ install , clean ]
