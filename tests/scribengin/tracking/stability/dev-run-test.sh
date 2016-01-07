@@ -40,7 +40,7 @@ GENERATOR_OPTS="\
 VALIDATOR_OPTS="--validator-num-of-reader 1 --validator-max-run-time 1000000000"
 
 
-DATAFLOW_OPTS="--dataflow-storage kafka --dataflow-num-of-worker 8 --dataflow-num-of-executor-per-worker 2"
+DATAFLOW_OPTS="--dataflow-storage kafka --dataflow-num-of-worker 8 --dataflow-num-of-executor-per-worker 2 --dataflow-tracking-window-size 1000 --dataflow-sliding-window-size 200"
 
 time $NEVERWINTERDP_BUILD/dataflow/tracking-sample/bin/run-tracking.sh $GENERATOR_OPTS $DATAFLOW_OPTS $VALIDATOR_OPTS 
 

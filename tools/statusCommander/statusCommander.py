@@ -67,9 +67,9 @@ statusCommands = {
   "zookeeper"    : [ statusCommandParams(identifiers = ["QuorumPeerMain"]) ],
   "kafka"        : [ statusCommandParams(identifiers = ["Kafka"]) ],
   "hadoop_worker": [ statusCommandParams(identifiers = ["DataNode", "NodeManager"]),
-                     statusCommandParams(command =  scribeJpsCommand, 
-                                          identifiers = ["vm-scribengin-master"],
-                                          quietIfNotRunning = True),
+                     #statusCommandParams(command =  scribeJpsCommand, 
+                     #                     identifiers = ["vm-scribengin-master"],
+                     #                     quietIfNotRunning = True),
                      statusCommandParams(command =  scribeJpsCommand, 
                                           identifiers = ["vm-master"],
                                           quietIfNotRunning = True),
@@ -80,12 +80,11 @@ statusCommands = {
                                           identifiers = ["dataflow-worker-*"],
                                           quietIfNotRunning = True),
                      statusCommandParams(command =  scribeJpsCommand, 
-                                          identifiers = ["validator"],
+                                          identifiers = ["vm-tracking-validator"],
                                           quietIfNotRunning = True),
                      statusCommandParams(command =  scribeJpsCommand, 
-                                          identifiers = ["generator"],
+                                          identifiers = ["vm-tracking-generator"],
                                           quietIfNotRunning = True),
-
                    ],
 }
 

@@ -99,31 +99,18 @@
   tags:
     - configure
 
-- name: Clean Hadoop datas
-  shell: "rm -rf {{ hadoop_master.software.installation.hadoop_home_dir }}/data"
-  sudo: yes
+- name: Check if Hadoop data is already exists
+  stat: path={{ hadoop_master.software.installation.hadoop_home_dir }}/logs
+  register: hadooplogdir
   tags:
-  - clean
+    - configure
 
-- name: Clean Hadoop logs
-  shell: "rm -rf {{ hadoop_master.software.installation.hadoop_home_dir }}/logs"
-  sudo: yes
+- include: clean.yml
+  when: hadooplogdir.stat.exists == False
   tags:
-  - clean
+    - configure
+        
+- include: clean.yml
+  tags:
+    - clean
 
-- name: Clean vm directory
-  shell: "rm -rf {{ hadoop_master.software.installation.hadoop_home_dir }}/vm"
-  sudo: yes
-  tags:
-  - clean
-
-- name: Clean vm directory
-  shell: "rm -rf {{ hadoop_master.software.installation.hadoop_home_dir }}/vm-logs/*"
-  sudo: yes
-  tags:
-  - clean
-
-- name: Format Hadoop 
-  shell: "{{ hadoop_master.software.installation.hadoop_home_dir }}/bin/hdfs namenode -format"
-  tags:
-  - clean
