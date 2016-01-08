@@ -3,18 +3,24 @@
   tags: 
     [ install, clean, start, stop, force-stop ]
 
+- name: Check elasticsearch running
+  shell: if (( $(ps -ef | grep -v grep | grep "Main" | wc -l) > 0 )); then echo "true"; else echo "false"; fi
+  register: shell_output
+  tags:
+    [ install, start ]
+
 #Start elasticsearch before importing kibana charts
 - name: Start Elasticsearch
   service: name=elasticsearch state=started enabled=yes
   sudo: true
-  when: ansible_virtualization_type != 'docker'
+  when: ansible_virtualization_type != 'docker' and shell_output.stdout == 'false'
   tags:
     [ install, start ]
     
 #Start elasticsearch before importing kibana charts
 - name: Start Elasticsearch
   shell: "{{ elasticsearch.software.installation.elasticsearch_home_dir }}/bin/elasticsearch.sh"
-  when: ansible_virtualization_type == 'docker'
+  when: ansible_virtualization_type == 'docker' and shell_output.stdout == 'false'
   tags:
     [ install, start ]
 
@@ -30,7 +36,7 @@
   copy: src=kibana.json dest=/opt/kibana.json
   tags:
     [ install, start ]
-  
+
 - name: Run elasticdump
   shell: elasticdump --input=/opt/kibana.json --output=http://localhost:9200/.kibana --type=data
   register: stdout
@@ -50,3 +56,4 @@
   ignore_errors: yes
   tags:
     [ install, start ]
+
