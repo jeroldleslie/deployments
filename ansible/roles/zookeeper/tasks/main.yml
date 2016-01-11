@@ -121,7 +121,7 @@
   - clean
   
 - name: Start Zookeeper Service
-  service: name=zookeeper state=started enabled=yes
+  service: name=zookeeper state=started enabled=no
   sudo: true
   when: ansible_virtualization_type != 'docker'
   tags:

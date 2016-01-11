@@ -28,7 +28,7 @@
     - force-stop
       
 - name: Start resourcemanager Service
-  service: name=hadoop-resourcemanager state=started enabled=yes
+  service: name=hadoop-resourcemanager state=started enabled=no
   sudo: true
   when: ansible_virtualization_type != 'docker'
   tags:

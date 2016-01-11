@@ -137,7 +137,7 @@
     [ install, start ]
 
 - name: Start Elasticsearch
-  service: name=elasticsearch state=started enabled=yes
+  service: name=elasticsearch state=started enabled=no
   sudo: true
   when: ansible_virtualization_type != 'docker' and shell_output.stdout == 'false'
   tags:

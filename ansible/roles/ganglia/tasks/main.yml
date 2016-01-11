@@ -109,7 +109,7 @@
 
       
 - name: Restart ganglia client service (CentOS)
-  service: name=gmond state=restarted
+  service: name=gmond state=restarted enabled=no
   sudo: yes
   when: ansible_distribution == 'CentOS' or ansible_distribution == 'Red Hat Enterprise Linux'
   when: ansible_virtualization_type != 'docker'
@@ -117,7 +117,7 @@
     - install
 
 - name: Stop ganglia client service (CentOS)
-  service: name=gmond state=stopped
+  service: name=gmond state=stopped enabled=no
   sudo: yes
   when: ansible_distribution == 'CentOS' or ansible_distribution == 'Red Hat Enterprise Linux'
   when: ansible_virtualization_type != 'docker'
@@ -133,7 +133,7 @@
     - force-stop
     
 - name: Start ganglia client service (CentOS)
-  service: name=gmond state=started
+  service: name=gmond state=started enabled=no
   sudo: yes
   when: ansible_distribution == 'CentOS' or ansible_distribution == 'Red Hat Enterprise Linux'
   when: ansible_virtualization_type != 'docker'
