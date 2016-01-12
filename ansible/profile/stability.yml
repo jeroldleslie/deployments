@@ -72,7 +72,7 @@ zookeeper:
       initLimit: 10
       syncLimit: 5
       maxClientCnxns: 60
-      autopurge_snapRetainCount: 3
+      autopurge_snapRetainCount: 5
       autopurge_purgeInterval: 1
 
 hadoop_master:

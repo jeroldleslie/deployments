@@ -28,7 +28,7 @@
     - force-stop
     
 - name: Start nodemanager Service
-  service: name=hadoop-nodemanager state=started enabled=yes
+  service: name=hadoop-nodemanager state=started enabled=no
   sudo: true
   when: ansible_virtualization_type != 'docker'
   tags:
@@ -39,4 +39,5 @@
   when: ansible_virtualization_type == 'docker'
   tags:
   - start
-  
+
+    

@@ -28,7 +28,7 @@
     - force-stop
      
 - name: Start secondarynamenode Service
-  service: name=hadoop-secondarynamenode state=started enabled=yes
+  service: name=hadoop-secondarynamenode state=started enabled=no
   sudo: true
   when: ansible_virtualization_type != 'docker'
   tags:

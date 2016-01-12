@@ -28,7 +28,7 @@
     - force-stop  
     
 - name: Start datanode Service
-  service: name=hadoop-datanode state=started enabled=yes
+  service: name=hadoop-datanode state=started enabled=no
   sudo: true
   when: ansible_virtualization_type != 'docker'
   tags:

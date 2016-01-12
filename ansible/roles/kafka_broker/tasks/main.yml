@@ -96,7 +96,7 @@
     - clean
   
 - name: Start Kafka Service
-  service: name=kafka-broker state=started enabled=yes
+  service: name=kafka-broker state=started enabled=no
   sudo: true
   when: ansible_virtualization_type != 'docker'
   tags:

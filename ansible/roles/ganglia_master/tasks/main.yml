@@ -74,7 +74,7 @@
 
     
 - name: Stop ganglia master services (CentOS)
-  service: name={{ item }} state=stopped
+  service: name={{ item }} state=stopped enabled=no
   sudo: yes
   when: ansible_distribution == 'CentOS' or ansible_distribution == 'Red Hat Enterprise Linux'
   with_items:
@@ -86,7 +86,7 @@
     - stop
 
 - name: Start ganglia master services (CentOS)
-  service: name={{ item }} state=started
+  service: name={{ item }} state=started enabled=no
   sudo: yes
   when: not ( host_os_info.stdout == "ubuntu" and ansible_virtualization_type == 'docker' )
   with_items:
