@@ -22,10 +22,10 @@ clientPort={{ zookeeper.software.installation.zookeeper_clientport }}
 # http://zookeeper.apache.org/doc/current/zookeeperAdmin.html#sc_maintenance
 #
 # The number of snapshots to retain in dataDir
-#autopurge.snapRetainCount={{ zookeeper.software.zoo_cfg.autopurge_snapRetainCount }}
+autopurge.snapRetainCount={{ zookeeper.software.zoo_cfg.autopurge_snapRetainCount }}
 # Purge task interval in hours
 # Set to 0 to disable auto purge feature
-#autopurge.purgeInterval={{ zookeeper.software.zoo_cfg.autopurge_purgeInterval }}
+autopurge.purgeInterval={{ zookeeper.software.zoo_cfg.autopurge_purgeInterval }}
 
 {% for host in groups['zookeeper'] %}
 server.{{ host | regex_replace('.*?([0-9]+)$', '\\1') }}={{ host }}:{{zookeeper.software.installation.zookeeper_leader_port}}:{{zookeeper.software.installation.zookeeper_election_port}}
