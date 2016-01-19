@@ -1,0 +1,57 @@
+#Include variables from file
+- include_vars: "../../../profile/{{ profile_type | default('default') }}.yml"
+  tags: 
+    [ install ]
+
+- name: Profile type
+  local_action: debug msg="{{ profile_type | default('default') }}"
+  run_once: true
+  tags: [ configure, install, clean, start, stop, force-stop ]
+
+- name: Remove Hiccup Meter directory
+  shell: rm -rf {{monitoring.software.installation.hiccup_meter_home}}
+  sudo: yes
+  tags:
+    - install
+
+
+- name: creating Hiccup Meter directory
+  file: path={{monitoring.software.installation.hiccup_meter_home}} state=directory mode=0755
+  tags:
+    - install
+    
+- name: Copy hiccupmeter.py
+  copy: src=hiccupmeter.py dest={{monitoring.software.installation.hiccup_meter_home}}
+  tags:
+    - install
+    
+- name: Copy hiccupmeter
+  template: src=hiccupmeter.j2 dest={{monitoring.software.installation.hiccup_meter_home}}/hiccupmeter
+  tags:
+    - install
+
+- name: Make hiccupmeter files executable
+  file: mode=u+rxw path={{monitoring.software.installation.hiccup_meter_home}}/{{item}}
+  with_items:
+    - hiccupmeter
+    - hiccupmeter.py
+  tags:
+    - install
+
+- name: Kill Hiccup Meter
+  shell: "/opt/hiccupmeter/hiccupmeter stop"
+  ignore_errors: yes
+  tags:
+    [ stop, force-stop ]
+
+- name: Remove pid if exists else igore failure
+  shell: rm /opt/hiccupmeter/hiccupmeter.pid
+  ignore_errors: yes
+  tags:
+    [ stop, force-stop ]
+     
+- name: Start Hiccup Meter and wait few seconds to allow hiccup meter to start
+  shell: "/opt/hiccupmeter/hiccupmeter start"
+  async: 50
+  tags:
+    - start
