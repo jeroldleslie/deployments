@@ -1,0 +1,6 @@
+---
+- name: hiccupmeter
+  hosts: all
+  remote_user: neverwinterdp
+  roles:
+    - hiccupmeter

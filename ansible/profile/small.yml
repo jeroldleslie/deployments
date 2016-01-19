@@ -145,6 +145,7 @@ monitoring:
       gradle_version: "1.12"
       gradle_zipfile: "gradle-1.12-all.zip"
       gradle_folder:  "gradle-1.12"
+      hiccup_meter_home: /opt/hiccupmeter
 
 common:
   linux_perf_tweaks:
