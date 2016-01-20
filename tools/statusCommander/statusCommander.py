@@ -94,10 +94,11 @@ def getSshOutput(ip, host, command, identifier, group, quietIfNotRunning):
   """
   SSH's onto machine, runs command, returns result along with info about process/host
   """
-  logging.debug("hostname: "+host+ " - IP: "+ip+" - command: "+command)
+  logger = logging.getLogger('statusCommander')
+  logger.debug("hostname: "+host+ " - IP: "+ip+" - command: "+command)
   s = ssh()
   out,err = s.sshExecute(ip, command)
-  logging.debug("\tstdout: "+out+ "\n\tstderr: "+err)
+  logger.debug("\tstdout: "+out+ "\n\tstderr: "+err)
   
   result = []
   
@@ -132,22 +133,27 @@ def getSshOutput(ip, host, command, identifier, group, quietIfNotRunning):
 @click.pass_context
 def mastercommand(ctx, debug, logfile, timeout, inventory_file, monitor, monitor_sleep):
   global _pool
+  logger = logging.getLogger('statusCommander')
   if debug:
+    logger.addHandler(logging.FileHandler(logfile, mode="w"))
+    logger.setLevel(logging.DEBUG)
       #Set logging file, overwrite file, set logging level to DEBUG
-      logging.basicConfig(filename=logfile, filemode="w", level=logging.DEBUG)
-      logging.getLogger().addHandler(logging.StreamHandler(stdout))
-      click.echo('Debug mode is %s' % ('on' if debug else 'off'))
+      #logger.basicConfig(filename=logfile, filemode="w", level=logging.DEBUG)
+    logger.addHandler(logging.StreamHandler(stdout))
+    click.echo('Debug mode is %s' % ('on' if debug else 'off'))
   else:
+    logger.addHandler(logging.FileHandler(logfile, mode="w"))
+    logger.setLevel(logging.INFO)
     #Set logging file, overwrite file, set logging level to INFO
-    logging.basicConfig(filename=logfile, filemode="w", level=logging.INFO)
-
+    #logger.basicConfig(filename=logfile, filemode="w", level=logging.INFO)
+  
 
   if inventory_file == "~/inventory":
     inventory_file=join( expanduser("~"), "inventory")
 
   #Check if inventory file exists
   if not isfile(inventory_file):
-    logging.error(inventory_file+" is not a file!  -i option needs to point to a valid ansible inventory file")
+    logger.error(inventory_file+" is not a file!  -i option needs to point to a valid ansible inventory file")
     print inventory_file+" is not a file!  -i option needs to point to a valid ansible inventory file"
     from sys import exit
     exit(-1)
@@ -173,7 +179,7 @@ def mastercommand(ctx, debug, logfile, timeout, inventory_file, monitor, monitor
 
           asyncresults.append(pool.apply_async(getSshOutput, [ip, hostName, command, identifier, server["group"], services.quietIfNotRunning]))
     except KeyError:
-      logging.error("No commands for ansible group: "+server["group"])
+      logger.error("No commands for ansible group: "+server["group"])
       print "No commands for ansible group: "+server["group"]
   
   #Get asynchronous results in order that they were added

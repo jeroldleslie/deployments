@@ -1,4 +1,5 @@
 import logging
+from pprint import pformat
 from ansible.inventory.ini import InventoryParser
 
 class ansibleInventoryParser(object):
@@ -19,5 +20,5 @@ class ansibleInventoryParser(object):
 
         results.append(toAppend)
 
-    logging.debug("Ansible inventory parsing results: "+str(results))
+    logging.debug("\nAnsible inventory parsing results: "+pformat(results)+"\n\n")
     return results
