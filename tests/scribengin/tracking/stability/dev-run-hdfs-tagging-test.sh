@@ -4,7 +4,7 @@ SCRIPT_DIR=$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )
 
 ROOT=$SCRIPT_DIR/../../../..
 
-INVENTORY="/home/neverwinterdp/inventory"
+INVENTORY="/tmp/cluster-stability.inventory"
 
 serviceCommander="$ROOT/tools/serviceCommander/serviceCommander.py"
 statusCommander="$ROOT/tools/statusCommander/statusCommander.py"
@@ -33,19 +33,16 @@ chmod +x $NEVERWINTERDP_BUILD/dataflow/*/bin/*.sh
 $SHELL vm info
 
 GENERATOR_OPTS="\
-  --generator-num-of-chunk=100 --generator-num-of-message-per-chunk=50000000 --generator-num-of-writer=1 --generator-break-in-period=30 \
-  --generator-num-of-kafka-partition=8 --generator-num-of-kafka-replication=2 \
-  --generator-max-wait-time=30000"
+  --generator-num-of-chunk 60 --generator-num-of-message-per-chunk 100000000 --generator-num-of-writer 1 --generator-break-in-period 50 \
+  --generator-kafka-num-of-partition 8 --generator-kafka-num-of-replication 2 \
+  --generator-max-wait-time 30000"
 
-#VALIDATOR_OPTS="--validator-disable"
-VALIDATOR_OPTS="--validator-num-of-reader=1 $VALIDATOR_OPTS"
+VALIDATOR_OPTS="--validator-num-of-reader 1 --validator-max-run-time 1000000000"
 
 
-DATAFLOW_OPTS="--dataflow-num-of-worker=8 --dataflow-num-of-executor-per-worker=2"
-DATAFLOW_STORAGE_OPTS="--dataflow-storage=kafka"
-#DATAFLOW_LOG_OPTS="--dataflow-worker-enable-gc"
-#DATAFLOW_KILL_OPTS="--dataflow-kill-worker-random=true --dataflow-kill-worker-max=200 --dataflow-kill-worker-period=600000"
-DATAFLOW_OPTS="$DATAFLOW_OPTS $DATAFLOW_STORAGE_OPTS $DATAFLOW_LOG_OPTS $DATAFLOW_KILL_OPTS"
+DATAFLOW_OPTS="\
+  --dataflow-storage kafka --dataflow-num-of-worker 8 --dataflow-num-of-executor-per-worker 2 \
+  --dataflow-tracking-window-size 10000 --dataflow-sliding-window-size 300"
 
-time $NEVERWINTERDP_BUILD/dataflow/tracking-sample/bin/run-tracking.sh $GENERATOR_OPTS $DATAFLOW_OPTS $VALIDATOR_OPTS 
+time $NEVERWINTERDP_BUILD/dataflow/tracking-sample/bin/run-hdfs-tagging-test.sh $GENERATOR_OPTS $DATAFLOW_OPTS $VALIDATOR_OPTS 
 

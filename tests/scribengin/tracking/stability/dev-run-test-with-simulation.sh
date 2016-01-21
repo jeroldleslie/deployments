@@ -33,7 +33,7 @@ chmod +x $NEVERWINTERDP_BUILD/dataflow/*/bin/*.sh
 $SHELL vm info
 
 GENERATOR_OPTS="\
-  --generator-num-of-chunk 60 --generator-num-of-message-per-chunk 100000000 --generator-num-of-writer 1 --generator-break-in-period 175 \
+  --generator-num-of-chunk 60 --generator-num-of-message-per-chunk 100000000 --generator-num-of-writer 1 --generator-break-in-period 75 \
   --generator-kafka-num-of-partition 5 --generator-kafka-num-of-replication 2 \
   --generator-max-wait-time 30000"
 
@@ -45,7 +45,7 @@ DATAFLOW_OPTS="\
   --dataflow-default-parallelism 5 --dataflow-default-replication 2"
 
 SIMULATION_OPTS="\
-  --simulation-period 450000 --simulation-max  200  --simulation-report-period 30000"
+  --simulation-period 450000 --simulation-max  200  --simulation-report-period 90000"
 
 time $NEVERWINTERDP_BUILD/dataflow/tracking-sample/bin/run-tracking-with-simulation.sh $GENERATOR_OPTS $DATAFLOW_OPTS $VALIDATOR_OPTS $SIMULATION_OPTS
 
