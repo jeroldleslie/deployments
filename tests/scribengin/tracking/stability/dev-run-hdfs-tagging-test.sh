@@ -33,16 +33,17 @@ chmod +x $NEVERWINTERDP_BUILD/dataflow/*/bin/*.sh
 $SHELL vm info
 
 GENERATOR_OPTS="\
-  --generator-num-of-chunk 60 --generator-num-of-message-per-chunk 100000000 --generator-num-of-writer 1 --generator-break-in-period 50 \
-  --generator-kafka-num-of-partition 8 --generator-kafka-num-of-replication 2 \
+  --generator-num-of-chunk 60 --generator-num-of-message-per-chunk 100000000 --generator-num-of-writer 1 --generator-break-in-period 75 \
+  --generator-kafka-num-of-partition 5 --generator-kafka-num-of-replication 2 \
   --generator-max-wait-time 30000"
 
 VALIDATOR_OPTS="--validator-num-of-reader 1 --validator-max-run-time 1000000000"
 
 
 DATAFLOW_OPTS="\
-  --dataflow-storage kafka --dataflow-num-of-worker 8 --dataflow-num-of-executor-per-worker 2 \
-  --dataflow-tracking-window-size 10000 --dataflow-sliding-window-size 300"
+  --dataflow-storage hdfs --dataflow-num-of-worker 5 --dataflow-num-of-executor-per-worker 2 \
+  --dataflow-tracking-window-size 50000 --dataflow-sliding-window-size 100 \
+  --dataflow-default-parallelism 5 --dataflow-default-replication 2"
 
 time $NEVERWINTERDP_BUILD/dataflow/tracking-sample/bin/run-hdfs-tagging-test.sh $GENERATOR_OPTS $DATAFLOW_OPTS $VALIDATOR_OPTS 
 
