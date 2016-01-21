@@ -435,6 +435,11 @@ def digitalocean(launch, create_containers, update_local_host_file, update_host_
     click.echo("Creating containers")
     digitalOcean.launchContainers(create_containers, region, subdomain)
   
+  #Adding a sleep because DO is unreliable
+  #and could report that the machines are ready
+  #when in fact they're not.  :(
+  sleep(30)
+
   if update_local_host_file or launch:
     click.echo("Updating local hosts file")
     digitalOcean.updateLocalHostsFile(subdomain)
