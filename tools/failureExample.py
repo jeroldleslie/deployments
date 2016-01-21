@@ -230,14 +230,14 @@ def mastercommand(debug, logfile, inventory_file, service, group, clean, sleep_t
                 extra_vars=extra_vars_dict,
                 limit="zookeeper-1",)
 
-  #Start kafka
+  #force stop multiple kafkas
   runner.deploy(playbook = join(ansible_root_dir, "kafka.yml"), 
                 inventory=inventory_file, 
                 outputToStdout=ansible_output, 
                 maxRetries=0,
-                tags="start",
+                tags="force-stop",
                 extra_vars=extra_vars_dict,
-                limit="kafka-1",)
+                limit="kafka-1,kafka-2,kafka-3",)
 
 
 
