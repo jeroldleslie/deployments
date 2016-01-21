@@ -352,9 +352,9 @@ function deploy_all(){
   PROFILE_TYPE=$(get_opt --profile-type 'stability' $@)
   
   if [[ $NEVERWINTERDP_HOME_OVERRIDE == "" ]] ; then
-    $SCRIPT_DIR/../../tools/serviceCommander/serviceCommander.py --services "elasticsearch,zookeeper,kafka,hadoop,kibana,ganglia" --install --configure --clean -i $INVENTORY_FILE_LOCATION --profile-type $PROFILE_TYPE
+    $SCRIPT_DIR/../../tools/serviceCommander/serviceCommander.py --services "elasticsearch,zookeeper,kafka,hadoop,kibana" --install --configure --clean -i $INVENTORY_FILE_LOCATION --profile-type $PROFILE_TYPE
   else
-    $SCRIPT_DIR/../../tools/serviceCommander/serviceCommander.py --services "elasticsearch,zookeeper,kafka,hadoop,kibana,ganglia" --install --configure --clean -i $INVENTORY_FILE_LOCATION --extra-vars "neverwinterdp_home_override=$NEVERWINTERDP_HOME_OVERRIDE" --profile-type $PROFILE_TYPE
+    $SCRIPT_DIR/../../tools/serviceCommander/serviceCommander.py --services "elasticsearch,zookeeper,kafka,hadoop,kibana" --install --configure --clean -i $INVENTORY_FILE_LOCATION --extra-vars "neverwinterdp_home_override=$NEVERWINTERDP_HOME_OVERRIDE" --profile-type $PROFILE_TYPE
   fi
 }
 

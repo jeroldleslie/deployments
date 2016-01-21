@@ -41,13 +41,14 @@ def getClusterStatus(inventory_file):
 @click.option('--logfile',                        default='/tmp/failuresim.log', help="Log file to write to")
 @click.option('--inventory-file',         '-i',   default='',                    help="Ansible inventory file to use")
 @click.option('--service',                '-s',   default='',                    help="Which service to disrupt")
+@click.option('--group',                  '-g',   default='',                    help="Which ansible group to disrupt")
 @click.option('--clean',                  '-c',   is_flag=True,                  help='Enable to Clean')
 @click.option('--sleep-time',             '-t',   default=30,                    help='Seconds to sleep after killing')
 @click.option('--ansible-root-dir', default=dirname(dirname(abspath(__file__)))+"/ansible", 
                                                                                  help="Root directory for Ansible")
 @click.option('--profile-type',           '-p',   default="stability",           help='Which profile type to use')
 @click.option('--ansible-output',         '-d',   is_flag=True,                  help='Enable output from ansible  to stdout')
-def mastercommand(debug, logfile, inventory_file, service, clean, sleep_time,ansible_root_dir, profile_type, ansible_output):
+def mastercommand(debug, logfile, inventory_file, service, group, clean, sleep_time,ansible_root_dir, profile_type, ansible_output):
   #Set up logging
   logger = logging.getLogger('failureSimulator')
   if debug:
@@ -78,7 +79,7 @@ def mastercommand(debug, logfile, inventory_file, service, clean, sleep_time,ans
   inventoryParser = ansibleInventoryParser(ansibleInventoryFilePath=inventory_file)
   parsedInv = inventoryParser.parseInventoryFile()
 
-  #If you want to print out a dictionary in a pretty format - uncomment this line - will work with any list/dictionary in python
+  #If you want to print out a dictionary in a pretty format - uncomment this next line - will work with any list/dictionary in python
   #print "Parsed Inventory:\n"+pformat(parsedInv)
 
   #Single out the group of machines we want
@@ -86,7 +87,7 @@ def mastercommand(debug, logfile, inventory_file, service, clean, sleep_time,ans
   machinesToFail = []
   for machine in parsedInv:
     #machine["group"] corresponds to the ansible group we want to effect
-    if machine["group"].lower() == service.lower():
+    if machine["group"].lower() == group.lower():
       machinesToFail.append(machine)
   logger.debug("Machines to Effect: \n"+pformat(machinesToFail)+"\n")
 
@@ -161,7 +162,91 @@ def mastercommand(debug, logfile, inventory_file, service, clean, sleep_time,ans
 
 
 
+  #####################################################################################
+  #Specific examples:
+  
+  #Stopping datanode
+  runner.deploy(playbook = join(ansible_root_dir, "hadoop_datanode.yml"), 
+                inventory=inventory_file, 
+                outputToStdout=ansible_output, 
+                maxRetries=0,
+                tags="force-stop",
+                extra_vars=extra_vars_dict,
+                limit="hadoop-worker-1",)
+
+  
+
+  #Cleaning hadoop
+  #Note about cleaning hadoop - take a look at neverwinterdp-deployments/ansible/roles/hadoop/tasks/clean.yml
+  #  to see what tasks are done when cleaning hadoop
+  #  Also note - if you specify the limit parameter, it will only execute on the node(s) specified
+  runner.deploy(playbook = join(ansible_root_dir, "hadoop.yml"), 
+                inventory=inventory_file, 
+                outputToStdout=ansible_output, 
+                maxRetries=0,
+                tags="clean",
+                extra_vars=extra_vars_dict,
+                limit="hadoop-worker-1",)
+
+  #I've added an extra flag to specifically disable formatting the namenode
+  #To do that, set this field like so in the extra_vars_dict, then call clean as normal
+  extra_vars_dict['disable_namenode_format'] = "True"
+  runner.deploy(playbook = join(ansible_root_dir, "hadoop.yml"), 
+                inventory=inventory_file, 
+                outputToStdout=ansible_output, 
+                maxRetries=0,
+                tags="clean",
+                extra_vars=extra_vars_dict,
+                limit="hadoop-worker-1",)
+
+  #To remove that key from the extra_vars_dict
+  extra_vars_dict.pop('disable_namenode_format', None)
+
+
+  #Starting datanode
+  runner.deploy(playbook = join(ansible_root_dir, "hadoop_datanode.yml"), 
+                inventory=inventory_file, 
+                outputToStdout=ansible_output, 
+                maxRetries=0,
+                tags="start",
+                extra_vars=extra_vars_dict,
+                limit="hadoop-worker-1",)
+
+  #Starting nodemanager
+  runner.deploy(playbook = join(ansible_root_dir, "hadoop_nodemanager.yml"), 
+                inventory=inventory_file, 
+                outputToStdout=ansible_output, 
+                maxRetries=0,
+                tags="start",
+                extra_vars=extra_vars_dict,
+                limit="hadoop-worker-1",)
+
+  #Start zookeeper
+  runner.deploy(playbook = join(ansible_root_dir, "zookeeper.yml"), 
+                inventory=inventory_file, 
+                outputToStdout=ansible_output, 
+                maxRetries=0,
+                tags="start",
+                extra_vars=extra_vars_dict,
+                limit="zookeeper-1",)
+
+  #Start kafka
+  runner.deploy(playbook = join(ansible_root_dir, "kafka.yml"), 
+                inventory=inventory_file, 
+                outputToStdout=ansible_output, 
+                maxRetries=0,
+                tags="start",
+                extra_vars=extra_vars_dict,
+                limit="kafka-1",)
+
+
+
 
 
 if __name__ == '__main__':
   mastercommand()
+
+
+
+
+
