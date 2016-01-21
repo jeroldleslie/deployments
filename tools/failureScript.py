@@ -72,11 +72,13 @@ if __name__ == '__main__':
 
   #Calls statusCommander to print out current status
   getClusterStatus(inventory_file)
-  
+
   #####################################################################
   #force stop kafka-1
   runner.deploy(playbook = kafkaPlaybook, 
                 inventory=inventory_file, 
+                #You can set this to False if you
+                #want to squelch Ansible from outputting to stdout
                 outputToStdout=True, 
                 maxRetries=0,
                 tags="force-stop",
