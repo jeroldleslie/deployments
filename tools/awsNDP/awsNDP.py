@@ -14,6 +14,24 @@ def getAwsRegions():
             "eu-central-1","ap-southeast-1","ap-northeast-1",
             "ap-southeast-2","ap-northeast-2","sa-east-1"]
 
+def getCluster(region):
+  group = {}
+  ec2 = boto3.resource('ec2', region_name=region)
+  instances = ec2.instances.filter(Filters=[{'Name': 'instance-state-name', 'Values': ['running']}])
+  for instance in instances:
+    for tag in instance.tags:
+      if "Key" in tag  and tag["Key"].lower() == "name":
+        groupKey = tag["Value"].rstrip('1234567890-').replace("-","_")
+        if not groupKey in group:
+          group[groupKey] = []
+        group[groupKey].append( {
+                      "name": tag["Value"],
+                      "publicIP": instance.public_ip_address,
+                      "privateIP": instance.private_ip_address,
+                      "publicDNS": instance.public_dns_name,
+                      })
+  return group
+
 @click.group(chain=True, help="AWS tool for NDP!")
 @click.option('--debug/--no-debug',      default=False, help="Turn debugging on")
 @click.option('--logfile',               default='/tmp/awsNDP.log', help="Log file to write to")
@@ -35,28 +53,27 @@ def mastercommand(debug, logfile):
 @click.option('--user',      '-u',   default="neverwinterdp",  help='Username to use')
 def ansibleinventory(region,keypath,user):
   logger = logging.getLogger('awsNDP')
-  group = {}
-  ec2 = boto3.resource('ec2', region_name=region)
-  instances = ec2.instances.filter(Filters=[{'Name': 'instance-state-name', 'Values': ['running']}])
-  for instance in instances:
-    for tag in instance.tags:
-      if "Key" in tag  and tag["Key"].lower() == "name":
-        groupKey = tag["Value"].rstrip('1234567890-').replace("-","_")
-        if not groupKey in group:
-          group[groupKey] = []
-        group[groupKey].append( {
-                      "name": tag["Value"],
-                      "publicIP": instance.public_ip_address,
-                      "privateIP": instance.private_ip_address
-                      })
+  group = getCluster(region)
   for group,machines in group.iteritems():
     print "["+group+"]"
     id=1
     for machine in machines:
-      print machine["name"]+" ansible_ssh_user="+str(user)+" ansible_ssh_private_key_file="+str(keypath)+" ansible_host="+str(machine["publicIP"])+" id="+str(id)
+      print machine["name"]+" ansible_ssh_user="+str(user)+" ansible_ssh_private_key_file="+str(keypath)+" ansible_host="+str(machine["publicDNS"])+" id="+str(id)
       id= id+1
     print ""
 
+@mastercommand.command(help="Create ansible inventory file from AWS cluster")
+@click.option('--region',    '-r',   default="us-west-2",  type=click.Choice(getAwsRegions()), help='AWS Region to connect to')
+def hostfile(region):
+  logger = logging.getLogger('awsNDP')
+  group = getCluster(region)
+  result = "##SCRIBENGIN CLUSTER START##\n"
+  for group,machines in group.iteritems():
+    for machine in machines:
+      result+= machine["privateIP"]+" "+machine["name"]+" "+machine["name"]+".private"+"\n"
+      result+= machine["publicDNS"]+" "+machine["name"]+".public\n"
+  result += "##SCRIBENGIN CLUSTER END##\n"
+  print result
 
 
 
