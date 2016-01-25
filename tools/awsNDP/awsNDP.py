@@ -31,11 +31,13 @@ def mastercommand(debug, logfile):
 
 @mastercommand.command(help="Create ansible inventory file from AWS cluster")
 @click.option('--region',    '-r',   default="us-west-2",  type=click.Choice(getAwsRegions()), help='AWS Region to connect to')
-def ansibleinventory(region):
+@click.option('--keypath',   '-k',   default="~/.ssh/id_rsa",  help='Path to SSH key')
+@click.option('--user',      '-u',   default="neverwinterdp",  help='Username to use')
+def ansibleinventory(region,keypath,user):
   logger = logging.getLogger('awsNDP')
   group = {}
   ec2 = boto3.resource('ec2', region_name=region)
-  instances = ec2.instances.filter(Filters=[{'Name': 'instance-state-name', 'Values': ['running']}])
+  instances = ec2.instances.filter(Filters=[{'Name': 'instance-state-name', 'Values': ['stopped']}])
   for instance in instances:
     for tag in instance.tags:
       if "Key" in tag  and tag["Key"].lower() == "name":
@@ -51,7 +53,7 @@ def ansibleinventory(region):
     print "["+group+"]"
     id=1
     for machine in machines:
-      print machine["name"]+" ansible_ssh_user=neverwinterdp ansible_ssh_private_key_file=~/.ssh/id_rsa ansible_host="+machine["publicIP"]+" id="+str(id)
+      print machine["name"]+" ansible_ssh_user="+str(user)+" ansible_ssh_private_key_file="+str(keypath)+" ansible_host="+str(machine["publicIP"])+" id="+str(id)
       id= id+1
     print ""
 
