@@ -48,7 +48,7 @@ def ansibleinventory(region):
                       "privateIP": instance.private_ip_address
                       })
   for group,machines in group.iteritems():
-    print "["+group+""
+    print "["+group+"]"
     id=1
     for machine in machines:
       print machine["name"]+" ansible_ssh_user=neverwinterdp ansible_ssh_private_key_file=~/.ssh/id_rsa ansible_host="+machine["publicIP"]+" id="+str(id)
