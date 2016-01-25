@@ -37,7 +37,7 @@ def ansibleinventory(region,keypath,user):
   logger = logging.getLogger('awsNDP')
   group = {}
   ec2 = boto3.resource('ec2', region_name=region)
-  instances = ec2.instances.filter(Filters=[{'Name': 'instance-state-name', 'Values': ['stopped']}])
+  instances = ec2.instances.filter(Filters=[{'Name': 'instance-state-name', 'Values': ['running']}])
   for instance in instances:
     for tag in instance.tags:
       if "Key" in tag  and tag["Key"].lower() == "name":
