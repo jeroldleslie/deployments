@@ -4,8 +4,12 @@ exec python $0 ${1+"$@"}
 """
 
 import click,logging, boto3
-from sys import stdout
-
+from sys import stdout,path
+from os.path import abspath, dirname
+from multiprocessing import Process
+#Make sure the commons package is on the path correctly
+path.insert(0, dirname(dirname(abspath(__file__))))
+from commons.ssh.ssh import ssh
 
 logger = None
 
@@ -31,6 +35,30 @@ def getCluster(region):
                       "publicDNS": instance.public_dns_name,
                       })
   return group
+
+def getHostsFile(region):
+  logger = logging.getLogger('awsNDP')
+  group = getCluster(region)
+  result = "##SCRIBENGIN CLUSTER START##\n"
+  for group,machines in group.iteritems():
+    for machine in machines:
+      result+= machine["privateIP"]+" "+machine["name"]+" "+machine["name"]+".private"+"\n"
+      result+= machine["publicIP"]+" "+machine["name"]+".public\n"
+  result += "##SCRIBENGIN CLUSTER END##\n"
+  return result
+
+
+def updateRemoteHostsFile(hostname,content,hostfile="/etc/hosts"):
+  logger = logging.getLogger('awsNDP')
+  s = ssh()
+  out,err = s.sshExecute(hostname, "sudo sh -c \"echo '"+content+"' > "+hostfile+"\"")
+  if out:
+    print "STDOUT: "+out
+  if err:
+    print "STDERR: "+err
+  logger.debug(hostname+": STDOUT: "+out)
+  logger.debug(hostname+": STDERR: "+err)
+
 
 @click.group(chain=True, help="AWS tool for NDP!")
 @click.option('--debug/--no-debug',      default=False, help="Turn debugging on")
@@ -65,15 +93,28 @@ def ansibleinventory(region,keypath,user):
 @mastercommand.command(help="Create ansible inventory file from AWS cluster")
 @click.option('--region',    '-r',   default="us-west-2",  type=click.Choice(getAwsRegions()), help='AWS Region to connect to')
 def hostfile(region):
-  logger = logging.getLogger('awsNDP')
+  print getHostsFile(region)
+
+@mastercommand.command(help="Create ansible inventory file from AWS cluster and update remote /etc/hosts file")
+@click.option('--region',    '-r',   default="us-west-2",  type=click.Choice(getAwsRegions()), help='AWS Region to connect to')
+def updateremotehostfile(region):
   group = getCluster(region)
-  result = "##SCRIBENGIN CLUSTER START##\n"
+  hostFile  = "127.0.0.1 localhost localhost.localdomain localhost4 localhost4.localdomain4\n"
+  hostFile += "::1 localhost localhost.localdomain localhost6 localhost6.localdomain6\n\n"
+  hostFile += getHostsFile(region)
+  logging.debug("Hostfile: \n"+hostFile)
+  processes = []
   for group,machines in group.iteritems():
     for machine in machines:
-      result+= machine["privateIP"]+" "+machine["name"]+" "+machine["name"]+".private"+"\n"
-      result+= machine["publicDNS"]+" "+machine["name"]+".public\n"
-  result += "##SCRIBENGIN CLUSTER END##\n"
-  print result
+      if machine["name"] != "kafka-test":
+        print "Updating: "+machine["name"]
+        p = Process(target=updateRemoteHostsFile, args=(machine["publicDNS"], hostFile))
+        p.start()
+        processes.append(p)
+
+  for process in processes:
+    process.join()
+
 
 
 
