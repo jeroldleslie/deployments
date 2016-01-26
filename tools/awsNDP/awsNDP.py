@@ -98,19 +98,20 @@ def hostfile(region):
 @mastercommand.command(help="Update /etc/hosts file on remote machines in AWS")
 @click.option('--region',    '-r',   default="us-west-2",  type=click.Choice(getAwsRegions()), help='AWS Region to connect to')
 def updateremotehostfile(region):
+  logger = logging.getLogger('awsNDP')
   group = getCluster(region)
   hostFile  = "127.0.0.1 localhost localhost.localdomain localhost4 localhost4.localdomain4\n"
   hostFile += "::1 localhost localhost.localdomain localhost6 localhost6.localdomain6\n\n"
   hostFile += getHostsFile(region)
-  logging.debug("Hostfile: \n"+hostFile)
+  logger.debug("Hostfile: \n"+hostFile)
   processes = []
   for group,machines in group.iteritems():
     for machine in machines:
-      if machine["name"] != "kafka-test":
-        print "Updating: "+machine["name"]
-        p = Process(target=updateRemoteHostsFile, args=(machine["publicDNS"], hostFile))
-        p.start()
-        processes.append(p)
+      print "Updating: "+machine["name"]
+      logger.debug("Updating: "+machine["name"])
+      p = Process(target=updateRemoteHostsFile, args=(machine["publicDNS"], hostFile))
+      p.start()
+      processes.append(p)
 
   for process in processes:
     process.join()
