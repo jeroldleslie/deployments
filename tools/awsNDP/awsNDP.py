@@ -131,7 +131,7 @@ def updateremotehostfile(region,subdomain):
   group = getCluster(region,subdomain)
   hostFile  = "127.0.0.1 localhost localhost.localdomain localhost4 localhost4.localdomain4\n"
   hostFile += "::1 localhost localhost.localdomain localhost6 localhost6.localdomain6\n\n"
-  hostFile += getHostsFile(region)
+  hostFile += getHostsFile(region,subdomain)
   logger.debug("Hostfile: \n"+hostFile)
   processes = []
   for group,machines in group.iteritems():
