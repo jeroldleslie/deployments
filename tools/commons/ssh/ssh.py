@@ -8,7 +8,7 @@ class ssh(object):
   def __init__(self, sshKeyPath=join(expanduser("~"),".ssh/id_rsa")):
     self.sshKeyPath = sshKeyPath
     
-  def sshExecute(self, host, command, user = "neverwinterdp", maxRetries=10, retries=0, sleepTime=10):
+  def sshExecute(self, host, command, user = "neverwinterdp", maxRetries=10, retries=0, sleepTime=10, get_pty=True):
     """
     SSH onto a machine, execute a command
     Returns [stdout,stderr]
@@ -19,7 +19,7 @@ class ssh(object):
       c = paramiko.SSHClient()
       c.set_missing_host_key_policy(paramiko.AutoAddPolicy())
       c.connect( hostname = host, username = user, pkey = key, timeout = 10 )
-      stdin, stdout, stderr = c.exec_command(command)
+      stdin, stdout, stderr = c.exec_command(command, get_pty=get_pty)
       
       stdout = stdout.read()
       stderr = stderr.read()

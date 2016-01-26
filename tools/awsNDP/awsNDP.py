@@ -90,12 +90,12 @@ def ansibleinventory(region,keypath,user):
       id= id+1
     print ""
 
-@mastercommand.command(help="Create ansible inventory file from AWS cluster")
+@mastercommand.command(help="Print out hostfile for AWS cluster")
 @click.option('--region',    '-r',   default="us-west-2",  type=click.Choice(getAwsRegions()), help='AWS Region to connect to')
 def hostfile(region):
   print getHostsFile(region)
 
-@mastercommand.command(help="Create ansible inventory file from AWS cluster and update remote /etc/hosts file")
+@mastercommand.command(help="Update /etc/hosts file on remote machines in AWS")
 @click.option('--region',    '-r',   default="us-west-2",  type=click.Choice(getAwsRegions()), help='AWS Region to connect to')
 def updateremotehostfile(region):
   group = getCluster(region)
