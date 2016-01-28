@@ -1,6 +1,7 @@
 from os.path import abspath, dirname, join
 from sys import path
 from random import sample
+
 path.insert(0, dirname(dirname(abspath(__file__))))
 from ssh.ssh import ssh
 from ansibleInventoryParser.ansibleInventoryParser import ansibleInventoryParser
@@ -38,7 +39,6 @@ class kafkaTool():
     newId = self.getNewBrokerID()
     return self.ssh.sshExecute(host, r"sed -i 's/broker.id=[0-9]*/broker.id="+str(newId)+r"/' "+ kafkaConfigPath)
     
-
 if __name__ == '__main__':
   x = kafkaTool("/tmp/scribengininventory_docker")
   print x.getBrokerIDs()

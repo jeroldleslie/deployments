@@ -12,7 +12,7 @@ kafka:
       KAFKA_HEAP_SIZE: 1536
     server_properties:
       zookeeper_clientport: 2181 
-      zookeeper_connection_timeout_ms: 10000
+      zookeeper_connection_timeout_ms: 6000
       port: 9092
       num_network_threads: 5
       num_io_threads: 8
@@ -68,8 +68,8 @@ zookeeper:
     jvm:
       ZOOKEEPER_HEAP_SIZE: 1536
     zoo_cfg:
-      tickTime: 5000
-      initLimit: 10
+      tickTime: 2000
+      initLimit: 5
       syncLimit: 5
       maxClientCnxns: 60
       autopurge_snapRetainCount: 5
