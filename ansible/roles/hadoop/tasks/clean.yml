@@ -15,5 +15,7 @@
   sudo: yes
 
 - name: Format namenode
-  shell: "{{ hadoop_master.software.installation.hadoop_home_dir }}/bin/hdfs namenode -format"
+  shell: "{{ hadoop_master.software.installation.hadoop_home_dir }}/bin/hdfs namenode -format -nonInteractive"
+  ignore_errors: yes
+  run_once: true
   when: (disable_namenode_format is not defined) or ( disable_namenode_format is defined and disable_namenode_format == "False")
