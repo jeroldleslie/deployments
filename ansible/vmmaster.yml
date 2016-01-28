@@ -1,0 +1,6 @@
+---
+- name: VMMaster
+  hosts: hadoop_worker
+  remote_user: neverwinterdp
+  roles:
+    - vmmaster

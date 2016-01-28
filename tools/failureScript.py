@@ -51,6 +51,8 @@ if __name__ == '__main__':
 
   kafkaPlaybook = join(ansible_root_dir, "kafka.yml")
   zookeeperPlaybook = join(ansible_root_dir, "zookeeper.yml")
+  vmmasterPlaybook = join(ansible_root_dir, "vmmaster.yml")
+  vmmasterPlaybookToStart = join(ansible_root_dir, "vmmaster_start.yml")
 
   #Parse the inventory file to get our cluster info
   runner = ansibleRunner()
@@ -113,4 +115,22 @@ if __name__ == '__main__':
 
   #Start zookeeper-1
   runner.deploy(playbook = zookeeperPlaybook, inventory=inventory_file, outputToStdout=True, maxRetries=0, tags="start", limit="zookeeper-1") 
+  getClusterStatus(inventory_file)
+
+ #####################################################################
+  #force stop vm-master
+  runner.deploy(playbook = vmmasterPlaybook, inventory=inventory_file, outputToStdout=True, maxRetries=0, tags="force-stop")
+  
+  #wait to kill all containers in all hadoop-worker machines
+  runner.deploy(playbook = vmmasterPlaybook, inventory=inventory_file, outputToStdout=True, maxRetries=0, tags="wait-to-kill")
+   
+  #Get cluster status 
+  getClusterStatus(inventory_file)
+  
+  #Start vm-master
+  #here we are using different playbook called vmmaster_start.yml, 
+  #its because vmmaster needs to start from a machine which is 
+  #specifically mentioned in the inventory file(currently its monitoring).
+  #And not from hadoop-worker machines
+  runner.deploy(playbook = vmmasterPlaybookToStart, inventory=inventory_file, outputToStdout=True, maxRetries=0, tags="start") 
   getClusterStatus(inventory_file)
