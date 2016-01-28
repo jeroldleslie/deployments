@@ -245,8 +245,3 @@ def mastercommand(debug, logfile, inventory_file, service, group, clean, sleep_t
 
 if __name__ == '__main__':
   mastercommand()
-
-
-
-
-

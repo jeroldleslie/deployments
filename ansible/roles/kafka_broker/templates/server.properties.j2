@@ -136,7 +136,7 @@ zookeeper.connect={% for host in groups['zookeeper'] %}{{ host }}:{{ kafka.softw
 # Timeout in ms for connecting to zookeeper
 zookeeper.connection.timeout.ms={{ kafka.software.server_properties.zookeeper_connection_timeout_ms }}
 
-zookeeper.session.timeout.ms=10000
+zookeeper.session.timeout.ms=6000
 
 #Rebalance the partitions. Beacreful, those options can be worse under the heavy load and cause the failure
 auto.leader.rebalance.enable=false

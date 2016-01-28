@@ -66,8 +66,8 @@ function get_opt() {
 TEST_STORAGE=$(get_opt --storage 'kafka' $@)
 
 GENERATOR_OPTS="\
-  --generator-num-of-chunk 60 --generator-num-of-message-per-chunk 100000000 --generator-num-of-writer 1 --generator-break-in-period 150 \
-  --generator-kafka-num-of-partition 5 --generator-kafka-num-of-replication 2 \
+  --generator-num-of-chunk 60 --generator-num-of-message-per-chunk 100000000 --generator-num-of-writer 1 --generator-break-in-period 500 \
+  --generator-kafka-num-of-partition 5 --generator-kafka-num-of-replication 3 \
   --generator-max-wait-time 30000"
 
 VALIDATOR_OPTS="--validator-num-of-reader 1 --validator-max-run-time 1000000000 --validator-message-wait-timeout 300000"
@@ -75,7 +75,7 @@ VALIDATOR_OPTS="--validator-num-of-reader 1 --validator-max-run-time 1000000000 
 DATAFLOW_OPTS="\
   --dataflow-storage $TEST_STORAGE --dataflow-num-of-worker 5 --dataflow-num-of-executor-per-worker 2 \
   --dataflow-tracking-window-size 50000 --dataflow-sliding-window-size 100 \
-  --dataflow-default-parallelism 5 --dataflow-default-replication 2"
+  --dataflow-default-parallelism 5 --dataflow-default-replication 3"
 
 SIMULATION_OPTS="\
   --simulation-period 450000 --simulation-max  200  --simulation-report-period 90000"

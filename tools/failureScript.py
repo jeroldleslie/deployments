@@ -15,8 +15,6 @@ from commons.ansibleInventoryParser.ansibleInventoryParser import ansibleInvento
 from commons.kafkaTool.kafkaTool import kafkaTool
 from statusCommander import statusCommander
 
-
-
 #Calling this in a threaded manner because if not
 #it seems that click automatically calls exit and 
 #kills the application in place
@@ -89,12 +87,7 @@ if __name__ == '__main__':
                 limit="kafka-1",)
 
   #Clean kafka-1
-  runner.deploy(playbook = kafkaPlaybook, 
-                inventory=inventory_file, 
-                outputToStdout=True, 
-                maxRetries=0,
-                tags="clean",
-                limit="kafka-1",)
+  runner.deploy(playbook = kafkaPlaybook, inventory=inventory_file, outputToStdout=True, maxRetries=0, tags="clean", limit="kafka-1")
 
   #Set a new broker ID for kafka-1 (Its guaranteed to be unique)
   #New broker ID will = (the max broker id of the cluster) + 1
@@ -105,47 +98,19 @@ if __name__ == '__main__':
 
 
   #Start kafka-1
-  runner.deploy(playbook = kafkaPlaybook, 
-                inventory=inventory_file, 
-                outputToStdout=True, 
-                maxRetries=0,
-                tags="start",
-                limit="kafka-1",)
+  runner.deploy(playbook = kafkaPlaybook, inventory=inventory_file, outputToStdout=True, maxRetries=0, tags="start", limit="kafka-1")
 
 
   getClusterStatus(inventory_file)
 
   #####################################################################
   #force stop zookeeper-1
-  runner.deploy(playbook = zookeeperPlaybook, 
-                inventory=inventory_file, 
-                outputToStdout=True, 
-                maxRetries=0,
-                tags="force-stop",
-                limit="zookeeper-1",)
-
+  runner.deploy(playbook = zookeeperPlaybook, inventory=inventory_file, outputToStdout=True, maxRetries=0, tags="force-stop", limit="zookeeper-1") 
   #Clean zookeeper-1
-  runner.deploy(playbook = zookeeperPlaybook, 
-                inventory=inventory_file, 
-                outputToStdout=True, 
-                maxRetries=0,
-                tags="clean",
-                limit="zookeeper-1",)
+  runner.deploy(playbook = zookeeperPlaybook, inventory=inventory_file, outputToStdout=True, maxRetries=0, tags="clean", limit="zookeeper-1")
 
   getClusterStatus(inventory_file)
 
   #Start zookeeper-1
-  runner.deploy(playbook = zookeeperPlaybook, 
-                inventory=inventory_file, 
-                outputToStdout=True, 
-                maxRetries=0,
-                tags="start",
-                limit="zookeeper-1",)
-
+  runner.deploy(playbook = zookeeperPlaybook, inventory=inventory_file, outputToStdout=True, maxRetries=0, tags="start", limit="zookeeper-1") 
   getClusterStatus(inventory_file)
-
-
-
-
-
-
