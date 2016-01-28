@@ -78,7 +78,6 @@
 
 - name: Add masters and slaves file
   template: src={{ item }}.j2 dest={{ hadoop_master.software.installation.hadoop_home_dir }}/etc/hadoop/{{ item }}
-  sudo: yes
   with_items:
     - slaves
     - masters
