@@ -1,0 +1,27 @@
+
+- name: Stop vm-master-*
+  shell: "kill -9 $(jps -m | grep 'vm-master-*' | awk '{print $1}')"
+  ignore_errors: yes
+  tags:
+    [ stop, force-stop ]
+
+- name: Start VM Service
+  shell: "{{ remote_scribengin_home }}scribengin/bin/shell.sh vm start"
+  register: stdout
+  tags:
+    - start
+    
+- name: Output from Start VM Service
+  debug: var=stdout.stdout_lines
+  run_once: true
+  tags:
+    - start
+    
+- name: Test whether all containers are killed
+  shell: if (( $(jps -m | grep -v grep | grep "master\|worker\|tracking\|validator\|generator" | wc -l) > 0 )); then echo "true"; else echo "false"; fi
+  register: result
+  until: result.stdout == 'false'
+  retries: 15
+  delay: 5
+  tags:
+    - wait-to-kill

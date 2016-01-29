@@ -1,0 +1,6 @@
+---
+- name: VMMaster
+  hosts: monitoring
+  remote_user: neverwinterdp
+  roles:
+    - vmmaster
