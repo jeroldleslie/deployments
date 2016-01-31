@@ -84,7 +84,6 @@ function runTest() {
   time $NEVERWINTERDP_BUILD/dataflow/tracking-sample/bin/run-tracking.sh $GENERATOR_OPTS $DATAFLOW_OPTS $VALIDATOR_OPTS 
 }
 
-
 function runWithFailureTest() {
   time $NEVERWINTERDP_BUILD/dataflow/tracking-sample/bin/run-tracking-with-simulation.sh $GENERATOR_OPTS $DATAFLOW_OPTS $VALIDATOR_OPTS $SIMULATION_OPTS
 }

@@ -15,6 +15,7 @@ from random import randint
 
 from kafka import KafkaTool
 from zookeeper import ZookeeperTool
+from scribengin import ScribenginTool
 
 path.insert(0, dirname(dirname(abspath(__file__))))
 from commons.ansibleInventoryParser.ansibleInventoryParser import ansibleInventoryParser
@@ -97,6 +98,27 @@ class ClusterChaos(object):
       self.killCleanRestartZookeeper(selZookeeperHost, failureDuration);
       count += 1;
 
+  def killRestartVMMaster(self, failureDuration):
+    scribenginTool = ScribenginTool();
+    scribenginTool.forceStopVMMaster();
+
+    if failureDuration > 0:
+      print "Wait for %d sec before  resume the vm master" % (failureDuration)
+      sleep(failureDuration);
+
+    scribenginTool.startVMMaster();
+    scribenginTool.submitTrackingDataflow();
+    self.printClusterStatus();
+
+  def randomVMMasterChaos(self, numOfFailures, failurePeriod, failureDuration):
+    count = 1;
+    while count  <= numOfFailures:
+      print "Wait for the next failure, wait time = %d" % (failurePeriod)
+      sleep(failurePeriod);
+      print "Restart vm-master %d time(s), failure duration %d sec " % (count, failureDuration)
+      self.killRestartVMMaster(failureDuration);
+      count += 1;
+
   def randomMixChaos(self, numOfFailures, failurePeriod, failureDuration):
     count = 1;
     while count  <= numOfFailures:
@@ -124,4 +146,6 @@ if __name__ == '__main__':
   #clusterChaos.randomZookeeperChaos(1,  10, 5);
   #clusterChaos.randomZookeeperChaos(30, 300, 30);
 
-  clusterChaos.randomMixChaos(50, 180, 30);
+  clusterChaos.randomVMMasterChaos(2,  60, 5);
+
+  #clusterChaos.randomMixChaos(50, 180, 30);
