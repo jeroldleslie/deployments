@@ -45,5 +45,5 @@ DATAFLOW_OPTS="\
   --dataflow-tracking-window-size 50000 --dataflow-sliding-window-size 100 \
   --dataflow-default-parallelism 5 --dataflow-default-replication 2"
 
-time $NEVERWINTERDP_BUILD/dataflow/tracking-sample/bin/run-hdfs-tagging-test.sh $GENERATOR_OPTS $DATAFLOW_OPTS $VALIDATOR_OPTS 
+time $NEVERWINTERDP_BUILD/dataflow/example/bin/run-hdfs-tagging-test.sh $GENERATOR_OPTS $DATAFLOW_OPTS $VALIDATOR_OPTS 
 

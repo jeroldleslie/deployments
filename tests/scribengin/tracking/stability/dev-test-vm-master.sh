@@ -47,5 +47,5 @@ DATAFLOW_OPTS="\
 SIMULATION_OPTS="\
   --simulation-period 450000 --simulation-max  200  --simulation-report-period 90000"
 
-time $NEVERWINTERDP_BUILD/dataflow/tracking-sample/bin/run-generator-validator.sh $GENERATOR_OPTS $DATAFLOW_OPTS $VALIDATOR_OPTS 
+time $NEVERWINTERDP_BUILD/dataflow/example/bin/run-generator-validator.sh $GENERATOR_OPTS $DATAFLOW_OPTS $VALIDATOR_OPTS 
 

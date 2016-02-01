@@ -81,11 +81,11 @@ SIMULATION_OPTS="\
   --simulation-period 450000 --simulation-max  200  --simulation-report-period 90000"
 
 function runTest() {
-  time $NEVERWINTERDP_BUILD/dataflow/tracking-sample/bin/run-tracking.sh $GENERATOR_OPTS $DATAFLOW_OPTS $VALIDATOR_OPTS 
+  time $NEVERWINTERDP_BUILD/dataflow/example/bin/run-tracking.sh $GENERATOR_OPTS $DATAFLOW_OPTS $VALIDATOR_OPTS 
 }
 
 function runWithFailureTest() {
-  time $NEVERWINTERDP_BUILD/dataflow/tracking-sample/bin/run-tracking-with-simulation.sh $GENERATOR_OPTS $DATAFLOW_OPTS $VALIDATOR_OPTS $SIMULATION_OPTS
+  time $NEVERWINTERDP_BUILD/dataflow/example/bin/run-tracking-with-simulation.sh $GENERATOR_OPTS $DATAFLOW_OPTS $VALIDATOR_OPTS $SIMULATION_OPTS
 }
 
 if [ "$COMMAND" = "basic" ] ; then
