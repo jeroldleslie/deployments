@@ -22,6 +22,7 @@
   file: path={{ hadoop_master.software.installation.hadoop_home_dir }}/vm-logs state=directory
   tags:
     - install
+    - start
    
 - name: Check if Hadoop is already downloaded
   stat: path=/tmp/{{ hadoop_master.software.installation.hadoop_tar }}
@@ -42,7 +43,6 @@
 
 - name: Decompress hadoop tar
   command: tar xfz /tmp/{{ hadoop_master.software.installation.hadoop_tar }} -C {{ hadoop_master.software.installation.hadoop_home_dir }} --strip-components=1
-  run_once: true
   tags:
     - install  
   
