@@ -42,6 +42,7 @@
 
 - name: Decompress hadoop tar
   command: tar xfz /tmp/{{ hadoop_master.software.installation.hadoop_tar }} -C {{ hadoop_master.software.installation.hadoop_home_dir }} --strip-components=1
+  run_once: true
   tags:
     - install  
   
