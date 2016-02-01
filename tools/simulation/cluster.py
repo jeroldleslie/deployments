@@ -109,15 +109,16 @@ class ClusterChaos(object):
     scribenginTool.startVMMaster();
     scribenginTool.submitTrackingDataflow();
     self.printClusterStatus();
+    scribenginTool.trackingDataflowStatus();
 
   def randomVMMasterChaos(self, numOfFailures, failurePeriod, failureDuration):
     count = 1;
     while count  <= numOfFailures:
       print "Wait for the next failure, wait time = %d" % (failurePeriod)
-      sleep(failurePeriod);
       print "Restart vm-master %d time(s), failure duration %d sec " % (count, failureDuration)
       self.killRestartVMMaster(failureDuration);
       count += 1;
+      sleep(failurePeriod);
 
   def randomMixChaos(self, numOfFailures, failurePeriod, failureDuration):
     count = 1;
@@ -134,7 +135,6 @@ class ClusterChaos(object):
         selKafkaHost = self.kafkaMachines[selHostIdx]; 
         print "Restart kafka %d time(s), select kafka host %s, failure duration %d sec " % (count, selKafkaHost, failureDuration)
         self.killCleanRestartKafka(selKafkaHost, failureDuration)
-
       count += 1;
 
 #Main function
@@ -146,6 +146,7 @@ if __name__ == '__main__':
   #clusterChaos.randomZookeeperChaos(1,  10, 5);
   #clusterChaos.randomZookeeperChaos(30, 300, 30);
 
-  clusterChaos.randomVMMasterChaos(2,  60, 5);
+  #clusterChaos.randomVMMasterChaos(2,  60, 5);
+  clusterChaos.randomVMMasterChaos(30,  300, 5);
 
   #clusterChaos.randomMixChaos(50, 180, 30);

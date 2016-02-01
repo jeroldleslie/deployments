@@ -56,3 +56,17 @@ class ScribenginTool(object):
     print "*********************************************************************************"
 
     subprocess.call([script, dataflowOpts]) 
+
+  def trackingDataflowStatus(self):
+    neverwinterdpHomeDir  = expanduser("~");
+    neverwinterdpBuildDir = neverwinterdpHomeDir + "/NeverwinterDP/release/build/release/neverwinterdp" ;
+    shellScript = neverwinterdpBuildDir + "/scribengin/bin/shell.sh" ;
+    opts=("plugin com.neverwinterdp.scribengin.dataflow.tracking.TrackingMonitor --dataflow-id tracking --show-history-vm")
+
+    print "*********************************************************************************"
+    print "Tracking Dataflow Status:"
+    print shellScript + ' ' + opts
+    print "*********************************************************************************"
+    args=[shellScript, "plugin", "com.neverwinterdp.scribengin.dataflow.tracking.TrackingMonitor", "--dataflow-id", "tracking", "--show-history-vm"];
+    #subprocess.call([shellScript, opts]) 
+    subprocess.call(args); 
