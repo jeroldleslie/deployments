@@ -1,0 +1,4 @@
+basho_bench_home_dir: /opt/basho_bench/
+basho_bench_conf_dir: /opt/basho_bench/conf/
+basho_bench_user: centos
+basho_bench_group: centos

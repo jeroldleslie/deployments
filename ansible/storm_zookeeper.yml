@@ -1,0 +1,6 @@
+---
+- name: Installs and configures Storm Zookeeper
+  hosts: storm-zookeeper
+  remote_user: centos
+  roles:
+    - storm_zookeeper

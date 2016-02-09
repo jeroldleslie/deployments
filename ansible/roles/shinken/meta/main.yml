@@ -1,0 +1,4 @@
+---
+dependencies:
+  - { role: odyssey_operating_system}
+  - { role: influxdb }

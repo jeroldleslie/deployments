@@ -1,0 +1,3 @@
+- name: Installs bind-utils (host & more)
+  yum: name='bind-utils' state=present
+  sudo: yes

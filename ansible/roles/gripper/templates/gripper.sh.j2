@@ -1,0 +1,7 @@
+#!/usr/bin/env bash
+JAVACMD='/usr/bin/java'
+JAR={{ gripper_home_dir }}{{ gripper_version }}/{{ gripper_jar_file }}
+JAVA_OPTS='-Xms256m -Xmx1024m -server -XX:NewRatio=2 -XX:+UseConcMarkSweepGC -XX:+TieredCompilation -XX:+AggressiveOpts'
+CLASSPATH={{ gripper_home_dir }}{{ gripper_version }}/
+
+${JAVACMD} -jar $JAR ${JAVA_OPTS} -classpath ${CLASSPATH} >>{{ gripper_log_folder }}{{ gripper_std_out }} 2>>{{ gripper_log_folder }}{{ gripper_std_err }}

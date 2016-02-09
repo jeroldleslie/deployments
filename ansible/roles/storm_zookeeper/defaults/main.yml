@@ -1,5 +1,5 @@
-zookeeper_user: neverwinterdp
-zookeeper_group: neverwinterdp
+zookeeper_user: centos
+zookeeper_group: centos
 
 zookeeper_home_dir: /opt/storm-zookeeper/
 zookeeper_data_dir: /data/storm-zookeeper/

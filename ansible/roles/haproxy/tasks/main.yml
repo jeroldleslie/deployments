@@ -1,0 +1,54 @@
+- name: make haproxy user
+  user: name={{ haproxy_user }} state=present
+  sudo: yes
+  tags:
+    [ install ]
+
+- name: make haproxy group
+  group: name={{ haproxy_group }} state=present
+  sudo: yes
+  tags:
+    [ install ]
+    
+- name: Check if HAProxy is already installed
+  sudo: yes
+  stat: path=/etc/haproxy/haproxy.cfg
+  register: installed_haproxy
+  tags:
+    [ install, configure ]
+    
+- name: Installing haproxy from RPM
+  sudo: yes
+  yum: name='haproxy' state=present
+  when: installed_haproxy.stat.exists == false
+  tags:
+    [ install, configure ]
+    
+- name: Check if HAProxy is already installed
+  stat: path=/etc/haproxy/haproxy.cfg
+  sudo: yes
+  register: installed_haproxy
+  tags:
+    [ install, configure ]
+    
+- name: backup the original haproxy.cfg
+  sudo: yes
+  command: mv /etc/haproxy/haproxy.cfg /etc/haproxy/haproxy.cfg.bak
+  when: installed_haproxy.stat.exists == True
+  tags:
+    [ install, configure ]
+    
+- name: Rendering haproxy.cfg
+  template: src={{ item }}.j2 dest=/etc/haproxy/{{ item }}
+  sudo: yes
+  with_items:
+    - haproxy.cfg
+  tags:
+    [ install, configure ]
+
+- name: Restart haproxy
+  sudo: yes
+  command: service haproxy restart
+  tags:
+    [ start ]
+

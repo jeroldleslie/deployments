@@ -1,0 +1,31 @@
+---
+#:TODO:
+#- include: data_volume.yml mount_point='/data'
+- include: firewall.yml
+  tags:
+    [ install ]
+
+- include: epel.yml
+  tags:
+    [ install ]
+
+- include: selinux.yml
+  tags:
+    [ install ]
+
+- include: disable_ipv6.yml
+  tags:
+    [ install ]
+
+- include: install_net_tools.yml
+  tags:
+    [ install ]
+
+#- include: install_vim.yml
+#  tags:
+#    [ install ]
+
+- include: install_bind_utils.yml  
+  tags:
+    [ install ]
+

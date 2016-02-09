@@ -1,0 +1,4 @@
+- name: Install Shinken's gripper services
+  sudo_user: shinken
+  template: src=gripper-service.cfg.j2 dest=/etc/shinken/services/gripper-service.cfg
+  when: shinken_type == "server"

@@ -1,0 +1,58 @@
+{% for storm_supervisor_service in shinken_storm_supervisor_services -%}
+    {% for s in storm_supervisor_service.services -%}
+        {% for host in groups['storm-supervisor'] %}
+define service{
+    host_name               {{host}}
+
+    service_description     {{s.desc}}
+    check_command           {{s.cmd}}
+
+    {% if max_check_attempts is defined -%}
+    max_check_attempts      {{max_check_attempts}}
+    {%- else -%}
+    max_check_attempts      5
+    {%- endif %}
+
+    {% if check_interval is defined -%}
+    check_interval          {{check_interval}}
+    {%- else -%}
+    check_interval          5
+    {%- endif %}
+
+    {% if retry_interval is defined -%}
+    retry_interval          {{retry_interval}}
+    {%- else -%}
+    retry_interval          3
+    {%- endif %}
+
+    {% if check_period is defined -%}
+    check_period            {{check_period}}
+    {%- else -%}
+    check_period            24x7
+    {%- endif %}
+
+    {% if notification_interval is defined -%}
+    notification_interval   {{notification_interval}}
+    {%- else -%}
+    notification_interval   30
+    {%- endif %}
+
+    {% if notification_period is defined -%}
+    notification_period     {{notification_period}}
+    {%- else -%}
+    notification_period     24x7
+    {%- endif %}
+
+    {% if notification_options is defined -%}
+    notification_options    {{notification_options}}
+    {%- else -%}
+    notification_options    w,c,r
+    {%- endif %}
+
+    ; must supply either contacts or a contact_groups
+    contacts               bdcoe
+}
+
+{% endfor %}
+{% endfor %}
+{% endfor %}

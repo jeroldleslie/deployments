@@ -1,0 +1,9 @@
+
+- name: Check if VIM is already installed
+  stat: path=/usr/bin/vim
+  register: installed
+
+- name: Installs VIM
+  yum: name='vim' state=present
+  sudo: yes
+  when: installed.stat.exists == false

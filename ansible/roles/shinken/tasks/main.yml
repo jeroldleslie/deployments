@@ -1,0 +1,387 @@
+
+
+- name: Ensure CentOS/RedHat 7 firewalld is disabled
+  service: name=firewalld state=stopped enabled=no
+  sudo: yes
+  when: ansible_os_family == "RedHat" and ansible_distribution_major_version == "7"
+  tags:
+    [install]
+
+- name: Ensure CentOS/RedHat 6 iptables is disabled
+  service: name=iptables state=stopped enabled=no
+  sudo: yes
+  when: ansible_os_family == "RedHat" and ansible_distribution_major_version == "6"
+  tags:
+    [install]
+
+
+
+# User & Group
+- name: Creating Shinken user
+  user: name={{ shinken_user }} state=present
+  sudo: yes
+  when: shinken_type == "server"
+  tags:
+    [install]
+
+- name: Creating Shinken group
+  group: name={{ shinken_group }} state=present
+  sudo: yes
+  when: shinken_type == "server"
+  tags:
+    [install]
+
+
+- name: Install necessary yum packages
+  yum: name={{item}} state=installed
+  sudo: yes
+  with_items:
+    - epel-release
+    - nrpe
+    - nagios-plugins
+    - nagios-plugins-nrpe
+    - nagios-plugins-all
+    - bc  # Needed for check_mem_avail
+  when: shinken_type == "agent"
+  tags:
+    [install]
+
+- name: Install necessary server additional yum packages
+  yum: name={{item}} state=installed
+  sudo: yes
+  with_items:
+    - python-pycurl
+    - python-setuptools
+    - python-pip
+    - python-paramiko
+    - openssl-devel
+  when: shinken_type == "server"
+  tags:
+    [install]
+
+- name: install shinken
+  sudo: yes
+  pip: name=shinken state=present
+  when: shinken_type == "server"
+  tags:
+    [install]
+
+- name: initialize shinken cli
+  sudo_user: shinken
+  shell: "shinken --init"
+  when: shinken_type == "server"
+  tags:
+    [install]
+
+- name: Is shinkens webui module installed
+  stat: path=/var/lib/shinken/modules/webui
+  register: webui_is_installed
+  sudo: yes
+  when: shinken_type == "server"
+  tags:
+    [install]
+
+- name: Is shinkens auth-cfg-password module installed
+  stat: path=/var/lib/shinken/modules/auth-cfg-password
+  register: auth_cfg_password_is_installed
+  sudo: yes
+  when: shinken_type == "server"
+  tags:
+    [install]
+
+- debug: var=webui_is_installed
+  tags:
+    [install]
+
+- debug: var=auth_cfg_password_is_installed
+  tags:
+    [install]
+
+
+- name: install shinken webui modules
+  sudo_user: shinken
+  shell: "shinken install {{item}}"
+  with_items:
+    - webui
+  when:
+    webui_is_installed is defined and webui_is_installed.stat.exists == False and shinken_type == "server"
+  tags:
+    [install]
+
+
+
+- name: install shinken auth-cfg-password modules
+  sudo_user: shinken
+  shell: "shinken install {{item}}"
+  with_items:
+    - auth-cfg-password
+  when:
+    auth_cfg_password_is_installed is defined and auth_cfg_password_is_installed.stat.exists == False and shinken_type == "server"
+  tags:
+    [install]
+
+- name: install influxdb
+  sudo: yes
+#  pip: name=shinken state=present
+  pip: name=influxdb state=present
+  when: shinken_type == "server"
+  tags:
+    [install]
+
+- name: Install Shinken sqlitedb
+  sudo_user: shinken
+  shell: "shinken install {{item}}"
+  with_items:
+    - sqlitedb
+  when: shinken_type == "server"
+  tags:
+    [install]
+
+- name: Is shinkens mod-influxdb module installed
+  stat: path=/var/lib/shinken/modules/mod-influxdb
+  register: mod_influxdb_is_installed
+  sudo: yes
+  when: shinken_type == "server"
+  tags:
+    [install]
+
+- name: Install Shinken mod-influxdb
+  sudo_user: shinken
+  shell: "shinken install {{item}}"
+  with_items:
+    - mod-influxdb
+  when:
+    mod_influxdb_is_installed is defined and mod_influxdb_is_installed.stat.exists == False and shinken_type == "server"
+  tags:
+    [install]
+
+
+- stat: path=/var/lib/shinken/inventory/linux-ssh
+  register: module_is_installed
+  sudo: yes
+- name: Install Shinken linux-ssh
+  sudo_user: shinken
+  shell: "shinken install linux-ssh"
+  when:
+    module_is_installed is defined and module_is_installed.stat.exists == False and shinken_type == "server"
+  tags:
+    [install]
+
+
+
+#- name: Install Shinken Modules
+#  sudo_user: shinken
+#  shell: "shinken install {{item}}"
+#  with_items:
+##    - booster-nrpe
+#    - linux-ssh
+##    - livestatus
+##    - graphite
+#    - mod-influxdb
+
+
+
+- template: src={{item}}.j2 dest=/etc/shinken/modules/{{item}}
+  sudo_user: shinken
+  with_items:
+    - webui.cfg
+  when: shinken_type == "server"
+  tags:
+    [install,configure]
+
+- template: src={{item}}.j2 dest=/etc/shinken/brokers/{{item}}
+  sudo_user: shinken
+  with_items:
+    - broker-master.cfg
+  when: shinken_type == "server"
+  tags:
+    [install,configure]
+
+- template: src={{item}}.j2 dest=/etc/shinken/resource.d/{{item}}
+  sudo_user: shinken
+  with_items:
+    - paths.cfg
+  when: shinken_type == "server"
+  tags:
+    [install,configure]
+
+- name: Ensure that shinken is running after reboot
+  sudo: yes
+  shell: /sbin/chkconfig shinken on
+  when: shinken_type == "server"
+  tags:
+    [start]
+
+- name: Install shinkens command config files
+  sudo_user: shinken
+  copy: src={{item}} dest=/etc/shinken/commands/{{item}} mode=0644 owner=shinken group=shinken
+  with_items:
+    - check_disk_nrpe.cfg
+    - check_memory_nrpe.cfg
+    - check_mem_avail_nrpe.cfg
+    - check_total_procs_nrpe.cfg
+    - check_zombie_procs_nrpe.cfg
+    - check_users_nrpe.cfg
+    - check_load_nrpe.cfg
+    - check_gripper_service.cfg
+    - check_kafka_broker_service.cfg
+    - check_kafka_zookeeper_service.cfg
+    - check_storm_nimbus_service.cfg
+    - check_storm_supervisor_service.cfg
+    - check_storm_ui_service.cfg
+    - check_storm_zookeeper_service.cfg
+  when: shinken_type == "server"
+  tags:
+    [install,configure]
+
+
+- name: Install additional plugins
+  sudo_user: root
+  copy: src={{item}} dest=/usr/lib64/nagios/plugins/{{item}} mode=0755 owner=root group=root
+  with_items:
+    - check_mem_avail
+  when: shinken_type == "agent"
+  tags:
+    [install,configure]
+
+
+- name: Install Shinkens contact config file
+  sudo_user: shinken
+  template: src={{item}}.j2 dest=/etc/shinken/contacts/{{item}}
+  with_items:
+    - bdcoe.cfg
+  when: shinken_type == "server"
+  tags:
+    [install,configure]
+
+- include: register_all_hosts.yml
+  tags:
+    [install,configure]
+
+- include: register_all_hostgroups.yml
+  tags:
+    [install,configure]
+
+- include: register_all_services.yml
+  tags:
+    [install,configure]
+
+- include: register_gripper_services.yml
+  tags:
+    [install,configure]
+
+- include: register_kafka_services.yml
+  tags:
+    [install,configure]
+
+- include: register_storm_zookeeper_services.yml
+  tags:
+    [install,configure]
+
+- include: register_storm_nimbus_services.yml
+  tags:
+    [install,configure]
+
+- include: register_storm_supervisor_services.yml
+  tags:
+    [install,configure]
+
+- name: status check of the file localhost.cfg
+  stat: path=/etc/shinken/hosts/localhost.cfg
+  register: localhost_cfg
+  sudo: yes
+  tags:
+    [install,configure]
+
+- name: move localhost.cfg to backup file
+  sudo: yes
+  command: mv /etc/shinken/hosts/{{item}} /etc/shinken/hosts/{{item}}.bak
+  with_items:
+    - localhost.cfg
+  when: localhost_cfg.stat.exists == True and shinken_type == "server"
+  tags:
+    [install,configure]
+
+
+#- name: Link /sbin/nrpe to {{paths_cfg_nagios_plugins_dir}}/check_nrpe
+#  file: src=/sbin/nrpe dest={{paths_cfg_nagios_plugins_dir}}/check_nrpe
+
+
+- name: Check if Shinken database exists in InfluxDB
+  sudo: yes
+  shell: echo "show databases" | /opt/influxdb/influx | grep shinken
+  register: shinken_db
+  ignore_errors: True
+  when: shinken_type == "server"
+  tags:
+    [install]
+
+- name: Create Shinken database in InfluxDB
+  sudo: yes
+  shell: echo "create database shinken" | /opt/influxdb/influx
+  when: shinken_db|failed and shinken_type == "server"
+  tags:
+    [install]
+
+
+- name: Is /etc/nagios/nrpe.cfg configured
+  stat: path=/etc/nagios/nrpe.cfg.bak
+  register: nrpe_cfg_configured
+  sudo: yes
+  when: shinken_type == "agent"
+  tags:
+    [install,configure]
+
+- name: Install shinkens command config files
+  sudo: yes
+  command: /bin/cp /etc/nagios/nrpe.cfg /etc/nagios/nrpe.cfg.bak
+  when:
+    nrpe_cfg_configured is defined and nrpe_cfg_configured.stat.exists == False and shinken_type == "agent"
+  tags:
+    [install]
+
+# Want to allow the new file to be overwritten each time in case of new updates to be propagated
+- template: src={{item}}.j2 dest=/etc/nagios/{{item}}
+  sudo: yes
+  with_items:
+    - nrpe.cfg
+  when:
+#    nrpe_cfg_configured is defined and nrpe_cfg_configured.stat.exists == False and shinken_type == "agent"
+    shinken_type == "agent"
+  tags:
+    [install,configure]
+
+#- name: run nrpe
+#  sudo: yes
+#  service: name=nrpe state=started enabled=yes
+#  when: shinken_type == "agent"
+
+- name: restart nrpe
+  sudo: yes
+  service: name=nrpe state=restarted enabled=yes sleep=5
+  when: shinken_type == "agent"
+  tags:
+    [start]
+
+#- name: stop shinken
+#  sudo: yes
+#  service: name=shinken state=stopped
+#  when: shinken_type == "server"
+#
+#- name: sleep before shinken restarts
+#  sudo: yes
+#  command: sleep 30ß
+#  when: shinken_type == "server"
+
+- name: restart shinken
+  sudo: yes
+  command: service shinken restart
+  when: shinken_type == "server"
+  tags:
+    [start]
+
+#- name: run shinken
+#  sudo: yes
+#  service: name=shinken state=started enabled=yes
+#  when: shinken_type == "server"
+

@@ -1,0 +1,7 @@
+{% for gn in group_names %}
+define hostgroup{
+   hostgroup_name  {{gn}}   ; The name of the hostgroup
+   alias           {{gn}}   ; Long name of the group
+   #members
+}
+{% endfor %}

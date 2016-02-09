@@ -1,0 +1,8 @@
+---
+# Installs and configures the monitoring layer of Odyssey
+
+- name: Installs and configures Elasticsearch
+  hosts: monitoring
+  remote_user: centos
+  roles:
+    - odyssey_elasticsearch

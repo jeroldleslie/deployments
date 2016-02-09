@@ -2,7 +2,7 @@ java.library.path: "/usr/local/lib:/opt/local/lib:/usr/lib"
 
 storm.local.dir: "storm-local"
 storm.zookeeper.servers:
-{% for host in groups['storm-zookeeper-group'] %}
+{% for host in groups['storm-zookeeper'] %}
   - {{ host }}
 {% endfor %}
 storm.zookeeper.port: 2181
@@ -27,10 +27,10 @@ storm.auth.simple-white-list.users: []
 storm.auth.simple-acl.users: []
 storm.auth.simple-acl.users.commands: []
 storm.auth.simple-acl.admins: []
-storm.meta.serialization.delegate: "backtype.storm.serialization.GzipThriftSerializationDelegate"
+storm.meta.serialization.delegate: "backtype.storm.serialization.DefaultSerializationDelegate"
 
 ### nimbus.* configs are for the master
-nimbus.host: {% for host in groups['storm-nimbus-group'] %}{{ host }}
+nimbus.host: {% for host in groups['storm-nimbus'] %}{{ host }}
 {% endfor %}
 nimbus.thrift.port: 6627
 nimbus.thrift.threads: 64
@@ -48,7 +48,7 @@ nimbus.topology.validator: "backtype.storm.nimbus.DefaultTopologyValidator"
 nimbus.credential.renewers.freq.secs: 600
 
 ### ui.* configs are for the master
-ui.host: {% for host in groups['storm-nimbus-group'] %}{{ host }}
+ui.host: {% for host in groups['storm-nimbus'] %}{{ host }}
 {% endfor %}
 ui.port: 8080
 ui.childopts: "-Xmx768m"

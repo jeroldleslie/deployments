@@ -1,0 +1,6 @@
+- name: Install Shinken's services
+  sudo_user: shinken
+  template: src=service.cfg.j2 dest=/etc/shinken/services/bdcoe.cfg
+#  with_items: shinken_services
+#  with_items: groups['all']
+  when: shinken_type == "server"

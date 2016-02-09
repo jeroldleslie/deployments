@@ -1,0 +1,95 @@
+---
+# User & Group
+- name: Creating Kibana user
+  user: name={{ kibana_user }} state=present
+  sudo: yes
+  tags:
+    [ install ]
+    
+- name: Creating Kibana group
+  group: name={{ kibana_group }} state=present
+  sudo: yes
+  tags:
+    [ install ]
+
+# Directories  
+
+- name: Check if home dir is created
+  stat: path={{ kibana_home_dir }}
+  register: kibana_home_dir_created
+  tags:
+    [ install ]
+
+- name: Create Kibana home directory if it has not been created yet
+  file: path={{ kibana_home_dir }} state=directory mode=750 group={{ kibana_group }} owner={{ kibana_user }}
+  when: kibana_home_dir_created.stat.exists == false
+  sudo: yes
+  tags:
+    [ install ]
+
+# Downloading Kibana
+- name: Check if Kibana is already downloaded
+  stat: path={{ kibana_home_dir }}/{{ kibana_tgz  }}
+  register: kibana_tgz_downloaded
+  tags:
+    [ install ]
+
+- name: Downloading Kibana tgz
+  get_url: url={{ kibana_tgz_url  }} dest={{ kibana_home_dir }}
+  when: kibana_tgz_downloaded.stat.exists == false
+  tags:
+    [ install ]
+
+# Untar + unzip
+- name: Check if the tgz is already unarchived
+  stat: path={{ kibana_home_dir }}/bin
+  register: kibana_tgz_unarchived
+  tags:
+    [ install ]
+
+- name: Unarchive tgz
+  unarchive: src={{ kibana_home_dir }}/{{ kibana_tgz  }} dest={{ kibana_home_dir }} copy=no
+  sudo: yes
+  when: kibana_tgz_unarchived.stat.exists == false
+  tags:
+    [ install ]
+
+- name: Rename Kibana dir to use short path
+  shell: mv {{ kibana_home_dir }}/{{ kibana_dir }}/* {{ kibana_home_dir }}/.
+  sudo: yes
+  when: kibana_tgz_unarchived.stat.exists == false
+  tags:
+    [ install ]
+
+# Adding Kibana Service to systemd - /lib/systemd/system/kibana-broker.service
+- name: Rendering kibana.service
+  template: src={{ item }}.j2 dest=/lib/systemd/system/{{ item }}
+  sudo: yes
+  with_items:
+    - kibana.service
+  tags:
+    [ install ]
+
+# Kibana Broker must be running all times
+- name: Kibana Service
+  service: name=kibana state=started enabled=yes
+  sudo: true
+  tags:
+    [ start ]
+
+# Kibana deploy odyssey_metrics dashboard meta data file
+- name: move kibana meta data json files to container
+  template: src={{ item }}.j2 dest={{ kibana_home_dir }}/{{ item }}
+  sudo: yes
+  with_items:
+    - odyssey_metrics.json
+  tags:
+    [ install ]
+
+
+- name: Run elasticdump
+  shell: elasticdump --input={{ kibana_home_dir }}/odyssey_metrics.json --output=http://{{ groups['monitoring']|first }}:{{ elasticsearch_port }}/.kibana --type=data
+  register: stdout
+  run_once: true
+
+

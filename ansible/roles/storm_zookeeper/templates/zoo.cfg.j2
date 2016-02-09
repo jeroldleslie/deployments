@@ -5,7 +5,7 @@ tickTime=2000
 initLimit=5
 syncLimit=2
 
-{% for host in groups['storm-zookeeper-group'] %}
+{% for host in groups['storm-zookeeper'] %}
 server.{{ hostvars[host].zoo_id }}={{ host }}:{{ zookeeper_leader_port }}:{{ zookeeper_election_port }}
 {% endfor %}
 

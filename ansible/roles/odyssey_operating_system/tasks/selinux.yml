@@ -1,0 +1,27 @@
+---
+- name: Checking if SElinux is disabled already
+  shell: /usr/sbin/getenforce
+  register: getenforce
+  failed_when: >
+    getenforce.rc != 0
+  changed_when: 1 == 0
+
+- name: Disable SELinux in runtime
+  shell: "/usr/sbin/setenforce 0"
+  register: setenforce
+  sudo: yes
+  when: not (getenforce.stdout == "Permissive" or getenforce.stdout == "Disabled")
+  changed_when: "setenforce.rc == 0"
+  
+- name: Checking if SElinux is disabled in configuration file
+  shell: egrep 'SELINUX=disabled' /etc/selinux/config
+  register: result
+  ignore_errors: True
+  failed_when: >
+    result.rc != 0
+  changed_when: 1 == 0
+
+- name: Disable SELinux for good
+  lineinfile: dest=/etc/selinux/config regexp=^SELINUX= line=SELINUX=disabled
+  sudo: yes
+  when: result|failed

@@ -1,0 +1,5 @@
+- name: Installs HAProxy on the first node of the gripper
+  hosts: 'load-balancer'
+  remote_user: 'centos'
+  roles:
+    - haproxy

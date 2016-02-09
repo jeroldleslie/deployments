@@ -1,0 +1,106 @@
+---
+# User & Group
+- name: Creating Kafka user
+  user: name={{ kafka_user }} state=present
+  sudo: yes
+  tags:
+    [install]
+
+- name: Creating Kafka group
+  group: name={{ kafka_group }} state=present
+  sudo: yes
+  tags:
+    [install]
+    
+# Directories  
+- name: Check if data dir is created
+  stat: path={{ kafka_data_dir }}
+  register: kafka_data_dir_created
+  tags:
+    [install]
+    
+- name: Create Kafka data directory
+  file: path={{ kafka_data_dir }} state=directory mode=750 group={{ kafka_group }} owner={{ kafka_user }}
+  when: kafka_data_dir_created.stat.exists == false
+  sudo: yes
+  tags:
+    [install]
+    
+- name: Check if home dir is created
+  stat: path={{ kafka_home_dir }}
+  register: kafka_home_dir_created
+  tags:
+    [install]
+    
+- name: Create Kafka home directory if it has not been created yet
+  file: path={{ kafka_home_dir }} state=directory mode=750 group={{ kafka_group }} owner={{ kafka_user }}
+  when: kafka_home_dir_created.stat.exists == false
+  sudo: yes
+  tags:
+    [install]
+    
+# Downloading Kafka
+- name: Check if Kafka is already downloaded
+  stat: path={{ kafka_home_dir }}/{{ kafka_tgz  }}
+  register: kafka_tgz_downloaded
+  tags:
+    [install]
+    
+- name: Downloading Kafka tgz
+  get_url: url={{ kafka_tgz_url  }} dest={{ kafka_home_dir }}
+  when: kafka_tgz_downloaded.stat.exists == false
+  tags:
+    [install]
+    
+# Untar + unzip
+- name: Check if the tgz is already unarchived
+  stat: path={{ kafka_home_dir }}/bin
+  register: kafka_tgz_unarchived
+  tags:
+    [install]
+    
+- name: Unarchive tgz
+  unarchive: src={{ kafka_home_dir }}/{{ kafka_tgz  }} dest={{ kafka_home_dir }} copy=no
+  sudo: yes
+  when: kafka_tgz_unarchived.stat.exists == false
+  tags:
+    [install]
+    
+- name: Rename Kafka dir to use short path
+  shell: mv {{ kafka_home_dir }}/{{ kafka_dir }}/* {{ kafka_home_dir }}/.
+  sudo: yes
+  when: kafka_tgz_unarchived.stat.exists == false
+  tags:
+    [install]
+    
+# Adding Kafka Service to systemd - /lib/systemd/system/kafka-broker.service
+- name: Rendering kafka-broker.service
+  template: src={{ item }}.j2 dest=/lib/systemd/system/{{ item }}
+  sudo: yes
+  with_items:
+    - kafka-broker.service
+  tags:
+    [install]
+    
+# Kafka server.properties executable
+- name: Rendering Kafka server.properties
+  template: src={{ item }}.j2 dest={{ kafka_home_dir }}/config/{{ item }}
+  sudo: yes
+  with_items:
+    - server.properties
+  tags:
+    [install, configure]
+    
+# Setting up ownership
+- name: Setting Ownership
+  file: path={{ kafka_home_dir }} owner={{ kafka_user }} group={{ kafka_group }} state='directory' recurse='yes'
+  sudo: true
+  tags:
+    [install]
+    
+# Kafka Broker must be running all times
+- name: Kafka Service
+  service: name=kafka-broker state=started enabled=yes
+  sudo: true
+  tags:
+    [start]

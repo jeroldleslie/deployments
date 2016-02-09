@@ -1,9 +1,9 @@
-storm_user: neverwinterdp
-storm_group: neverwinterdp
+storm_user: centos
+storm_group: centos
 
 storm_home_dir: /opt/storm
 
-storm_tgz_url: 'https://s3-us-west-2.amazonaws.com/nvent-repo/tgz/storm/0.9.3/apache-storm-0.9.3.tar.gz'
-storm_tgz: apache-storm-0.9.3.tar.gz
-storm_dir: apache-storm-0.9.3
+storm_tgz_url: 'https://s3-us-west-2.amazonaws.com/nvent-repo/tgz/storm/0.9.5/apache-storm-0.9.5.tar.gz'
+storm_tgz: apache-storm-0.9.5.tar.gz
+storm_dir: apache-storm-0.9.5
 

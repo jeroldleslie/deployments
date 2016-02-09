@@ -1,0 +1,4 @@
+- name: Install Shinken's storm zookeeper services
+  sudo_user: shinken
+  template: src=storm-zookeeper-service.cfg.j2 dest=/etc/shinken/services/storm-zookeeper-service.cfg
+  when: shinken_type == "server"

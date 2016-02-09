@@ -1,0 +1,36 @@
+## Kafka Properties
+########  DO NOT CHANGE THE PROPERTY KEYS , CAN CHANGE PROPERTY VALUES ##################
+bootstrap.servers={{ groups['kafka-zookeeper']|join(':9092,') }}:9092
+metadata.fetch.timeout.ms=1000
+metadata.max.age.ms=100000
+batch.size=256
+buffer.memory=1024000
+acks=0
+timeout.ms=250
+linger.ms=0
+client.id=shovel-test-client
+send.buffer.bytes=102400
+receive.buffer.bytes=102400
+max.request.size=5000000
+reconnect.backoff.ms=100
+block.on.buffer.full=true
+retries=3
+retry.backoff.ms=100
+compression.type=snappy
+metrics.sample.window.ms=60000
+metrics.num.samples=15
+max.in.flight.requests.per.connection=8192
+key.serializer=org.apache.kafka.common.serialization.ByteArraySerializer
+value.serializer=org.apache.kafka.common.serialization.ByteArraySerializer
+########################################################################
+kafka.client.host={{ groups['kafka-zookeeper']|first }}
+kafka.client.port=9092
+kafka.topics.allowed=test-topic1,test-topic2
+
+## Elasticsearch
+es.server.hostnames={{ groups['monitoring']|join(':9200,') }}:9200
+
+## Security Properties
+security.hmac.sha1.key=OvQVG3oQGsC07YFeaJLrXViNNBmj28f6X5Yk0ORKGFt1oMBEiHDQlGQoCxhyjTv9ub4BwI6FIe9Y
+security.hmac.verification.enabled=true
+

@@ -1,0 +1,83 @@
+---
+# Installs and configures the monitoring layer of Odyssey
+
+- name: Installs and configures Elasticsearch
+  hosts: monitoring
+  remote_user: centos
+  roles:
+    - odyssey_elasticsearch
+    - odyssey_kibana
+
+- name: Installs and configures Shinken Agent Components for monitoring
+  hosts: monitoring
+  remote_user: centos
+  roles:
+     - { role: shinken, shinken_type: 'agent' }
+
+- name: Installs and configures Shinken Agent Components for gripper
+  hosts: gripper
+  remote_user: centos
+  roles:
+     - { role: shinken, shinken_type: 'agent' }
+
+- name: Installs and configures Shinken Agent Components for storm-zookeeper
+  hosts: storm-zookeeper
+  remote_user: centos
+  roles:
+     - { role: shinken, shinken_type: 'agent' }
+
+- name: Installs and configures Shinken Agent Components for storm-nimbus
+  hosts: storm-nimbus
+  remote_user: centos
+  roles:
+     - { role: shinken, shinken_type: 'agent' }
+
+- name: Installs and configures Shinken Agent Components for storm-supervisor
+  hosts: storm-supervisor
+  remote_user: centos
+  roles:
+     - { role: shinken, shinken_type: 'agent' }
+                  
+- name: Installs and configures Shinken
+  hosts: monitoring
+  remote_user: centos
+  roles:
+    - { role: shinken, shinken_type: 'server' }
+
+- name: Installs and configures Shinken for gripper
+  hosts: gripper
+  remote_user: centos
+  roles:
+    - { role: shinken, shinken_type: 'gripper' }
+
+#- name: Installs and configures Shinken Agent Components
+#  hosts: kafka-zookeeper
+#  remote_user: neverwinterdp
+#  roles:
+#     - { role: shinken, shinken_type: 'agent' }
+     
+#- name: Installs and configures Shinken for kafka cluster
+#  hosts: kafka-zookeeper
+#  remote_user: neverwinterdp
+#  roles:
+#    - { role: shinken, shinken_type: 'kafka' }
+
+- name: Installs and configures Shinken for storm zookeeper
+  hosts: storm-zookeeper
+  remote_user: centos
+  roles:
+    - { role: shinken, shinken_type: 'storm-zookeeper' }
+
+- name: Installs and configures Shinken for storm nimbus
+  hosts: storm-nimbus
+  remote_user: centos
+  roles:
+    - { role: shinken, shinken_type: 'storm-nimbus' }
+
+- name: Installs and configures Shinken for storm supervisor
+  hosts: storm-supervisor
+  remote_user: centos
+  roles:
+    - { role: shinken, shinken_type: 'storm-supervisor' }
+
+

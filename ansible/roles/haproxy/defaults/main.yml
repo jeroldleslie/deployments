@@ -1,0 +1,10 @@
+haproxy_user: haproxy
+haproxy_group: haproxy
+haproxy_app_name: odyssey
+haproxy_mode: http
+haproxy_enable_stats: enable
+haproxy_algorithm: roundrobin
+haproxy_stats_users:
+  - {username: admin, password: admin}
+haproxy_gripper_port: 8080
+haproxy_gripper_paramstring: check

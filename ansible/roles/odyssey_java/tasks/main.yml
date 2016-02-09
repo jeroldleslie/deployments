@@ -1,0 +1,44 @@
+## Creating home dir
+
+- name: Check if home dir is created
+  stat: path={{ java_home_dir }}
+  register: created
+  tags:
+    [install]
+    
+- name: Create Java home
+  file: path={{ java_home_dir }} state=directory mode=755 group={{ java_group }} owner={{ java_user }}
+  when: created.stat.exists == false
+  sudo: yes
+  tags:
+    [install]
+
+## Downloading Java
+
+- name: Check if Java is already downloaded
+  stat: path={{ java_home_dir }}/{{ java_rpm_file  }}
+  register: downloaded
+  tags:
+    [install]
+
+- name: Downloading Java RPM
+  get_url: url={{ java_rpm_url  }} dest={{ java_home_dir }}
+  when: downloaded.stat.exists == false
+  tags:
+    [install]
+
+## Install 
+
+- name: Check if Java is already installed
+  stat: path='/usr/bin/java'
+  register: installed
+  tags:
+    [install]
+
+- name: Install Java RPM
+  yum: name={{ java_home_dir }}/{{ java_rpm_file  }} state='present'
+  sudo: yes
+  when: installed.stat.exists == false
+  tags:
+    [install]
+

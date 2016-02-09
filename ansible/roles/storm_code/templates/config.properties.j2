@@ -1,0 +1,61 @@
+#Broker host
+kafka.zookeeper.host.port={{ groups['kafka-zookeeper']|join(',') }}
+#Kafka topic to consume.
+kafka.topic=test-topic1
+#Location in ZK for the Kafka spout to store state.
+kafka.zkRoot=/data_event_spout
+#Kafka Spout Executors.
+spout.thread.count=1
+storm.config.workers=8
+bolt.s3.parallel.hint=8
+
+zk.connect={{ groups['storm-zookeeper']|join(':2181,') }}:2181
+metadata.broker.list={{ groups['kafka-broker']|join(':9092,') }}:9092
+notification.topic=notification-topic1
+
+#aws_access_key_id = AKIAIYBHDOZNUJGB2R7A
+aws_access_key_id = AKIAJZAINKOVJTQAR45Q
+#aws_secret_access_key = 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
+aws_secret_access_key = oeyYdRK5BOyWEXs1OeqoBulBqbGE9OPYTfnNnCD6
+
+
+#S3 Config properties
+s3.bucket.name=app1-odyssey-nvent
+s3.file.prefix=log
+s3.file.extension=.json
+s3.file.path=#topic/#year/#month/#day/#hour/
+s3.file.content.type=text/plain
+
+s3.file.rotation.size.enabled=false
+s3.file.rotation.size=1.0F
+s3.file.rotation.unit=KB
+
+s3.file.rotation.time.enabled=true
+s3.file.rotation.time.duration=1
+s3.file.rotation.time.unit=MIN
+
+s3.file.rotation.count.enabled=true
+s3.file.rotation.count.size=1000
+
+#Elastic Search configurations
+elastic.search.hosts={{ groups['monitoring']|join(':9200,') }}:9200
+
+# Movers Config data
+topology.name=odyssey-topology
+# Executions modes can be: local or remote
+execution.mode=remote
+
+# Snowflake JDBC connection data
+snowflake.user.name=nvent_etl
+snowflake.user.password=3t14nv3nt0r5!
+snowflake.account=nvent
+snowflake.warehouse.name=ETL_WH
+snowflake.database=nvent
+snowflake.schema=public
+snowflake.tracing=ALL
+snowflake.ssl=on
+snowflake.url=jdbc:snowflake://nvent.snowflakecomputing.com:443
+snowflake.table=integration_test
+snowflake.table.definition=(SRC VARIANT)
+snowflake.stage.name=integration_test
+

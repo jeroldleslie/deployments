@@ -1,0 +1,4 @@
+- name: Install Shinken's kafka services
+  sudo_user: shinken
+  template: src=kafka-service.cfg.j2 dest=/etc/shinken/services/kafka-service.cfg
+  when: shinken_type == "server"

@@ -1,0 +1,19 @@
+- name: Check if InfluxDB is already installed
+  stat: path=/opt/influxdb/versions/{{ influxdb_version }}
+  register: installed
+  tags:
+    [install]
+    
+- name: Yum install InfluxDB
+  yum: name=https://s3-us-west-2.amazonaws.com/nvent-repo/rpm/influxdb/0.9.0/influxdb-0.9.0_rc24-1.x86_64.rpm state=present
+  sudo: yes
+  when: installed.stat.exists == false
+  tags:
+    [install]
+
+- name: Check InfluxDB is Running
+  sudo: yes
+  service: name=influxdb state=started enabled=yes
+  tags:
+    [install, start]
+

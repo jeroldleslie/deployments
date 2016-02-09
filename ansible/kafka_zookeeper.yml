@@ -1,0 +1,14 @@
+---
+## Installs and configures the tier 2 layer of Odyssey
+
+- name: Installs and configures Kafka Zookeeper
+  hosts: kafka-zookeeper
+  remote_user: centos
+  roles:
+    - odyssey_kafka_zookeeper
+
+- name: Installs and configures Kafka Broker
+  hosts: kafka-broker
+  remote_user: centos
+  roles:
+    - { role: 'odyssey_kafka_broker', kafka_zk_string: "{{ groups['kafka-broker']|join(':2181,') }}:2181" }

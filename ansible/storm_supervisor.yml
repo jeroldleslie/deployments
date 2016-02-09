@@ -1,0 +1,6 @@
+---
+- name: Installs and configures Storm Supervisor
+  hosts: storm-supervisor
+  remote_user: centos
+  roles:
+    - storm_supervisor

@@ -1,0 +1,85 @@
+---
+
+#Install elasticdump
+- include: elasticdump.yml
+  tags:
+    [install]
+
+# User & Group
+- name: Creating Elasticsearch user
+  user: name={{ elasticsearch_user }} state=present
+  sudo: yes
+  tags:
+    [install]
+
+- name: Creating Elasticsearch group
+  group: name={{ elasticsearch_group }} state=present
+  sudo: yes
+  tags:
+    [install]
+
+# Directories  
+
+- name: Check if home dir is created
+  stat: path={{ elasticsearch_home_dir }}
+  register: elasticsearch_home_dir_created
+  tags:
+    [install]
+
+- name: Create Elasticsearch home directory if it has not been created yet
+  file: path={{ elasticsearch_home_dir }} state=directory mode=750 group={{ elasticsearch_group }} owner={{ elasticsearch_user }}
+  when: elasticsearch_home_dir_created.stat.exists == false
+  sudo: yes
+  tags:
+    [install]
+
+# Downloading Elasticsearch
+- name: Check if Elasticsearch is already downloaded
+  stat: path={{ elasticsearch_home_dir }}/{{ elasticsearch_tgz  }}
+  register: elasticsearch_tgz_downloaded
+  tags:
+    [install]
+
+- name: Downloading Elasticsearch tgz
+  get_url: url={{ elasticsearch_tgz_url  }} dest={{ elasticsearch_home_dir }}
+  when: elasticsearch_tgz_downloaded.stat.exists == false
+  tags:
+    [install]
+
+# Untar + unzip
+- name: Check if the tgz is already unarchived
+  stat: path={{ elasticsearch_home_dir }}/bin
+  register: elasticsearch_tgz_unarchived
+  tags:
+    [install]
+
+- name: Unarchive tgz
+  unarchive: src={{ elasticsearch_home_dir }}/{{ elasticsearch_tgz  }} dest={{ elasticsearch_home_dir }} copy=no
+  sudo: yes
+  when: elasticsearch_tgz_unarchived.stat.exists == false
+  tags:
+    [install]
+
+- name: Rename Elasticsearch dir to use short path
+  shell: mv {{ elasticsearch_home_dir }}/{{ elasticsearch_dir }}/* {{ elasticsearch_home_dir }}/.
+  sudo: yes
+  when: elasticsearch_tgz_unarchived.stat.exists == false
+  tags:
+    [install]
+
+# Adding Elasticsearch Service to systemd - /lib/systemd/system/elasticsearch-broker.service
+- name: Rendering elasticsearch.service
+  template: src={{ item }}.j2 dest=/lib/systemd/system/{{ item }}
+  sudo: yes
+  with_items:
+    - elasticsearch.service
+  tags:
+    [install]
+
+# Elasticsearch Broker must be running all times
+- name: Elasticsearch Service
+  service: name=elasticsearch state=started enabled=yes
+  sudo: true
+  tags:
+    [start]
+  

@@ -1,0 +1,9 @@
+elasticsearch_user: centos
+elasticsearch_group: centos
+
+elasticsearch_home_dir: /opt/elasticsearch/
+
+elasticsearch_tgz_url: 'https://s3-us-west-2.amazonaws.com/nvent-repo/tgz/elasticsearch/1.7.0/elasticsearch-1.7.0.tar.gz'
+elasticsearch_tgz: elasticsearch-1.7.0.tar.gz
+elasticsearch_dir: elasticsearch-1.7.0
+

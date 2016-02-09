@@ -1,0 +1,109 @@
+---
+- name: make zookeeper user
+  user: name={{ zookeeper_user }} state=present
+  sudo: yes
+  tags:
+    [install]
+    
+- name: make zookeeper group
+  group: name={{ zookeeper_group }} state=present
+  sudo: yes
+  tags:
+    [install]
+    
+- name: Create zookeeper data directory
+  file: path={{ zookeeper_data_dir }} state=directory mode=755 group={{ zookeeper_group }} owner={{ zookeeper_user }}
+  sudo: yes
+  tags:
+    [install]
+    
+## Creating home dir
+
+- name: Check if home dir is created
+  stat: path={{ zookeeper_home_dir }}
+  register: created
+  tags:
+    [install]
+    
+- name: Create Zookeeper home directory if it has not been created yet
+  file: path={{ zookeeper_home_dir }} state=directory mode=755 group={{ zookeeper_group }} owner={{ zookeeper_user }}
+  when: created.stat.exists == false
+  sudo: yes
+  tags:
+    [install]
+    
+## Downloading Kafka
+
+- name: Check if Kafka is already downloaded
+  stat: path={{ zookeeper_home_dir }}/{{ kafka_tgz  }}
+  register: downloaded
+  tags:
+    [install]
+    
+- name: Downloading Kafka tgz
+  get_url: url={{ kafka_tgz_url  }} dest={{ zookeeper_home_dir }}
+  when: downloaded.stat.exists == false
+  tags:
+    [install]
+    
+## Untar + unzip
+- name: Check if the tgz is already unarchived
+  stat: path={{ zookeeper_home_dir }}/bin
+  register: unarchived
+  tags:
+    [install]
+    
+- name: Unarchive tgz
+  unarchive: src={{ zookeeper_home_dir }}/{{ kafka_tgz  }} dest={{ zookeeper_home_dir }} copy=no
+  sudo: yes
+  when: unarchived.stat.exists == false
+  tags:
+    [install]
+    
+- name: Rename Kafka dir to use short path
+  shell: mv {{ zookeeper_home_dir }}/{{ kafka_dir }}/* {{ zookeeper_home_dir }}/.
+  sudo: yes
+  when: unarchived.stat.exists == false
+  tags:
+    [install]
+    
+## Adding Zookeeper ID file
+- name: Create zookeeper id file
+  template: src={{ item }}.j2 dest={{ zookeeper_data_dir }}/{{ item }} group={{ zookeeper_group }} owner={{ zookeeper_user }}
+  with_items:
+    - myid
+  tags:
+    [install, configure]
+    
+## Adding Zookeeper configuration
+
+- name: Rendering a zookeeper.properties
+  template: src={{ item }}.j2 dest={{ zookeeper_home_dir }}/config/{{ item }}
+  sudo: yes
+  with_items:
+    - zookeeper.properties
+  tags:
+    [install,configure]
+    
+# Adding Kafka Service to systemd - /lib/systemd/system/kafka-zookeeper.service
+- name: Rendering kafka-zookeeper.service
+  template: src={{ item }}.j2 dest=/lib/systemd/system/{{ item }}
+  sudo: yes
+  with_items:
+    - kafka-zookeeper.service
+  tags:
+    [install]
+    
+# Setting up ownership
+- name: Setting Ownership
+  file: path={{ zookeeper_home_dir }} owner={{ zookeeper_user }} group={{ zookeeper_group }} state='directory' recurse='yes'
+  sudo: true
+  tags:
+    [install]
+    
+# Kafka Broker must be running all times
+- name: Kafka Service
+  service: name=kafka-zookeeper state=started enabled=yes
+  sudo: true
+  tags:
+    [start]

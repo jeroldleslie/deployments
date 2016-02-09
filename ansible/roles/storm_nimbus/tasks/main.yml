@@ -2,47 +2,65 @@
 - name: make storm user
   user: name={{ storm_user }} state=present
   sudo: yes
+  tags:
+    [ install ]
 
 - name: make storm group
   group: name={{ storm_group }} state=present
   sudo: yes
+  tags:
+    [ install ]
 
 ## Creating home dir
 
 - name: Check if home dir is created
   stat: path={{ storm_home_dir }}
   register: created
+  tags:
+    [ install ]
 
 - name: Create storm home directory if it has not been created yet
   file: path={{ storm_home_dir }} state=directory mode=755 group={{ storm_group }} owner={{ storm_user }}
   when: created.stat.exists == false
   sudo: yes
+  tags:
+    [ install ]
 
 ## Downloading storm
 
 - name: Check if storm is already downloaded
   stat: path={{ storm_home_dir }}/{{ storm_tgz }}
   register: downloaded
+  tags:
+    [ install ]
 
 - name: Downloading storm tgz
   get_url: url={{ storm_tgz_url }} dest={{ storm_home_dir }}
   when: downloaded.stat.exists == false
+  tags:
+    [ install ]
 
 ## Untar + unzip
 
 - name: Check if the tgz is already unarchived
   stat: path={{ storm_home_dir }}/bin
   register: unarchived
+  tags:
+    [ install ]
 
 - name: Unarchive tgz
   unarchive: src={{ storm_home_dir }}/{{ storm_tgz  }} dest={{ storm_home_dir }} copy=no
   sudo: yes
   when: unarchived.stat.exists == false
+  tags:
+    [ install ]
 
 - name: Rename storm dir to use short path
   shell: mv {{ storm_home_dir }}/{{ storm_dir }}/* {{ storm_home_dir }}/.
   sudo: yes
   when: unarchived.stat.exists == false
+  tags:
+    [ install ]
 
 ## Adding storm configuration
 
@@ -51,11 +69,16 @@
   sudo: yes
   with_items:
     - storm.yaml
+  tags:
+    [ install, configure ]
 
 # Setting up ownership
 - name: Setting Ownership
   file: path={{ storm_home_dir }} owner={{ storm_user }} group={{ storm_group }} state='directory' recurse='yes'
   sudo: true
+  tags:
+    [ install ]
+
 
 # Adding Storm Nimbus Service to systemd - /lib/systemd/system/storm-nimbus.service
 - name: Rendering storm-nimbus.service
@@ -63,13 +86,15 @@
   sudo: yes
   with_items:
     - storm-nimbus.service
+  tags:
+    [ install, configure ]
 
 # Storm Nimbus must be running all times
 - name: Storm Nimbus Service
-  #service: name=storm-nimbus state=started enabled=yes
-  shell: systemctl enable storm-nimbus
+  service: name=storm-nimbus state=started enabled=yes
   sudo: true
-  ignore_errors: yes
+  tags:
+    [ start ]
 
 # Adding Storm Nimbus Service to systemd - /lib/systemd/system/storm-ui.service
 - name: Rendering storm-ui.service
@@ -77,11 +102,13 @@
   sudo: yes
   with_items:
     - storm-ui.service
+  tags:
+    [ install ]
 
 # Storm UI must be running all times
 - name: Storm UI Service
   service: name=storm-ui state=started enabled=yes
-  #shell: systemctl enable storm-ui
   sudo: true
-  ignore_errors: yes
+  tags:
+    [ start ]
 

@@ -1,0 +1,4 @@
+block_device: '/dev/xvdb'
+data_dir: '/data'
+owner: 'centos'
+group: 'centos'

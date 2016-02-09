@@ -1,0 +1,132 @@
+---
+- name: make gripper user
+  user: name={{ gripper_user }} state=present
+  sudo: yes
+  tags:
+    [ install ]
+
+- name: make gripper group
+  group: name={{ gripper_group }} state=present
+  sudo: yes
+  tags:
+    [ install ]
+
+## Creating home dir
+- name: Check if home dir is created
+  stat: path={{ gripper_home_dir }}
+  register: created
+  tags:
+    [ install ]
+
+- name: Create Gripper home directory if it has not been created yet
+  file: path={{ gripper_home_dir }}{{ gripper_version }}  state=directory mode=755 group={{ gripper_group }} owner={{ gripper_user }}
+  when: created.stat.exists == false
+  sudo: yes
+  tags:
+    [ install ]
+
+## Downloading Gripper
+- name: Check if Gripper is already downloaded
+  stat: path={{ gripper_home_dir }}{{ gripper_version }}/{{ gripper_tgz  }}
+  register: downloaded
+  tags:
+    [ install ]
+
+- name: Downloading Gripper tgz
+  get_url: url={{ gripper_tgz_url  }} dest={{ gripper_home_dir }}{{ gripper_version }}/
+#  when: downloaded.stat.exists == false
+  tags:
+    [ install ]
+
+## Untar + unzip
+- name: Check if the tgz is already unarchived
+  stat: path={{ gripper_home_dir }}{{ gripper_version  }}
+  register: unarchived
+  tags:
+    [ install ]
+
+- name: Unarchive tgz
+  unarchive: src={{ gripper_home_dir }}{{ gripper_version}}/{{ gripper_tgz  }} dest={{ gripper_home_dir }}{{ gripper_version }}/ copy=no
+  sudo: yes
+ # when: unarchived.stat.exists == false
+  tags:
+    [ install ]
+
+## Rendering templates
+
+# Adding Gripper configuration
+
+- name: Check if conf dir is created
+  stat: path={{ gripper_home_dir }}{{ gripper_version }}/conf
+  register: created
+  tags:
+    [ install ]
+
+- name: Create Gripper home directory if it has not been created yet
+  file: path={{ gripper_home_dir }}{{ gripper_version }}/conf  state=directory mode=755 group={{ gripper_group }} owner={{ gripper_user }}
+  #when: created.stat.exists == false
+  sudo: yes
+  tags:
+    [ install ]
+
+- name: Rendering config.properties
+  template: src={{ item }}.j2 dest={{ gripper_home_dir }}{{ gripper_version }}/conf/{{ item }}
+  sudo: yes
+  with_items:
+    - config.properties
+  tags:
+    [ install, configure ]
+
+# Adding Gripper Service to systemd - /lib/systemd/system/gripper.service
+
+- name: Rendering gripper.service
+  template: src={{ item }}.j2 dest=/lib/systemd/system/{{ item }}
+  sudo: yes
+  with_items:
+    - gripper.service
+  tags:
+    [ install, configure ]
+
+# Systemd executable
+
+- name: Rendering gripper.exe
+  template: src={{ item }}.j2 dest={{ gripper_home_dir }}/{{ item }}
+  sudo: yes
+  with_items:
+    - gripper.sh
+  tags:
+    [ install, configure ]
+
+## Log files
+
+- name: Check if log file is created
+  stat: path={{ gripper_log_folder }}/{{ gripper_std_out }}
+  register: created
+  tags:
+    [ install ]
+
+- name: Creating log files
+  file: path={{ item.dest }}/{{ item.file }} state=touch mode=640 group={{ gripper_group }} owner={{ gripper_user }}
+  sudo: true
+  when: created.stat.exists == false
+  with_items:
+    - { file: "{{ gripper_std_out }}", dest: "{{ gripper_log_folder }}" }
+    - { file: "{{ gripper_std_err }}", dest: "{{ gripper_log_folder }}" }
+  tags:
+    [ install ]
+
+## Setting up ownership
+
+- name: Setting Ownership
+  file: path={{ gripper_home_dir }} owner={{ gripper_user }} group={{ gripper_group }} state='directory' recurse='yes' mode=755
+  sudo: true
+  tags:
+    [ install ]
+  
+
+- name: Gripper Service
+  service: name=gripper state=restarted enabled=yes
+  sudo: true
+  tags:
+    [ start ]
+  

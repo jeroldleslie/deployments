@@ -1,0 +1,68 @@
+## Creating home dir
+
+- name: Check if home dir is created
+  stat: path={{ storm_code_home_dir }}
+  register: created
+  tags:
+    [install]
+
+- name: Create storm_code home
+  file: path={{ storm_code_home_dir }} state=directory mode=755 group={{ storm_code_group }} owner={{ storm_code_user }}
+  when: created.stat.exists == false
+  sudo: yes
+  tags:
+    [install]
+
+## Downloading storm_code
+
+- name: Check if storm_code is already downloaded
+  stat: path={{ storm_code_home_dir }}{{ storm_code_version}}/{{ storm_code_jar_file  }}
+  register: downloaded
+  tags:
+    [install]
+
+- name: Create Storm Movers version directory if it has not been created yet
+  file: path={{ storm_code_home_dir }}{{ storm_code_version }}  state=directory mode=755 group={{ storm_code_group }} owner={{ storm_code_user }}
+#  when: created.stat.exists == false
+  sudo: yes
+  tags:
+    [install]
+
+- name: Downloading storm_code RPM
+  get_url: url={{ storm_code_jar_url  }} dest={{ storm_code_home_dir }}{{ storm_code_version }}/{{ storm_code_jar_file  }}
+#  when: downloaded.stat.exists == false
+  sudo: yes
+  tags:
+    [install]
+
+## Rendering templates
+
+# Adding Storm Movers configuration
+
+- name: Check if conf dir is created
+  stat: path={{ storm_code_home_dir }}{{ storm_code_version }}/conf
+  register: created
+  tags:
+    [install]
+
+- name: Create Storm Movers conf directory if it has not been created yet
+  file: path={{ storm_code_home_dir }}{{ storm_code_version }}/conf  state=directory mode=755 group={{ storm_code_group }} owner={{ storm_code_user }}
+  when: created.stat.exists == false
+  sudo: yes
+  tags:
+    [install]
+
+- name: Rendering config.properties
+  template: src={{ item }}.j2 dest={{ storm_code_home_dir }}{{ storm_code_version }}/conf/{{ item }}
+  sudo: yes
+  with_items:
+    - config.properties
+  tags:
+    [install]
+
+## Install 
+- name: Deploy the JAR
+  command: /opt/storm/bin/storm jar {{ storm_code_home_dir }}{{ storm_code_version }}/{{ storm_code_jar_file }} com.odyssey.storm.topology.OdysseyDataPipelineTopology
+  tags:
+    [install]
+

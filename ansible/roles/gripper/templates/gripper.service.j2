@@ -1,0 +1,14 @@
+#/lib/systemd/system/gripper.service
+[Unit]
+Description=Gripper Service
+DefaultDependencies=no
+After=local-fs.target systemd-tmpfiles-setup.service
+Conflicts=shutdown.target
+Before=sysinit.target shutdown.target
+RefuseManualStop=no
+
+[Service]
+ExecStart=/opt/gripper/gripper.sh
+
+[Install]
+WantedBy=multi-user.target

@@ -1,0 +1,18 @@
+- name: Check if nodejs is already installed
+  stat: path=/usr/share/doc/nodejs-0.10.36
+  register: installed
+
+- name: Yum install nodejs
+  yum: name='nodejs' state=present
+  sudo: yes
+  when: installed.stat.exists == false
+
+- name: Check if elasticdump is already installed
+  stat: path=/usr/bin/elasticdump
+  register: installed_elasticdump
+
+- name: Yum install elasticdump
+  yum: name=https://s3-us-west-2.amazonaws.com/nvent-repo/rpm/elasticdump/0.14.3/elasticdump-0.14.3-1.x86_64.rpm state=present
+  sudo: yes
+  when: installed_elasticdump.stat.exists == false
+

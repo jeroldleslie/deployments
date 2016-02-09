@@ -1,0 +1,11 @@
+- name: Create the xfs filesystem on the EBS volume
+  sudo: yes
+  filesystem: fstype=xfs dev={{ block_device }}
+
+- name: Creates directory  /data
+  sudo: yes
+  file: path={{ data_dir }} state=directory owner={{ owner }} group={{ group }} mode=0775
+
+- name: mount the xfs filesystem to the data directory
+  sudo: yes
+  action: mount name={{ data_dir }} src={{ block_device }} opts=noatime fstype=xfs state=mounted

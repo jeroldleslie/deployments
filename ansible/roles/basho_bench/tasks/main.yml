@@ -1,0 +1,87 @@
+## Installing
+
+- name: Check if R is already installed
+  stat: path=/usr/bin/R
+  register: installed_r
+  tags:
+    [install]
+    
+- name: Installing R using yum
+  yum: name='R' state=present
+  sudo: yes
+  when: installed_r.stat.exists == false
+  tags:
+    [install]
+
+- name: Check if basho_bench is already installed
+  stat: path=/usr/bin/basho_bench
+  register: installed
+  tags:
+    [install]
+
+- name: Installing basho_bench from RPM
+  yum: name=https://s3-us-west-2.amazonaws.com/nvent-repo/rpm/basho_bench/0.10.0/basho-bench-0.10.0-1.el6.x86_64.rpm state=present
+  sudo: yes
+  when: installed.stat.exists == false
+  tags:
+    [install]
+
+## Creating home dir
+#This is a fake home dir for storing the test results
+
+- name: make basho_bench user
+  user: name={{ basho_bench_user }} state=present
+  sudo: yes
+  tags:
+    [install]
+
+- name: make basho_bench group
+  group: name={{ basho_bench_group }} state=present
+  sudo: yes
+  tags:
+    [install]
+
+- name: Check if home dir is created
+  stat: path={{ basho_bench_home_dir }}
+  register: created_home
+  tags:
+    [install]
+
+- name: Create basho_bench home directory if it has not been created yet
+  file: path={{ basho_bench_home_dir }} state=directory mode=755 group={{ basho_bench_group }} owner={{ basho_bench_user }}
+  when: created_home.stat.exists == false
+  sudo: yes
+  tags:
+    [install]
+
+- name: Check if conf dir is created
+  stat: path={{ basho_bench_conf_dir }}
+  register: created_conf
+  tags:
+    [install]
+
+- name: Create basho_bench conf directory if it has not been created yet
+  file: path={{ basho_bench_conf_dir }} state=directory mode=755 group={{ basho_bench_group }} owner={{ basho_bench_user }}
+  when: created_conf.stat.exists == false
+  sudo: yes
+  tags:
+    [install]
+
+
+## Deploying test code & configuration
+
+- name: Deploying test code and configuration
+  #there must be a better way
+  copy: src={{ item }} dest={{ basho_bench_home_dir }}/conf/{{ item }}
+  sudo: yes
+  with_items:
+    - http_fix_1min.conf.template
+    - http_max_1min.conf
+    - http_hmac_max_5min.conf
+    - basho_bench_runner.sh
+  tags:
+    [install,configure]
+
+
+
+

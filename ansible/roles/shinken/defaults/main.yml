@@ -1,0 +1,114 @@
+shinken_user: shinken
+shinken_group: shinken
+
+webui_cfg_modules:
+  - auth-cfg-password
+  - SQLitedb
+
+broker_master_modules:
+  - webui
+
+generic_shinken_contact_email: dummy@placeholder.com
+
+
+shinken_hosts:
+  - host_name: localhost
+    ip: 127.0.0.1
+    contacts:
+      - bdcoe
+
+shinken_services:
+  - host_names:
+      - localhost
+    contacts:
+      - bdcoe
+    services:
+      - name: memory
+        desc: check_mem_avail
+        cmd: check_mem_avail_nrpe
+        #max_check_attemtps: 5, #default
+        #check_interval: 3, #default
+        #retry_interval: 3, #default
+        #
+        #check_period: 24x7, #default
+        #notification_interval: 30 #default
+        #notification_period: 24x7 #default
+      - name: load
+        desc: check_load
+        cmd: check_load_nrpe
+
+shinken_base_services:
+  - contacts:
+      - bdcoe
+    services:
+      - name: memory
+        desc: check_mem_avail
+        cmd: check_mem_avail_nrpe
+        #max_check_attemtps: 5, #default
+        #check_interval: 3, #default
+        #retry_interval: 3, #default
+        #
+        #check_period: 24x7, #default
+        #notification_interval: 30 #default
+        #notification_period: 24x7 #default
+      - name: load
+        desc: check_load
+        cmd: check_load_nrpe
+      - name: total_procs
+        desc: check_total_procs
+        cmd: check_total_procs_nrpe
+      - name: zombie_procs
+        desc: check_zombie_procs
+        cmd: check_zombie_procs_nrpe
+      - name: users
+        desc: check_users
+        cmd: check_users_nrpe
+
+
+shinken_gripper_services:
+  - contacts:
+      - bdcoe
+    services:
+      - name: gripper_service
+        desc: check_gripper_service
+        cmd: check_gripper_service
+
+shinken_kafka_services:
+  - contacts:
+      - bdcoe
+    services:
+      - name: kafka_zookeeper_service
+        desc: check_kafka_zookeeper_service
+        cmd: check_kafka_zookeeper_service
+      - name: kafka_broker_service
+        desc: check_kafka_broker_service
+        cmd: check_kafka_broker_service
+
+shinken_storm_zookeeper_services:
+  - contacts:
+      - bdcoe
+    services:
+      - name: storm_zookeeper_service
+        desc: check_storm_zookeeper_service
+        cmd: check_storm_zookeeper_service
+
+shinken_storm_nimbus_services:
+  - contacts:
+      - bdcoe
+    services:
+      - name: storm_nimbus_service
+        desc: check_storm_nimbus_service
+        cmd: check_storm_nimbus_service
+      - name: storm_ui_service
+        desc: check_storm_ui_service
+        cmd: check_storm_ui_service
+
+shinken_storm_supervisor_services:
+  - contacts:
+      - bdcoe
+    services:
+      - name: storm_supervisor_service
+        desc: check_storm_supervisor_service
+        cmd: check_storm_supervisor_service
+
+paths_cfg_nagios_plugins_dir: /usr/lib64/nagios/plugins

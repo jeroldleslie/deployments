@@ -1,0 +1,6 @@
+---
+- name: Installs and configures Storm Nimbus
+  hosts: storm-nimbus
+  remote_user: centos
+  roles:
+    - storm_nimbus

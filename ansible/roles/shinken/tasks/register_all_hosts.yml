@@ -1,0 +1,7 @@
+- name: Install Shinkens host config file
+  sudo_user: shinken
+#  template: src=host.cfg.j2 dest=/etc/shinken/hosts/{{item.host_name}}.cfg
+  template: src=host.cfg.j2 dest=/etc/shinken/hosts/{{item}}.cfg
+  #with_items: shinken_hosts
+  with_items: groups['all']
+  when: shinken_type == "server"
