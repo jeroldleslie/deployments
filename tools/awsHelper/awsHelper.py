@@ -24,48 +24,51 @@ def getCluster(region, identifier):
   groupMap = {}
   instanceCounterMap = {}
   for instance in instances:
+    idf=""
+    groupNames=[]
     for tag in instance.tags:
-      if "Key" in tag  and tag["Key"].lower() == "name":
-        nodename=tag["Value"]
-        if identifier in nodename:
-          for groupStr in nodename.split("_"):
-            groupNames=""  
-            if groupStr.startswith("g="):
-              groupNames=groupStr.split("g=")[1].split(",")
-              for groupKey in groupNames:
-                addWithoutHostVar=False
-                try:
-                  hostVar=groupKey.split("-")[1]
-                  if hostVar=="zookeeper":
-                    hostVar="zoo"
-                  if not hostVar in hostVarsToOmit:
-                    hostVar+="_id"
-                    instanceID=0
-                    if not instanceCounterMap.get(hostVar) is None:
-                      instanceID = instanceCounterMap.get(hostVar)+1
-                    instanceCounterMap[hostVar]=instanceID
-                    if not groupKey in groupMap:
-                      groupMap[groupKey] = []
-                    groupMap[groupKey].append( {
-                      "name": tag["Value"],
-                      "publicIP": instance.public_ip_address,
-                      "privateIP": instance.private_ip_address,
-                      "publicDNS": instance.public_dns_name,
-                      "hostVar":hostVar+"="+str(instanceID)
-                      })
-                  else:
-                    addWithoutHostVar=True
-                except IndexError:
-                  addWithoutHostVar=True
-                if addWithoutHostVar == True:
-                  if not groupKey in groupMap:
-                    groupMap[groupKey] = []
-                  groupMap[groupKey].append( {
-                      "name": tag["Value"],
-                      "publicIP": instance.public_ip_address,
-                      "privateIP": instance.private_ip_address,
-                      "publicDNS": instance.public_dns_name,
-                      })
+      if "Key" in tag: 
+        if tag["Key"].lower() == "groups":  
+          groupNames=tag["Value"].split(",")
+        if tag["Key"].lower() == "name":
+          nodename=tag["Value"]
+        if tag["Key"].lower() == "identifier":
+          idf=tag["Value"]
+    if identifier==idf:
+      for groupKey in groupNames:
+        addWithoutHostVar=False
+        try:
+          hostVar=groupKey.split("-")[1]
+          if hostVar=="zookeeper":
+            hostVar="zoo"
+          if not hostVar in hostVarsToOmit:
+            hostVar+="_id"
+            instanceID=0
+            if not instanceCounterMap.get(hostVar) is None:
+              instanceID = instanceCounterMap.get(hostVar)+1
+            instanceCounterMap[hostVar]=instanceID
+            if not groupKey in groupMap:
+              groupMap[groupKey] = []
+            groupMap[groupKey].append( {
+              "name": tag["Value"],
+              "publicIP": instance.public_ip_address,
+              "privateIP": instance.private_ip_address,
+              "publicDNS": instance.public_dns_name,
+              "hostVar":hostVar+"="+str(instanceID)
+              })
+          else:
+              addWithoutHostVar=True
+        except IndexError:
+          addWithoutHostVar=True
+          if addWithoutHostVar == True:
+            if not groupKey in groupMap:
+              groupMap[groupKey] = []
+            groupMap[groupKey].append( {
+              "name": tag["Value"],
+              "publicIP": instance.public_ip_address,
+              "privateIP": instance.private_ip_address,
+              "publicDNS": instance.public_dns_name,
+              })
   return groupMap             
 
 @click.group(chain=True, help="AWS tool for NDP!")
@@ -85,7 +88,7 @@ def mastercommand(debug, logfile):
 
 @mastercommand.command(help="Create ansible inventory file from AWS cluster")
 @click.option('--region',    '-r',   default="us-west-2",  type=click.Choice(getAwsRegions()), help='AWS Region to connect to')
-@click.option('--identifier',    '-i',   default="osi", help='Identifier string to filter rewuired instances from AWS')
+@click.option('--identifier',    '-i',   default="odyssey", help='Identifier string to filter rewuired instances from AWS')
 def ansibleinventory(region, identifier):
   logger = logging.getLogger('awsHelper')
   group = getCluster(region, identifier)
