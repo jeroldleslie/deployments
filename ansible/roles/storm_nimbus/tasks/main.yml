@@ -91,7 +91,7 @@
 
 # Storm Nimbus must be running all times
 - name: Storm Nimbus Service
-  service: name=storm-nimbus state=started enabled=yes
+  service: name=storm-nimbus state=restarted enabled=yes
   sudo: true
   tags:
     [ start ]
@@ -107,7 +107,7 @@
 
 # Storm UI must be running all times
 - name: Storm UI Service
-  service: name=storm-ui state=started enabled=yes
+  service: name=storm-ui state=restarted enabled=yes
   sudo: true
   tags:
     [ start ]

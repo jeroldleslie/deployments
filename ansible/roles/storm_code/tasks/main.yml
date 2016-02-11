@@ -64,5 +64,5 @@
 - name: Deploy the JAR
   command: /opt/storm/bin/storm jar {{ storm_code_home_dir }}{{ storm_code_version }}/{{ storm_code_jar_file }} com.odyssey.storm.topology.OdysseyDataPipelineTopology
   tags:
-    [install, start]
+    [start]
 

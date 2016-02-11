@@ -78,7 +78,7 @@
 
 # Elasticsearch Broker must be running all times
 - name: Elasticsearch Service
-  service: name=elasticsearch state=started enabled=yes
+  service: name=elasticsearch state=restarted enabled=yes
   sudo: true
   tags:
     [start]
