@@ -38,7 +38,7 @@ s3.file.rotation.count.enabled=true
 s3.file.rotation.count.size=1000
 
 #Elastic Search configurations
-elastic.search.hosts={{ groups['monitoring']|join(':9200,') }}:9200
+elastic.search.hosts={{ groups['odyssey-monitoring']|join(':9200,') }}:9200
 
 # Movers Config data
 topology.name=odyssey-topology

@@ -17,6 +17,7 @@
   tags:
     [ install ]
 
+
 ## Creating home dir
 
 - name: Check if home dir is created

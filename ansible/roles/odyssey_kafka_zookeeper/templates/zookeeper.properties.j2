@@ -6,6 +6,6 @@ initLimit=5
 syncLimit=2
 
 {% for host in groups['kafka-zookeeper'] %}
-server.{{ hostvars[host].zoo_id }}={{ host }}:{{ zookeeper_leader_port }}:{{ zookeeper_election_port }}
+server.{{ hostvars[host].id }}={{ host }}:{{ zookeeper_leader_port }}:{{ zookeeper_election_port }}
 {% endfor %}
 

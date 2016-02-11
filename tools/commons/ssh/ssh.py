@@ -5,16 +5,14 @@ from time import sleep
 import paramiko, logging
 
 class ssh(object):
-  def __init__(self, sshKeyPath=join(expanduser("~"),".ssh/id_rsa")):
-    self.sshKeyPath = sshKeyPath
     
-  def sshExecute(self, host, command, user = "neverwinterdp", maxRetries=10, retries=0, sleepTime=10, get_pty=True):
+  def sshExecute(self, host, command, user = "neverwinterdp", sshKeyPath=join(expanduser("~"),".ssh/id_rsa"), maxRetries=10, retries=0, sleepTime=10, get_pty=True):
     """
     SSH onto a machine, execute a command
     Returns [stdout,stderr]
     """
     try:
-      key = paramiko.RSAKey.from_private_key_file(self.sshKeyPath)
+      key = paramiko.RSAKey.from_private_key_file(sshKeyPath)
       
       c = paramiko.SSHClient()
       c.set_missing_host_key_policy(paramiko.AutoAddPolicy())

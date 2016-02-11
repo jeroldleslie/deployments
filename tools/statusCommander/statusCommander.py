@@ -56,6 +56,9 @@ class statusCommandParams():
 #_pool is to help us clean up threads when ctrl+c/SIGINT is entered
 _pool = None
 
+omitGroups = ["kafka-broker", "kafka-zookeeper","gripper",
+               "load-balancer","storm-zookeeper","storm-nimbus",
+               "storm-supervisor","performance","odyssey-monitoring"]
 scribeJpsCommand = "jps -m | grep "+statusCommandParams.defaultReplacementString+" | awk '{print $1 \" \" $4}'"
 
 #Each key corresponds to an ansible group read in from your ansible inventory
@@ -167,20 +170,21 @@ def mastercommand(ctx, debug, logfile, timeout, inventory_file, monitor, monitor
   asyncresults = []
 
   for server in i.parseInventoryFile():
-    #Go through and asynchronously run ssh commands to get process status
-    try:
-      for services in statusCommands[server["group"]]:
-        for identifier in services.identifiers:
-          command = services.command.replace(services.replacementString, identifier)
-          ip = server["host"]
-          hostName=server["host"]
-          if "ansible_host" in server:
-            ip = server["ansible_host"]
-
-          asyncresults.append(pool.apply_async(getSshOutput, [ip, hostName, command, identifier, server["group"], services.quietIfNotRunning]))
-    except KeyError:
-      logger.error("No commands for ansible group: "+server["group"])
-      print "No commands for ansible group: "+server["group"]
+    if server["group"] not in omitGroups:
+      #Go through and asynchronously run ssh commands to get process status
+      try:
+        for services in statusCommands[server["group"]]:
+          for identifier in services.identifiers:
+            command = services.command.replace(services.replacementString, identifier)
+            ip = server["host"]
+            hostName=server["host"]
+            if "ansible_host" in server:
+              ip = server["ansible_host"]
+  
+            asyncresults.append(pool.apply_async(getSshOutput, [ip, hostName, command, identifier, server["group"], services.quietIfNotRunning]))
+      except KeyError:
+        logger.error("No commands for ansible group: "+server["group"])
+        print "No commands for ansible group: "+server["group"]
   
   #Get asynchronous results in order that they were added
   tableRows=[]

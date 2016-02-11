@@ -1,15 +1,15 @@
 ---
-# Installs and configures the monitoring layer of Odyssey
+# Installs and configures the odyssey-monitoring layer of Odyssey
 
 - name: Installs and configures Elasticsearch
-  hosts: monitoring
+  hosts: odyssey-monitoring
   remote_user: centos
   roles:
     - odyssey_elasticsearch
     - odyssey_kibana
 
-- name: Installs and configures Shinken Agent Components for monitoring
-  hosts: monitoring
+- name: Installs and configures Shinken Agent Components for odyssey-monitoring
+  hosts: odyssey-monitoring
   remote_user: centos
   roles:
      - { role: shinken, shinken_type: 'agent' }
@@ -39,7 +39,7 @@
      - { role: shinken, shinken_type: 'agent' }
                   
 - name: Installs and configures Shinken
-  hosts: monitoring
+  hosts: odyssey-monitoring
   remote_user: centos
   roles:
     - { role: shinken, shinken_type: 'server' }

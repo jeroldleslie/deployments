@@ -1,6 +1,6 @@
 ## Kafka Properties
 ########  DO NOT CHANGE THE PROPERTY KEYS , CAN CHANGE PROPERTY VALUES ##################
-bootstrap.servers={{ groups['kafka-zookeeper']|join(':9092,') }}:9092
+bootstrap.servers={{ groups['kafka-broker']|join(':9092,') }}:9092
 metadata.fetch.timeout.ms=1000
 metadata.max.age.ms=100000
 batch.size=256
@@ -23,12 +23,12 @@ max.in.flight.requests.per.connection=8192
 key.serializer=org.apache.kafka.common.serialization.ByteArraySerializer
 value.serializer=org.apache.kafka.common.serialization.ByteArraySerializer
 ########################################################################
-kafka.client.host={{ groups['kafka-zookeeper']|first }}
+kafka.client.host={{ groups['kafka-broker']|first }}
 kafka.client.port=9092
 kafka.topics.allowed=test-topic1,test-topic2
 
 ## Elasticsearch
-es.server.hostnames={{ groups['monitoring']|join(':9200,') }}:9200
+es.server.hostnames={{ groups['odyssey-monitoring']|join(':9200,') }}:9200
 
 ## Security Properties
 security.hmac.sha1.key=OvQVG3oQGsC07YFeaJLrXViNNBmj28f6X5Yk0ORKGFt1oMBEiHDQlGQoCxhyjTv9ub4BwI6FIe9Y

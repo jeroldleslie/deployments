@@ -88,7 +88,7 @@
 
 
 - name: Run elasticdump
-  shell: elasticdump --input={{ kibana_home_dir }}/odyssey_metrics.json --output=http://{{ groups['monitoring']|first }}:{{ elasticsearch_port }}/.kibana --type=data
+  shell: elasticdump --input={{ kibana_home_dir }}/odyssey_metrics.json --output=http://{{ groups['odyssey-monitoring']|first }}:{{ elasticsearch_port }}/.kibana --type=data
   register: stdout
   run_once: true
 
