@@ -1,0 +1,3 @@
+---
+odyssey_home: "{{ lookup('env','ODYSSEY_HOME') }}"
+remote_odyssey_event_gen_home: /opt/odyssey_event_gen/

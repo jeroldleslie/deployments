@@ -1,0 +1,8 @@
+---
+# Installs and configures the odyssey-monitoring layer of Odyssey
+
+- name: Installs and configures Elasticsearch
+  hosts: monitoring
+  remote_user: neverwinterdp
+  roles:
+    - odyssey_event_gen_code

@@ -1,0 +1,75 @@
+#############################################################################################################################################################
+#To run:
+#  Set your ODYSSEY_HOME variable
+#    #> export ODYSSEY_HOME=/path/to/odyssey_home
+#############################################################################################################################################################
+
+- name: Check to make sure environment variables are sane
+  fail: msg="Variable '{{ item }}' is not defined" 
+  when: ({{item}} is undefined) or ({{item}} is none) or ({{item}}|trim == '') 
+  run_once: true
+  with_items: 
+    - odyssey_home
+  tags:
+    - install
+  
+- name: Get odyssey_event_gen path info locally
+  local_action: stat path={{odyssey_home}}/odyssey-event-gen
+  register: check_path
+  run_once: true
+  tags:
+    - install
+  
+- name: Check if odyssey_event_gen path exists locally
+  local_action: fail msg='odyssey_event_gen does not exist in {{odyssey_home}}, please checkout odyssey-event-gen in {{odyssey_home}}'
+  when: not(check_path.stat.exists)
+  run_once: true
+  tags:
+    - install
+
+- name: Echo local odyssey_event_gen path
+  debug: msg="This is odyssey_event_gen path in local machine {{odyssey_home}}/odyssey-event-gen"
+  run_once: true
+  tags:
+    - install
+    
+- name: Copy local files from {{odyssey_home}}/odyssey-event-gen to remote hosts {{remote_odyssey_event_gen_home}}
+  synchronize: src={{odyssey_home}}/odyssey-event-gen/ dest={{remote_odyssey_event_gen_home}}
+  tags:
+    - install
+    
+- name: Install odyssey-event-gen
+  sudo: yes
+  async: 5000
+  command: chdir={{odyssey_home}}/odyssey-event-gen/ mvn clean install -Dmaven.test.skip=true
+  tags:
+    - install
+    
+- name: Create a directory if it doesn't exist
+  sudo: yes
+  file: path={{odyssey_home}}/odyssey-event-gen/bin state=directory mode=0755
+  tags:
+    - install
+    
+# Adding odyssey-event-gen start/stop script
+- name: Adding odyssey-event-gen start/stop script
+  template: src={{ item }}.j2 dest={{odyssey_home}}/odyssey-event-gen/bin/{{ item }}.sh
+  sudo: yes
+  with_items:
+    - odyssey-event-gen
+  tags:
+    [ install ]
+
+- name: Make odyssey-event-gen.sh executable
+  file: mode=u+rxw path={{odyssey_home}}/odyssey-event-gen/bin/odyssey-event-gen.sh
+  sudo: yes
+  tags:
+    - install
+    
+- name: Start odyssey-event-gen
+  sudo: yes
+  async: 100
+  shell: "{{odyssey_home}}/odyssey-event-gen/bin/odyssey-event-gen.sh start"
+  tags:
+    - start
+
