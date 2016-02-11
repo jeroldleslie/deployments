@@ -5,7 +5,8 @@ exec python $0 ${1+"$@"}
 
 import click,logging, boto3, re
 from sys import stdout,path
-from os.path import abspath, dirname
+from os.path import abspath, dirname, join, expanduser
+#from os.path import abspath, dirname, join, expanduser, realpath
 from multiprocessing import Process
 #Make sure the commons package is on the path correctly
 path.insert(0, dirname(dirname(abspath(__file__))))
@@ -96,16 +97,23 @@ def mastercommand(debug, logfile):
 def ansibleinventory(region, keypath, user, identifier):
   logger = logging.getLogger('awsHelper')
   group = getCluster(region, identifier)
+  inventory = ""
   for group,machines in group.iteritems():
-    print "["+group+"]"
+    inventory += "\n["+group+"]\n"
     id=1
     for machine in machines:
       if group in odysseyGroups:
-        print str(machine["publicDNS"])+" id="+str(id)
+        inventory += str(machine["publicDNS"])+" id="+str(id)+"\n"
       else: 
-        print machine["name"]+" ansible_ssh_user="+str(user)+" ansible_ssh_private_key_file="+str(keypath)+" ansible_host="+str(machine["publicDNS"])+" id="+str(id)
+        inventory += machine["name"]+" ansible_ssh_user="+str(user)+" ansible_ssh_private_key_file="+str(keypath)+" ansible_host="+str(machine["publicDNS"])+" id="+str(id)+"\n"
       id= id+1
-    print ""
+  print inventory
+  defaultInventory = open(join(expanduser("~"),"inventory"),'w+')
+  defaultInventory.write(inventory)
+  defaultInventory.close()
+    
+  print "Ansible inventory written to ~/inventory"
+  logging.debug("Ansible inventory written to ~/inventory")  
 
 @mastercommand.command(help="Update /etc/hosts file on remote machines in AWS")
 @click.option('--region',    '-r',   default="us-west-2",  type=click.Choice(getAwsRegions()), help='AWS Region to connect to')
