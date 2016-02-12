@@ -122,11 +122,16 @@
   sudo: true
   tags:
     [ install ]
-  
 
 - name: Gripper Service
   service: name=gripper state=restarted enabled=yes
   sudo: true
   tags:
     [ start ]
-  
+
+- name: Kill Gripper
+  shell:  kill $(ps aux | grep 'gripper' | awk '{print $2}')
+  ignore_errors: yes
+  sudo: yes
+  tags:
+    - force-stop  

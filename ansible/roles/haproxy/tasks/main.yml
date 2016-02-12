@@ -52,3 +52,9 @@
   tags:
     [ start ]
 
+- name: Kill haproxy
+  shell:  kill $(ps aux | grep 'haproxy' | awk '{print $2}')
+  ignore_errors: yes
+  sudo: yes
+  tags:
+    - force-stop  

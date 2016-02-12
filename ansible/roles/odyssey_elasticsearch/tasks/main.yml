@@ -82,4 +82,10 @@
   sudo: true
   tags:
     [start]
-  
+
+- name: Kill Elasticsearch
+  shell:  kill $(ps aux | grep 'elasticsearch' | awk '{print $2}')
+  ignore_errors: yes
+  sudo: yes
+  tags:
+    - force-stop    

@@ -112,3 +112,18 @@
   tags:
     [ start ]
 
+# Kill storm nimbus
+- name: Kill storm nimbus
+  shell:  kill $(ps aux | grep 'nimbus' | awk '{print $2}')
+  ignore_errors: yes
+  sudo: yes
+  tags:
+    - force-stop
+
+# Kill storm ui
+- name: Kill storm ui
+  shell:  kill $(netstat -nlp | grep 8080 | awk '{split($7,a,"/"); print a[1]}')
+  ignore_errors: yes
+  sudo: yes
+  tags:
+    - force-stop

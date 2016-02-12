@@ -104,6 +104,12 @@
   tags:
     [ install ]
 
+- name: Clean zookeeper datas
+  shell: "rm -rf {{ zookeeper_data_dir }}"
+  sudo: yes 
+  tags:
+  - clean
+  
 # Storm Zookeeper must be running all times
 - name: Storm Zookeeper Service
   service: name=storm-zookeeper state=restarted enabled=yes
@@ -111,3 +117,10 @@
   tags:
     [ start ]
 
+# Kill Zookeeper
+- name: Kill Zookeeper
+  shell:  kill $(ps aux | grep 'zookeeper' | awk '{print $2}')
+  sudo: yes
+  ignore_errors: yes
+  tags:
+    - force-stop

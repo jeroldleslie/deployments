@@ -99,4 +99,11 @@
   tags:
     [ start ]
 
+# Kill storm supervisor
+- name: Kill storm supervisor
+  shell:  kill $(ps aux | grep 'supervisor' | awk '{print $2}')
+  ignore_errors: yes
+  sudo: yes
+  tags:
+    - force-stop
 
