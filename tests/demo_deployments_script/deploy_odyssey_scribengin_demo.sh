@@ -3,6 +3,7 @@
 SCRIPT_DIR=$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )
 ROOT=$SCRIPT_DIR/../..
 
+
 serviceCommander="$ROOT/tools/serviceCommander/serviceCommander.py"
 awsHelper="$ROOT/tools/awsHelper/awsHelper.py"
 
