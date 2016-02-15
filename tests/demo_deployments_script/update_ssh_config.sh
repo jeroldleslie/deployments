@@ -3,7 +3,7 @@
 function print_usage() { 
   echo "Usage:"
   echo "    --local-aws-pem   Local aws pem file path which need be copied to remote hosting machine, ex: --aws-pem-file=/home/download/test.pem"
-  echo "    --host-ip         Host machines public IP (usually it may be neverwinterdp monitoring machine), ex: --user=neverwinterdp, default=neverwinterdp"
+  echo "    --host-ip         Host machines public IP (usually its monitoring machines public IP)"
   echo "    --user            Host machines user, ex: --user=neverwinterdp, default=neverwinterdp"
   echo "    --key-path        Path to private key to communicate with host machine, ex: --key-path=~/.ssh/id_rsa, default=~/.ssh/id_rsa"
 }
