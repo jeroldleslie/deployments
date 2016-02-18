@@ -18,7 +18,7 @@ function get_opt() {
 }
 
 SCRIPT_DIR=$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )
-ROOT=$SCRIPT_DIR/../../../..
+ROOT=$SCRIPT_DIR/../..
 INVENTORY=$(get_opt --inventory '' $@)
 
 clusterCommander="$ROOT/tools/cluster/clusterCommander.py"
