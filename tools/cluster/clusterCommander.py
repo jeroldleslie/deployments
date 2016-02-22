@@ -526,7 +526,7 @@ def digitaloceandevsetupubuntu(name, size, region, image, private_networking, cr
     print "Configure neverwinterdp user for Docker"
     sshHandle.sshExecute("sudo gpasswd -a neverwinterdp docker && sudo service docker restart")
     print "Install Ansible"
-    sshHandle.sshExecute("sudo apt-get install software-properties-common -y && sudo apt-add-repository ppa:ansible/ansible -y && sudo apt-get update && sudo apt-get install ansible -y")
+    sshHandle.sshExecute("sudo apt-get install software-properties-common -y && sudo apt-add-repository ppa:ansible/ansible-1.9 -y && sudo apt-get update && sudo apt-get install ansible=1.9.4-1ppa~trusty -y")
     
     print "Copy AWS credentials file"
     try:
