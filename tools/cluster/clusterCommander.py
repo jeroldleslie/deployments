@@ -539,7 +539,7 @@ def digitaloceandevsetupubuntu(name, size, region, image, private_networking, cr
     
     print "Check out NeverwinterDP"
     sshHandle.sshExecute("git clone https://github.com/Nventdata/NeverwinterDP/ && cd NeverwinterDP && git checkout "+branch)
-    sshHandle.sshExecute(r'echo -e "NEVERWINTERDP_HOME=/home/neverwinterdp/NeverwinterDP\\n" >> ~/.bashrc')
+    sshHandle.sshExecute(r'echo -e "export NEVERWINTERDP_HOME=/home/neverwinterdp/NeverwinterDP\\n" >> ~/.bashrc')
     print "Check out neverwinterdp-deployments"
     sshHandle.sshExecute("echo -e \"StrictHostKeyChecking no\\n\" >> ~/.ssh/config")
     sshHandle.sshExecute("git clone git@bitbucket.org:nventdata/neverwinterdp-deployments.git")
