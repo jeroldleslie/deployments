@@ -1,0 +1,7 @@
+---
+- name: Install kibana charts for odyssey in elasticsearch
+  hosts: odyssey-monitoring
+  remote_user: centos
+  roles:
+    - odyssey_kibana_charts
+
