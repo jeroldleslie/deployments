@@ -1,5 +1,5 @@
 ---
-## Installs and configures the tier 2 layer of Odyssey
+## Installs and configures the zookeeper and kafka of Odyssey
 
 - name: Installs and configures Kafka Zookeeper
   hosts: kafka-zookeeper

@@ -1,7 +1,7 @@
 ---
-- name: Installs and configures the tier 1 layer of Odyssey
+- name: Installs and configures the gripper of Odyssey
   hosts: 'gripper'
   remote_user: 'centos'
   roles:
-    - { role: 'gripper', kafka_conn_string: "{{ groups['tier2-kafka-broker']|join(':9092,') }}:9092" }
+    - { role: 'gripper', kafka_conn_string: "{{ groups['kafka-broker']|join(':9092,') }}:9092" }
 

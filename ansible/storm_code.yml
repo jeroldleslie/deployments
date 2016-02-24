@@ -1,5 +1,5 @@
 ---
-- name: Installs and configures the tier 3 layer of Odyssey
+- name: Installs and configures the storm_code of Odyssey
   hosts: 'storm-nimbus'
   remote_user: 'centos'
   roles:

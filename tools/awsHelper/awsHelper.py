@@ -37,8 +37,11 @@ def getCluster(region, identifier):
           nodename=tag["Value"]
         if tag["Key"].lower() == "identifier":
           idf=tag["Value"]
+    print groupNames;
+    print identifiers
     if idf in identifiers:
       for groupKey in groupNames:
+        print groupKey;
         if not groupKey in groupMap:
           groupMap[groupKey] = []
         groupMap[groupKey].append( {

@@ -1,5 +1,5 @@
 ---
-# Installs and configures the tier 3 layer of Odyssey
+# Installs and configures the storm_zookeeper,storm_nimbus,storm_supervisor,storm_code of Odyssey
 - name: Installs and configures Storm Zookeeper
   hosts: storm-zookeeper
   remote_user: centos
@@ -18,7 +18,7 @@
   roles:
     - storm_supervisor
 
-- name: Installs and configures the tier 3 layer of Odyssey
+- name: Installs and configures the storm_code of Odyssey
   hosts: 'storm-nimbus'
   remote_user: 'centos'
   roles:
