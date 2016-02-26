@@ -94,7 +94,7 @@
       
 - name: Install elasticdump
   sudo: yes
-  shell: npm install elasticdump@1.0.3 -g
+  shell: npm install elasticdump@1.0.0 -g
   tags:
     - install
 
