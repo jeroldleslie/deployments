@@ -26,6 +26,8 @@ value.serializer=org.apache.kafka.common.serialization.ByteArraySerializer
 kafka.client.host={{ groups['kafka-broker']|first }}
 kafka.client.port=9092
 kafka.topics.allowed=test-topic1,test-topic2
+kafka.message.key=odyssey-gripper
+kafka.sync.timeout=5000
 
 ## Elasticsearch
 es.server.hostnames={{ groups['odyssey-monitoring']|join(':9200,') }}:9200
