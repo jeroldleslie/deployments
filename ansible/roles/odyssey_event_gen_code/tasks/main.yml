@@ -41,19 +41,19 @@
 - name: Install odyssey-event-gen
   sudo: yes
   async: 5000
-  command: chdir={{odyssey_home}}/odyssey-event-gen/ mvn clean install -Dmaven.test.skip=true
+  command: chdir={{remote_odyssey_event_gen_home}} mvn clean install -Dmaven.test.skip=true
   tags:
     - install
     
 - name: Create a directory if it doesn't exist
   sudo: yes
-  file: path={{odyssey_home}}/odyssey-event-gen/bin state=directory mode=0755
+  file: path={{remote_odyssey_event_gen_home}}/bin state=directory mode=0755
   tags:
     - install
     
 # Adding odyssey-event-gen start/stop script
 - name: Adding odyssey-event-gen start/stop script
-  template: src={{ item }}.j2 dest={{odyssey_home}}/odyssey-event-gen/bin/{{ item }}.sh
+  template: src={{ item }}.j2 dest={{remote_odyssey_event_gen_home}}/bin/{{ item }}.sh
   sudo: yes
   with_items:
     - odyssey-event-gen
@@ -61,7 +61,7 @@
     [ install ]
 
 - name: Make odyssey-event-gen.sh executable
-  file: mode=u+rxw path={{odyssey_home}}/odyssey-event-gen/bin/odyssey-event-gen.sh
+  file: mode=u+rxw path={{remote_odyssey_event_gen_home}}/bin/odyssey-event-gen.sh
   sudo: yes
   tags:
     - install
@@ -69,7 +69,13 @@
 - name: Start odyssey-event-gen
   sudo: yes
   async: 100
-  shell: "{{odyssey_home}}/odyssey-event-gen/bin/odyssey-event-gen.sh start"
+  shell: "{{remote_odyssey_event_gen_home}}/bin/odyssey-event-gen.sh start"
   tags:
     - start
 
+- name: Kill odyssey-event-gen
+  sudo: yes
+  shell: kill -9 $(ps aux | grep 'odyssey-event-gen' | awk '{print $2}')
+  ignore_errors: yes
+  tags:
+    [ stop, force-stop ] 
