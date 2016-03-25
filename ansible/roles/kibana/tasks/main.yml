@@ -52,7 +52,7 @@
 
 - name: set default dashboard
   sudo: yes
-  lineinfile: 'dest=/opt/kibana/config/kibana.yml regexp="default_app_id: *" line="default_app_id: \"dashboard/Log4j-Detail\""'
+  lineinfile: 'dest=/opt/kibana/config/kibana.yml regexp="default_app_id: *" line="default_app_id: \"dashboard/Scribengin-Log4j-Detail\""'
   tags:
     - install
     
