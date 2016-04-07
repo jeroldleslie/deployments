@@ -48,7 +48,7 @@ class ScribenginTool(object):
       "--dataflow-tracking-window-size 50000 --dataflow-sliding-window-size 100 " +
       "--dataflow-default-parallelism 5 --dataflow-default-replication 3 ");
 
-    script = neverwinterdpBuildDir + "/dataflow/tracking-sample/bin/run-simple-tracking.sh" ;
+    script = neverwinterdpBuildDir + "/scribengin/bin/tracking/run-simple-tracking.sh" ;
 
     print "*********************************************************************************"
     print "Submit Tracking Datadataflow With Script:"

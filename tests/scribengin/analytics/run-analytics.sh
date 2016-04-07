@@ -53,7 +53,7 @@ elif [ "$COMMAND" = "monitor" ] ; then
     --zk-connect zookeeper-1:2181 --hadoop-master-connect hadoop-master \
     --generator-odyssey-num-of-events 10000 --generator-web-num-of-events 10000000 \
     --dataflow-num-of-workers 5 --dataflow-num-of-executor-per-worker 4 \
-    --generator-web-num-of-threads 5 --generator-web-max-visit-time 40000 --generator-web-min-visit-time 5000 --wait-for-input"
+    --generator-web-num-of-threads 1 --generator-web-max-visit-time 300000 --generator-web-min-visit-time 5000 --wait-for-input"
   time $NEVERWINTERDP_BUILD/dataflow/analytics/bin/run-analytics.sh $ANALYTICS_OPTS
 fi
 

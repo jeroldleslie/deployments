@@ -8,6 +8,7 @@ import time
 from time import sleep
 from os.path import join, expanduser, dirname, abspath
 from sys import stdout,  path
+import sys
 from multiprocessing import Process
 from pprint import pformat
 from datetime import datetime
@@ -114,16 +115,20 @@ class ClusterChaos(object):
   def randomVMMasterChaos(self, numOfFailures, failurePeriod, failureDuration):
     count = 1;
     while count  <= numOfFailures:
-      print "Wait for the next failure, wait time = %d" % (failurePeriod)
       print "Restart vm-master %d time(s), failure duration %d sec " % (count, failureDuration)
       self.killRestartVMMaster(failureDuration);
       count += 1;
+      print "*********************************************************************************"
+      print "Wait for the next failure, wait time = %d" % (failurePeriod)
+      print "*********************************************************************************"
       sleep(failurePeriod);
 
   def randomMixChaos(self, numOfFailures, failurePeriod, failureDuration):
     count = 1;
     while count  <= numOfFailures:
+      print "*********************************************************************************"
       print "Wait for the next failure, wait time = %d" % (failurePeriod)
+      print "*********************************************************************************"
       sleep(failurePeriod);
       if count % 2 == 0:
         selHostIdx = randint(0, len(self.zookeeperMachines)) - 1
@@ -140,13 +145,19 @@ class ClusterChaos(object):
 #Main function
 if __name__ == '__main__':
   clusterChaos = ClusterChaos("Run chaos simulation for the entire cluster"); 
-  #clusterChaos.randomKafkaChaos(1,  10, 5);
-  #clusterChaos.randomKafkaChaos(30, 300, 30);
-
-  #clusterChaos.randomZookeeperChaos(1,  10, 5);
-  #clusterChaos.randomZookeeperChaos(30, 300, 30);
-
-  #clusterChaos.randomVMMasterChaos(2,  60, 5);
-  clusterChaos.randomVMMasterChaos(30,  300, 5);
-
-  #clusterChaos.randomMixChaos(50, 180, 30);
+  command = sys.argv[1];
+  print 'command = ' + command
+  if command == 'run-vm-master-chaos':
+    clusterChaos.randomVMMasterChaos(30,  300, 5);
+  elif command == 'run-kafka-chaos':
+    clusterChaos.randomKafkaChaos(30, 300, 30);
+  elif command == 'run-zookeeper-chaos':
+    clusterChaos.randomZookeeperChaos(30, 300, 30);
+  elif command == 'run-mix-chaos':
+    clusterChaos.randomMixChaos(50, 180, 30);
+  else:
+    print "Use command:"
+    print "    run-vm-master-chaos:  To kill the vm-master and restart the dataflow automatically"
+    print "    run-kafka-chaos:      To randomly kill a kafka instance, clean the data and restart"
+    print "    run-zookeeper-chaos:  To randomly kill a zookeeper instance, clean the data and restart"
+    print "    run-mix-chaos:        To randomly kill a zookeeper or kafka instance, clean the data and restart"
