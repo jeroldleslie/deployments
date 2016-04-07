@@ -4,7 +4,7 @@ SCRIPT_DIR=$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )
 
 ROOT=$SCRIPT_DIR/../../..
 
-INVENTORY="/tmp/cluster-stability.inventory"
+INVENTORY="$HOME/inventory"
 
 serviceCommander="$ROOT/tools/serviceCommander/serviceCommander.py"
 statusCommander="$ROOT/tools/statusCommander/statusCommander.py"
