@@ -32,7 +32,9 @@ $SHELL vm info
 #################################################################################################################################
 
 SAMPLE_OPTS="\
-  --generator-num-of-web-events 100000 --dataflow-num-of-worker 4 --dataflow-num-of-executor-per-worker 2"
+  --zk-connect zookeeper-1:2181 \
+  --generator-num-of-web-events 100000 \
+  --dataflow-num-of-worker 4 --dataflow-num-of-executor-per-worker 2 --dataflow-output-es-addresses elasticsearch-1:9300"
 
 function runTest() {
   time $NEVERWINTERDP_BUILD/dataflow/sample/bin/run-sample.sh $SAMPLE_OPTS 
